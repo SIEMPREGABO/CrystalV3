@@ -1,0 +1,192 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.AppSty {
+  width: 80%;
+  height: 300px;
+  border-radius: 21px 21px 0 0;
+}
+
+.footer {
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+}
+
+.btn-custom {
+  border: 1px solid #100;
+  width: 100px;
+}
+
+.btn-custom-register {
+  border: 1px solid #100;
+  width: 200px;
+}
+
+.btn-custom-config{
+  height: 35px;
+}
+
+.login {
+  border: 10px solid #000;
+
+}
+
+.img-sm {
+  width: 150px;
+}
+
+.img-md {
+  width: 300px;
+}
+
+.img-lg {
+  width: 512px;
+}
+
+.border-container {
+  border-radius: 20px;
+}
+
+.size-input {
+  size: 100%;
+}
+
+
+#list-format{
+  list-style: none;
+  padding: 1rem 2rem;
+  #row {
+    margin-bottom: 2rem;
+  }
+}
+
+.chat-dimension{
+  
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+  overflow-y: scroll;
+ 
+}
+
+.message-dimension{
+  display: inline-block;
+  padding: 5px;
+  border: 1px solid #ccc;
+  
+}
+
+.send-text{
+  border: 2px solid #e6e6e6;
+}
+
+.flex {
+  display: flex;
+}
+
+.size-calendar{
+  width: 600px;
+  max-width: 100%;
+  margin: 20px auto;
+}
+
+.centered-calendar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+ /* Esto centra verticalmente el calendario en la pantalla completa */
+}
+
+.Without-border{
+  border-style: none;
+}
+
+.border-light{
+  border: 4px solid #000;
+}
+
+@import url('https://cdn.syncfusion.com/ej2/material.css');
+
+.sidebar {
+  box-shadow: rgb(113 122 131 / 11%) 0px 7px 30px 0px;
+}
+.nav-item,
+.navbar {
+  z-index: 10000;
+}
+@media  screen and (max-width:800px) {
+  .sidebar{
+    z-index: 10000000;
+  }
+}
+
+.e-dlg-center-center, .e-quick-popup-wrapper.e-device{
+  z-index: 1000000 !important;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgb(216, 216, 216);
+  border-radius: 40px;
+}
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+/* color-picker style  */
+
+
+ #preview {
+  background: transparent
+    url('https://ej2.syncfusion.com/react/demos/src/color-picker/images/pen.png')
+    no-repeat;
+  display: inline-block;
+  height: 80px;
+  margin: 10px 0;
+  min-width: 300px;
+  max-width: 600px;
+  background-color: #008000;
+}
+
+.e-input-group:not(.e-float-icon-left), .e-input-group.e-success:not(.e-float-icon-left), .e-input-group.e-warning:not(.e-float-icon-left), .e-input-group.e-error:not(.e-float-icon-left), .e-input-group.e-control-wrapper:not(.e-float-icon-left), .e-input-group.e-control-wrapper.e-success:not(.e-float-icon-left), .e-input-group.e-control-wrapper.e-warning:not(.e-float-icon-left), .e-input-group.e-control-wrapper.e-error:not(.e-float-icon-left){
+  border: none;
+}
