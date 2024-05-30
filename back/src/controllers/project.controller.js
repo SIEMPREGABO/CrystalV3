@@ -8,7 +8,7 @@ import {
     obtenerFechasTareas, ActualizarEstadoTareas, AgregarMensaje, GetMessages,
     eliminarParticipante,
     GetTareasxIteracion, GetTareasKanban,
-    DeleteTask, UpdateTask,
+    DeleteTask, UpdateTask,  
     getTareaDependiente,
     obtenerTareasDep,
     obtenerFechasConfigID,
