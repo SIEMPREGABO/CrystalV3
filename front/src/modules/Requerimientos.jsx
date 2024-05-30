@@ -15,7 +15,7 @@ export const Requerimientos = () => {
         resolver: zodResolver(requerimientoSchema)
     });
 
-    const { createRequirements, entregaactual,fechasproject,projecterrors, message } = useProject();
+    const { createRequirements, entregaactual, fechasproject, projecterrors, message } = useProject();
 
     const onSubmit = handleSubmit(async (values) => {
 
@@ -38,7 +38,15 @@ export const Requerimientos = () => {
                     <div>
                         {entregaactual === "" &&
                             <div className="w-full p-6 m-auto bg-white rounded-md  ring-indigo-600 lg:max-w-xl">
-                                no puedes asignar requerimientos
+                                No puedes asignar requerimientos
+                            </div>}
+                    </div>
+                }
+                {fechasproject[0].ESTADO === "Finalizado" &&
+                    <div>
+                        {entregaactual === "" &&
+                            <div className="w-full p-6 m-auto bg-white rounded-md  ring-indigo-600 lg:max-w-xl">
+                                No puedes asignar requerimientos
                             </div>}
                     </div>
                 }
@@ -53,12 +61,23 @@ export const Requerimientos = () => {
                                         <input type="text" className="form-control" id="exampleFormControlInput1" name="OBJETIVO"
                                             placeholder="objetivo del requerimiento"
                                             {...register("OBJETIVO", { required: true, message: "Campo Requerido" })} />
+                                        {errors.OBJETIVO &&
+                                            <div className="p-2">
+                                                <div className=" bg-danger mt-2 text-white shadow ">{errors.OBJETIVO.message}</div>
+                                            </div>
+                                        }
                                     </div>
                                     <div className="mb-1">
                                         <label className={styles.labels}>Descripción: </label>
                                         <textarea className="form-control" id="exampleFormControlTextarea1" name="DESCRIPCION"
                                             rows="3" placeholder='describe el requerimiento'
-                                            {...register("DESCRIPCION", { required: true, message: "Campo Requerido" })}></textarea>
+                                            {...register("DESCRIPCION", { required: true, message: "Campo Requerido" })}>
+                                        </textarea>
+                                        {errors.DESCRIPCION &&
+                                            <div className="p-2">
+                                                <div className=" bg-danger mt-2 text-white shadow ">{errors.DESCRIPCION.message}</div>
+                                            </div>
+                                        }
                                     </div>
                                     <div className="mb-1">
                                         <label className={styles.labels}>Tipo de Requerimiento: </label>
@@ -71,6 +90,11 @@ export const Requerimientos = () => {
                                             <option value="5">Requerimiento de Calidad</option>
                                             <option value="6">Solicitud de Cambio</option>
                                         </select>
+                                        {errors.TIPO_REQ &&
+                                            <div className="p-2">
+                                                <div className=" bg-danger mt-2 text-white shadow ">{errors.TIPO_REQ.message}</div>
+                                            </div>
+                                        }
                                     </div>
                                     <div className='mt-3 row'>
                                         <div className='mt-3 d-flex justify-content-center'>

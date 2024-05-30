@@ -20,7 +20,7 @@ import { useForm } from 'react-hook-form'
 import { useProject } from "../context/projectContext.js";
 import { zodResolver } from '@hookform/resolvers/zod'
 import styles from '../css/voicereq.module.css';
-import { requerimientoSchema } from '../schemas/project.js';
+import { requerimientoxVozSchema } from '../schemas/project.js';
 
 
 
@@ -35,7 +35,7 @@ export const RequerimientoVoz = () => {
         handleSubmit,
         formState: { errors },
     } = useForm({
-        resolver: zodResolver(requerimientoSchema)
+        resolver: zodResolver(requerimientoxVozSchema)
     });
 
     const { createRequirements, projecterrors, entregaactual, message } = useProject();
@@ -115,7 +115,7 @@ export const RequerimientoVoz = () => {
                     <h1 className={styles.titulo}>Requerimientos X Voz</h1>
                     <p className={styles.parrafo}>Para levantar requerimientos con respecto a una entrega, solo pulsa el
                         botón en forma de micrófono que se encuentra justo debajo y comienza a hablar!</p>
-                    <p className={styles.parrafo}><em>Nota: Para solcitar un nuevo requerimiento di "levantar requerimiento (tu requerimiento)", en caso de que desees solictar un cambio dí lo siguiente "cambio de (tu cambio)"</em></p>
+                    <p className={styles.parrafo}><em>Nota: Para solicitar un nuevo requerimiento di "levantar requerimiento (tu requerimiento)", en caso de que desees solictar un cambio dí lo siguiente "cambio de (tu cambio)"</em></p>
                     <form className={styles.formulario} onSubmit={handleSubmit(onSubmit)}>
                         <IconButton color='primary' size='large' onMouseUp={startListening} onMouseDown={stopListening}>
                             <Icon fontSize='large' />
@@ -130,13 +130,18 @@ export const RequerimientoVoz = () => {
                             variant="standard"
                             placeholder='Aquí se mostrar la transcripción del requerimiento / o cambio solicitado'
                             value={transcript}
-                            name="REQUERIMIENTOS"
+                            name="REQUERIMIENTO"
                             {...register("REQUERIMIENTO", { required: true, message: "Campo requerido" })}
                         />
                         <IconButton type="submit" color="primary" size="large" onMouseUp={addRequirement}>
                             <DoneIcon fontSize='large'>
                             </DoneIcon>
                         </IconButton>
+                        {errors.REQUERIMIENTO &&
+                            <div className="p-2">
+                                <div className=" bg-danger mt-2 text-white shadow ">{errors.REQUERIMIENTO.message}</div>
+                            </div>
+                        }
                     </form>
                     <p>{transcript}</p>
                     <p>{messagev}</p>
