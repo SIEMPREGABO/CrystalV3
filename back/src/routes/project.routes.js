@@ -5,7 +5,9 @@ import {
     getProject, getPermissions, agregarRequerimiento, agregarMensaje, 
     getMessages, addParticipant,deleteParticipant, getTareasxIteracion,
     configurarProyecto, deleteTask, updateTask, updateTaskState, delegarParticipant, 
-    deleteProject
+    deleteProject,
+    degradarParticipant,
+    ascenderParticipant
 } from "../controllers/project.controller.js";
 import { createSchema, joinSchema, taskSchema, addSchema, requerimientoSchema } from "../schemas/project.schema.js";
 import { validateSchema } from "../middlewares/validator.middleware.js";
@@ -18,6 +20,8 @@ router.post('/deleteProject', deleteProject);
 router.post('/joinProject',validateSchema(joinSchema),joinProject);
 router.post('/addParticipant',validateSchema(addSchema),addParticipant);
 router.post('/delegarParticipant',delegarParticipant);
+router.post('/degradarParticipant',degradarParticipant);
+router.post('/ascenderParticipant',ascenderParticipant);
 router.post('/deleteParticipant',deleteParticipant);
 router.get('/getProjects' ,getProjects);
 router.post('/getProject', getProject);

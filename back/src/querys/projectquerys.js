@@ -38,6 +38,24 @@ export function crearProyecto(NOMBRE_PROYECTO, OBJETIVO, DESCRIPCION, FECHA_CREA
     });
 };
 
+export function IdUsuarios(Id_project){
+    return new Promise(async (resolve, reject) => {
+        const connection = await getConnection();
+        const insertarquery = 'SELECT ID_USUARIO FROM U_SEUNE_P WHERE ID_PROYECTO = ?';
+        connection.query(insertarquery, [Id_project], (err, results) => {
+            if(err){
+                reject({success: false});
+            }else{
+                if(results.length>0){
+                    resolve({success: true, participantes: results})
+                }else{
+                    resolve({success: true, participantes: []});
+                }
+            }
+        });
+    });
+}
+
 export function agregarUsuario(FECHA_CREACION, ES_CREADOR, ID_PROYECTO, ID) {
     return new Promise(async (resolve, reject) => {
         const connection = await getConnection();
@@ -133,6 +151,43 @@ export function delegarParticipante(ID_PROYECTO, ID_USUARIO, ID_admin) {
                         }
                     })
 
+                } else {
+                    resolve({ success: false });
+                }
+            }
+        })
+    })
+}
+
+
+export function ascenderParticipante(ID_PROYECTO, ID_USUARIO) {
+    return new Promise(async (resolve, reject) => {
+        const connection = await getConnection();
+        const query = 'UPDATE U_SEUNE_P SET ES_CREADOR = 1 WHERE ID_PROYECTO = ? AND ID_USUARIO = ?;';
+        connection.query(query, [ID_PROYECTO, ID_USUARIO], (err, results) => {
+            if (err) {
+                reject(err);
+            } else {
+                if (results.affectedRows > 0) {
+                    resolve({success:true})
+                } else {
+                    resolve({ success: false });
+                }
+            }
+        })
+    })
+}
+
+export function degradarParticipante(ID_PROYECTO, ID_USUARIO) {
+    return new Promise(async (resolve, reject) => {
+        const connection = await getConnection();
+        const query = 'UPDATE U_SEUNE_P SET ES_CREADOR = 0 WHERE ID_PROYECTO = ? AND ID_USUARIO = ?;';
+        connection.query(query, [ID_PROYECTO, ID_USUARIO], (err, results) => {
+            if (err) {
+                reject(err);
+            } else {
+                if (results.affectedRows > 0) {
+                    resolve({success:true})
                 } else {
                     resolve({ success: false });
                 }
@@ -312,21 +367,23 @@ export function eliminarChats(ID_ITERACION) {
     return new Promise(async (resolve, reject) => {
         const conn = await getConnection();
         try {
-            await conn.beginTransaction();
-
             const deleteChatsQuery = `DELETE FROM CHATS_ITERACIONES WHERE ID_ITERACION = ?`;
-            await conn.query(deleteChatsQuery, [ID_ITERACION]);
-
-            await conn.commit();
-            resolve({ success: true });
+            conn.query(deleteChatsQuery, [ID_ITERACION], (err,results)=>{
+                if(err){
+                    reject({ success: false })
+                }else{
+                    if(results.affectedRows >0){
+                        resolve({ success: true });
+                    }else{
+                        resolve({ success: true });
+                    }
+                }
+            });
         } catch (error) {
-            await conn.rollback();
             reject({ success: false })
         } finally {
-            // Cerrar la conexión
-            await conn.end();
+            conn.end();
         }
-
     })
 }
 
@@ -357,6 +414,40 @@ export function verificarUnionCorreo(ID_PROYECTO, CORREO) {
                 }
             }
         });
+    });
+}
+
+export function registarNotificacion(id_usuario ,contenido, tipo, fecha){
+    return new Promise(async (resolve, reject) => {
+        try {
+            const connection = await getConnection();
+            const query = 'INSERT INTO NOTIFICACIONES (CONTENIDO, FECHA_ENVIO ,ID_TIPO_NOTIFICACION ) VALUES (?,?,?)';
+            const queryRecibe = 'INSERT INTO U_RECIBE_N (ID_USUARIO, ID_NOTIFICACION , ESTADO_VISUALIZACION) VALUES (?,?,?)';
+            connection.query(query, [contenido, fecha, tipo], (err, results) => {
+                if (err) {
+                    reject(err)
+                } else {
+                    if (results.affectedRows > 0) {
+                        const idNotificacion = results.insertId;
+                        connection.query(queryRecibe, [id_usuario, idNotificacion, false], (err, results) => {
+                            if (err) {
+                                reject(err)
+                            } else {
+                                if (results.affectedRows > 0) {
+                                    resolve({success:true});
+                                }else{
+                                    resolve({success:false});
+                                }
+                            }
+                        })
+                    }else{
+                        resolve({success:false});
+                    }
+                }
+            })
+        } catch (error) {
+            reject(error);
+        }
     });
 }
 
@@ -474,10 +565,42 @@ export function verificarNumeroParticipantes(ID_PROYECTO) {
                 reject(err);
             } else {
                 if (results.length < 20) {
-                    resolve({ success: true });
+                    resolve({ success: true, participantes: results });
                 } else {
                     resolve({ success: false });
                 }
+            }
+        });
+    });
+}
+
+export function actualizarCrystal(CRYSTAL, ID){
+    return new Promise(async (resolve, reject) => {
+        const connection = await getConnection();
+        const query = ' UPDATE PROYECTOS SET ID_CATEGORIA_CRYSTAL = ? WHERE ID = ?';
+        connection.query(query, [CRYSTAL, ID], (err, results) => {
+            if (err) {
+                reject(err);
+            } else {
+                if (results.affectedRows > 0) {
+                    resolve({ success: true});
+                } else {
+                    resolve({ success: false });
+                }
+            }
+        });
+    });
+}
+
+export function getAdmins(ID){
+    return new Promise(async (resolve, reject) => {
+        const connection = await getConnection();
+        const query = ' SELECT ID_USUARIO FROM U_SEUNE_P WHERE ID_PROYECTO = ? AND ES_CREADOR = 1';
+        connection.query(query, [CRYSTAL, ID], (err, results) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(results);  
             }
         });
     });
@@ -852,6 +975,29 @@ export function DeleteTask(ID_TAREA) {
     })
 }
 
+export function getTask(ID_TAREA) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const connection = await getConnection();
+
+            const query = "SELECT * FROM TAREAS WHERE ID_TAREA = ?"
+            connection.query(query, [ID_TAREA], async (err, results) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    if (results.length > 0) {
+                        resolve({success: true, task: results});
+                    } else { 
+                        resolve({success: false});
+                    }
+                }
+            });
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
 export function UpdateTask(ID, NOMBRE, DESCRIPCION, ESTADO_DESARROLLO, FECHA_INICIO, FECHA_MAX_TERMINO) {
     return new Promise(async (resolve, reject) => {
         try {
@@ -1208,6 +1354,43 @@ export function GetMessages(ID_iteracion) {
             const connection = await getConnection();
             const chatquery = 'SELECT c.*, u.NOMBRE_USUARIO FROM CHATS_ITERACIONES c JOIN  USUARIO u ON c.ID_USUARIO_ENVIA = u.ID WHERE ID_ITERACION = ? ORDER BY c.FECHA_ENVIO, c.HORA_ENVIO;';            
             connection.query(chatquery, [ID_iteracion], (error, results) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(results);
+                }
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+export function getProjectName(ID){
+    return new Promise(async (resolve, reject) => {
+        try {
+            const connection = await getConnection();
+            const query = 'SELECT NOMBRE,OBJETIVO,DESCRIPCION_GNRL FROM PROYECTOS WHERE ID = ? ;';            
+            connection.query(query, [ID], (error, results) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(results);
+                }
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+
+export function getProjectWithIter(ID){
+    return new Promise(async (resolve, reject) => {
+        try {
+            const connection = await getConnection();
+            const query = 'SELECT P.ID AS ProyectoID FROM PROYECTOS P JOIN ENTREGAS E ON P.ID = E.ID_PROYECTO JOIN ITERACIONES I ON E.ID = I.ID_ENTREGA WHERE I.ID = ?;';            
+            connection.query(query, [ID], (error, results) => {
                 if (error) {
                     reject(error);
                 } else {

@@ -32,7 +32,7 @@ const employeesGrid = [
 const Usuario = () => {
 
   const { id } = useParams();
-  const {user} = useAuth();
+  const { user } = useAuth();
 
   const {
     register,
@@ -42,7 +42,8 @@ const Usuario = () => {
     resolver: zodResolver(addSchema)
   });
 
-  const { projecterrors, message, fechasproject, addParticipant, participants, deleteParticipant, delegarParticipant } = useProject();
+  const { projecterrors, message, fechasproject, addParticipant, participants, deleteParticipant, delegarParticipant,
+    ascenderParticipant, degradarParticipant, twoAdmins } = useProject();
 
   const onSubmit = handleSubmit(async (values) => {
     const data = {
@@ -84,6 +85,36 @@ const Usuario = () => {
       window.location.href = '/';
     }, 5000);
     return () => clearTimeout(timer);
+
+  };
+
+  const handleDegradarClick = async (args) => {
+    const data = {
+      ID: args.ID_USUARIO,
+      ID_PROYECTO: id,
+      ID_admin: user.ID
+    }
+    degradarParticipant(data);
+
+    //const timer = setTimeout(() => {
+    //  window.location.href = '/';
+    //}, 5000);
+    //return () => clearTimeout(timer);
+
+  };
+
+  const handleAscenderClick = async (args) => {
+    const data = {
+      ID: args.ID_USUARIO,
+      ID_PROYECTO: id,
+      ID_admin: user.ID
+    }
+    ascenderParticipant(data);
+
+    //const timer = setTimeout(() => {
+    //  window.location.href = '/';
+    //}, 5000);
+    //return () => clearTimeout(timer);
 
   };
 
@@ -129,21 +160,60 @@ const Usuario = () => {
                 )
               )}
             />
-
-            <ColumnDirective
-              headerText='Delegar'
-              field='Delegar'
-              width='120'
-              textAlign='Center'
-              template={(props) => (
-                props.ROLE === 0 && (
-                  <button
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded-full"
-                    onClick={() => handleDelegarClick(props)}>Delegar
-                  </button>
-                )
-              )}
-            />
+            {fechasproject[0].ID_CATEGORIA_CRYSTAL === 1 &&
+              <ColumnDirective
+                headerText='Delegar'
+                field='Delegar'
+                width='120'
+                textAlign='Center'
+                template={(props) => (
+                  props.ROLE === 0 && (
+                    <button
+                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded-full"
+                      onClick={() => handleDelegarClick(props)}>Delegar
+                    </button>
+                  )
+                )}
+              />}
+            {fechasproject[0].ID_CATEGORIA_CRYSTAL === 2 &&
+              <div>
+                {twoAdmins &&
+                  <div>
+                    <ColumnDirective
+                      headerText='Degradar'
+                      field='Degradar'
+                      width='120'
+                      textAlign='Center'
+                      template={(props) => (
+                        props.ROLE === 1 && (
+                          <button
+                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded-full"
+                            onClick={() => handleDegradarClick(props)}>Degradar
+                          </button>
+                        )
+                      )}
+                    />
+                  </div>}
+                {!twoAdmins &&
+                  <div>
+                    <ColumnDirective
+                      headerText='Ascender'
+                      field='Ascender'
+                      width='120'
+                      textAlign='Center'
+                      template={(props) => (
+                        props.ROLE === 0 && (
+                          <button
+                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded-full"
+                            onClick={() => handleAscenderClick(props)}>Ascender
+                          </button>
+                        )
+                      )}
+                    />
+                  </div>
+                }
+              </div>
+            }
 
           </ColumnsDirective>
           <Inject services={[Page, Search, Toolbar]} />

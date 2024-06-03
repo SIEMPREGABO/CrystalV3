@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { createContext, useContext, useState } from "react";
 import { requestLogin, requestRegister, requestLogout, requestVerify, requestReset, requestPass, requestUpdate } from "../requests/auth.js";
 import Cookies from "js-cookie";
-import { useProject } from "./projectContext.js";
 import {requestProjects} from "../requests/projectReq.js";
 
 const AuthContext = createContext();
@@ -62,9 +61,21 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
-        setAutherrors(error.response.data.message);
+        //setProjecterrors(error.response.data.message);
+        swal({
+          title: 'Iniciar sesión',
+          text: error.response.data.message,
+          icon: 'warning',
+          button: 'Aceptar',
+        });
       } else {
-        setAutherrors("Error del servidor");
+        //setProjecterrors("Error del servidor");
+        swal({
+          title: 'Iniciar sesión',
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
       }
     }
   };
@@ -72,12 +83,30 @@ export const AuthProvider = ({ children }) => {
   const signup = async (user) => {
     try {
       const res = await requestRegister(user);
-      setMessage(res.data.message);
+      //setMessage(res.data.message);
+      swal({
+        title: 'Registrar Usuario',
+        text: res.data.message,
+        icon: 'success',
+        button: 'Aceptar',
+      });
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
-        setAutherrors(error.response.data.message);
+        //setProjecterrors(error.response.data.message);
+        swal({
+          title: 'Registrar Usuario',
+          text: error.response.data.message,
+          icon: 'warning',
+          button: 'Aceptar',
+        });
       } else {
-        setAutherrors("Error del servidor");
+        //setProjecterrors("Error del servidor");
+        swal({
+          title: 'Registrar Usuario',
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
       }
     }
   }
@@ -85,12 +114,30 @@ export const AuthProvider = ({ children }) => {
   const resetToken = async (user) => {
     try {
       const res = await requestReset(user);
-      setMessage(res.data.message);
+      //setMessage(res.data.message);
+      swal({
+        title: 'Restablecer contraseña',
+        text: res.data.message,
+        icon: 'success',
+        button: 'Aceptar',
+      });
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
-        setAutherrors(error.response.data.message);
+        //setProjecterrors(error.response.data.message);
+        swal({
+          title: 'Restablecer contraseña',
+          text: error.response.data.message,
+          icon: 'warning',
+          button: 'Aceptar',
+        });
       } else {
-        setAutherrors("Error del servidor");
+        //setProjecterrors("Error del servidor");
+        swal({
+          title: 'Restablecer contraseña',
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
       }
     }
   }
@@ -98,12 +145,30 @@ export const AuthProvider = ({ children }) => {
   const resetPass = async (user) => {
     try {
       const res = await requestPass(user);
-      setMessage(res.data.message);
+      //setMessage(res.data.message);
+      swal({
+        title: 'Restablecer contraseña',
+        text: res.data.message,
+        icon: 'success',
+        button: 'Aceptar',
+      });
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
-        setAutherrors(error.response.data.message);
+        //setProjecterrors(error.response.data.message);
+        swal({
+          title: 'Restablecer contraseña',
+          text: error.response.data.message,
+          icon: 'warning',
+          button: 'Aceptar',
+        });
       } else {
-        setAutherrors("Error del servidor");
+        //setProjecterrors("Error del servidor");
+        swal({
+          title: 'Restablecer contraseña',
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
       }
     }
   }
@@ -117,9 +182,21 @@ export const AuthProvider = ({ children }) => {
 
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
-        setAutherrors(error.response.data.message);
+        //setProjecterrors(error.response.data.message);
+        swal({
+          title: 'Cerrar sesión',
+          text: error.response.data.message,
+          icon: 'warning',
+          button: 'Aceptar',
+        });
       } else {
-        setAutherrors("Error del servidor");
+        //setProjecterrors("Error del servidor");
+        swal({
+          title: 'Cerrar sesión',
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
       }
     }
   }
@@ -129,12 +206,30 @@ export const AuthProvider = ({ children }) => {
       console.log(user);
       const res = await requestUpdate(user);
       setUser(res.data);
-      setMessage("Informacion Actualizada");
+      //setMessage("Informacion Actualizada");
+      swal({
+        title: 'Actualizar usuario',
+        text: 'Informacion Actualizada',
+        icon: 'success',
+        button: 'Aceptar',
+      });
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
-        setAutherrors(error.response.data.message);
+        //setProjecterrors(error.response.data.message);
+        swal({
+          title: 'Actualizar usuario',
+          text: error.response.data.message,
+          icon: 'warning',
+          button: 'Aceptar',
+        });
       } else {
-        setAutherrors("Error del servidor");
+        //setProjecterrors("Error del servidor");
+        swal({
+          title: 'Actualizar usuario',
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
       }
     }
   }

@@ -41,6 +41,7 @@ export async function sendemailRegister(CORREO, NOMBRE_USUARIO){
     });
 }
 
+
 export async function sendemailJoin(CORREO, PROYECTO){
     return await transporter.sendMail({
         from: '"Clear 👻" <clear@gmail.com>', 
@@ -56,6 +57,7 @@ export async function sendemailJoin(CORREO, PROYECTO){
         </div>`
     });
 }
+
 
 export async function sendemailAdd(CORREO, PROYECTO){
     return await transporter.sendMail({
@@ -85,6 +87,92 @@ export async function sendemailTask(CORREO, NOMBRE, DESCRIPCION,REGISTRO_INICIO,
         <p>Rol: ${ROLPARTICIPANTE}. </p>
         <p>Fecha Inicial: ${REGISTRO_INICIO}. </p>
         <p>Fecha Final: ${REGISTRO_MAX}.</p>
+        <p> =D </p>
+        </div>`
+    });
+}
+
+export async function sendemailConfig(Proyecto, CORREO){
+    return await transporter.sendMail({
+        from: '"Clear 👻" <clear@gmail.com>', 
+        to: CORREO, 
+        subject: `Configuración de '${Proyecto}' actualizada`, 
+        html: `<div>
+        <p>Se han actualizado las fechas de tu proyecto</p>
+        <p>Revisalas en la pestaña calendario de tu proyecto en Clear/p>
+        <p> =D </p>
+        </div>`
+    });
+}
+
+export async function sendemailUpdateTask(NOMBRE, CORREO, DESCRIPCION, ESTADO_DESARROLLO, FECHA_INICIO, FECHA_MAX_TERMINO){
+    return await transporter.sendMail({
+        from: '"Clear 👻" <clear@gmail.com>', 
+        to: CORREO, 
+        subject: `Tu tarea '${NOMBRE}' fue actualizada`, 
+        html: `<div>
+        <p>Se ha actualizado tu tarea</p>
+        <p>Descripción: ${DESCRIPCION}</p>
+        <p>Estado:${ESTADO_DESARROLLO} /p>
+        <p>Fecha de inicio:${FECHA_INICIO} /p>
+        <p>Fecha de termino:${FECHA_MAX_TERMINO} </p>
+        <p> =D </p>
+        </div>`
+    });
+}
+
+
+export async function sendemailDeleteTask(NOMBRE, CORREO, DESCRIPCION){
+    return await transporter.sendMail({
+        from: '"Clear 👻" <clear@gmail.com>', 
+        to: CORREO, 
+        subject: `Tu tarea '${NOMBRE}' fue eliminada`, 
+        html: `<div>
+        <p>Se ha eliminado tu tarea</p>
+        <p>Descripción: ${DESCRIPCION}</p>
+        <p> =D </p>
+        </div>`
+    });
+}
+
+
+export async function sendemailStartProject(NOMBRE, CORREO, OBJETIVO, DESCRIPCION_GNRL){
+    return await transporter.sendMail({
+        from: '"Clear 👻" <clear@gmail.com>', 
+        to: CORREO, 
+        subject: `Tu proyecto '${NOMBRE}' ha comenzado`, 
+        html: `<div>
+        <p>Tu proyecto en clear ha iniciado</p>
+        <p>Descripción: ${DESCRIPCION_GNRL}</p>
+        <p>Objetivo: ${OBJETIVO}</p>
+        <p> =D </p>
+        </div>`
+    });
+}
+
+export async function sendemailEndProject(NOMBRE, CORREO, OBJETIVO, DESCRIPCION_GNRL){
+    return await transporter.sendMail({
+        from: '"Clear 👻" <clear@gmail.com>', 
+        to: CORREO, 
+        subject: `Tu proyecto '${NOMBRE}' ha terminado`, 
+        html: `<div>
+        <p>Tu proyecto en clear ha terminado</p>
+        <p>Descripción: ${DESCRIPCION_GNRL}</p>
+        <p>Objetivo: ${OBJETIVO}</p>
+        <p> =D </p>
+        </div>`
+    });
+}
+
+export async function sendemailFaseProject(NOMBRE, CORREO, OBJETIVO, DESCRIPCION_GNRL){
+    return await transporter.sendMail({
+        from: '"Clear 👻" <clear@gmail.com>', 
+        to: CORREO, 
+        subject: `Tu proyecto '${NOMBRE}' ha cambiado de fase`, 
+        html: `<div>
+        <p>Tu proyecto en clear ha cambiado de fase</p>
+        <p>Descripción: ${DESCRIPCION_GNRL}</p>
+        <p>Objetivo: ${OBJETIVO}</p>
         <p> =D </p>
         </div>`
     });

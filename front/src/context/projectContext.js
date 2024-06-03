@@ -1,12 +1,16 @@
 import { useEffect } from "react";
 import { createContext, useContext, useState } from "react";
 import { requestVerify } from "../requests/auth.js";
-import { requestCreate, requestJoin, requestPermissions, requestgetProject, 
-  requestAddRequirement, requestCreateTask, requestAdd,requestDelete, 
+import {
+  requestCreate, requestJoin, requestPermissions, requestgetProject,
+  requestAddRequirement, requestCreateTask, requestAdd, requestDelete,
   requestAddMessage, requestMessages, requestDeleteTask, requestUpdateTask, requestUpdateTState,
-  requestTasksProject,requestConfig,
+  requestTasksProject, requestConfig,
   requestDelegar,
-  requestDeleteProject} from "../requests/projectReq.js";
+  requestDeleteProject,
+  requestDegradar,
+  requestAscender
+} from "../requests/projectReq.js";
 import Cookies from "js-cookie";
 import { useAuth } from "./authContext.js";
 import swal from 'sweetalert';
@@ -20,10 +24,11 @@ export const useProject = () => {
 };
 
 export const ProjectProvider = ({ children }) => {
-  const {setUser, setIsAuthenticated ,setLoading, logout} = useAuth();
+  const { setUser, setIsAuthenticated, setLoading, logout } = useAuth();
 
   const [IsParticipant, setIsParticipant] = useState(true);
   const [userRole, setUserRole] = useState(false);
+  const [twoAdmins, setTwoAdmins] = useState(false);
 
   const [message, setMessage] = useState([]);
   const [projecterrors, setProjecterrors] = useState([]);
@@ -41,9 +46,8 @@ export const ProjectProvider = ({ children }) => {
   const [iteracionactual, setiteracionactual] = useState([]);
   const [requerimientos, setRequerimientos] = useState([]);
   const [messagesChat, setMessagesChat] = useState([]);
-  const [chaterrors, setChatErrors] = useState([]);
 
-  const [entregasproject,  setEntregasProject] = useState([]);
+  const [entregasproject, setEntregasProject] = useState([]);
   const [projectInfo, setProjectInfo] = useState([]);
 
   useEffect(() => {
@@ -60,91 +64,111 @@ export const ProjectProvider = ({ children }) => {
       return () => clearTimeout(timer);
     }
   }, [projecterrors, message]);
-/*
-  useEffect(() => {
-    let events = [];
-    
-    fechasproject?.forEach(project => {
-      events.push({
-        Subject: `Inicio del Proyecto: ${project.NOMBRE}`,  
-        StartTime: new Date(project.FECHA_INICIO),
-        EndTime: new Date(project.FECHA_TERMINO),
-        IsAllDay: true
-      });
-    });
 
-
-    fechasentregas?.forEach((entrega, index) => {
-      events.push({
-        Subject: `Entrega ${index + 1}`,
-        StartTime: new Date(entrega.FECHA_INICIO),
-        EndTime: new Date(entrega.FECHA_TERMINO),
-        IsAllDay: true
-      });
-    });
-
-
-    fechasiteraciones?.forEach((iteracionesPorEntrega, index) => {
-      iteracionesPorEntrega.forEach((iteracion, subIndex) => {
-        events.push({
-          Subject: `Iteración ${subIndex + 1} de Entrega ${index + 1}`,
-          StartTime: new Date(iteracion.FECHA_INICIO),
-          EndTime: new Date(iteracion.FECHA_TERMINO),
-          IsAllDay: true
-        });
-      });
-    });
-    console.log(events);
-    setScheduleData(events);
-    
-  }, [fechasproject, fechasentregas, fechasiteraciones]);
-*/
   const createTask = async (Task) => {
     try {
       const res = await requestCreateTask(Task);
-      setMessage(res.data.message);
+      //setMessage(res.data.message);
       swal({
-        title: 'Asignacion de tarea',
+        title: 'Asignación de tarea',
         text: res.data.message,
-        icon: (res.status === 200 ? 'success' : (res.status === 400 ? 'warning' : 'error')),
+        icon: 'success',
         button: 'Aceptar',
       });
-      console.log(res);
+      //console.log(res);
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
+        swal({
+          title: 'Asignación de tarea',
+          text: error.response.data.message,
+          icon: 'warning',
+          button: 'Aceptar',
+        });
         setProjecterrors(error.response.data.message);
         console.log(error.response.data.message);
-        
+
       } else {
+        swal({
+          title: 'Asignación de tarea',
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
         setProjecterrors("Error del servidor");
       }
     }
   }
 
   const deleteTask = async (Task) => {
-    try{
-      console.log(Task);
+    try {
+      //console.log(Task);
       const res = await requestDeleteTask(Task);
-      console.log(res.data.message);
-    }catch(error){
+      swal({
+        title: 'Eliminación de tarea',
+        text: res.data.message,
+        icon: 'success',
+        button: 'Aceptar',
+      });
+      //console.log(res.data.message);
+    } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
-        setProjecterrors(error.response.data.message);
+        swal({
+          title: 'Eliminación de tarea',
+          text: error.response.data.message,
+          icon: 'warning',
+          button: 'Aceptar',
+        });
+        //setProjecterrors(error.response.data.message);
       } else {
-        setProjecterrors("Error del servidor");
+        swal({
+          title: 'Eliminación de tarea',
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
+        //setProjecterrors("Error del servidor");
       }
     }
   }
 
   const deleteProjectFunction = async (id) => {
-    try{
-      console.log(id);
-      const res = await requestDeleteProject(id);
-      setMessage(res.data.message);
-    }catch(error){
+    try {
+      swal({
+        title: "Eliminar proyecto",
+        text: "¿Quieres eliminar el proyecto?",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+      })
+        .then(async (willDelete) => {
+          if (willDelete) {
+            const res = await requestDeleteProject(id);
+            swal({
+              title: "Eliminar proyecto",
+              text: res.data.message,
+              icon: 'success',
+              button: 'Aceptar',
+            });
+          }
+        });
+      //setMessage(res.data.message);
+    } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
-        setProjecterrors(error.response.data.message);
+        swal({
+          title: "Eliminar proyecto",
+          text: error.response.data.message,
+          icon: 'success',
+          button: 'Aceptar',
+        });
+        //setProjecterrors(error.response.data.message);
       } else {
-        setProjecterrors("Error del servidor");
+        swal({
+          title: "Eliminar proyecto",
+          text: "Error del servidor",
+          icon: 'success',
+          button: 'Aceptar',
+        });
+        //setProjecterrors("Error del servidor");
       }
     }
   }
@@ -155,22 +179,52 @@ export const ProjectProvider = ({ children }) => {
       console.log(res.data.message);
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
-        setProjecterrors(error.response.data.message);
+        //setProjecterrors(error.response.data.message);
+        swal({
+          title: 'Actualizar tarea',
+          text: error.response.data.message,
+          icon: 'warning',
+          button: 'Aceptar',
+        });
       } else {
-        setProjecterrors("Error del servidor");
+        //setProjecterrors("Error del servidor");
+        swal({
+          title: 'Actualizar tarea',
+          text: "Error del servidor",
+          icon: 'error',
+          button: 'Aceptar',
+        });
       }
     }
   }
 
   const updateTask = async (Task) => {
-    try{
+    try {
       const res = await requestUpdateTask(Task);
-      console.log(res.data.message);
-    }catch(error){
+      //console.log(res.data.message);
+      swal({
+        title: 'Actualizar tarea',
+        text: res.data.message,
+        icon: 'success',
+        button: 'Aceptar',
+      });
+    } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
-        setProjecterrors(error.response.data.message);
+        //setProjecterrors(error.response.data.message);
+        swal({
+          title: 'Actualizar tarea',
+          text: error.response.data.message,
+          icon: 'warning',
+          button: 'Aceptar',
+        });
       } else {
-        setProjecterrors("Error del servidor");
+        //setProjecterrors("Error del servidor");
+        swal({
+          title: 'Actualizar tarea',
+          text: "Error del servidor",
+          icon: 'error',
+          button: 'Aceptar',
+        });
       }
     }
   }
@@ -178,27 +232,58 @@ export const ProjectProvider = ({ children }) => {
   const configProyect = async (fechas) => {
     try {
       const res = await requestConfig(fechas);
-      setMessage(res.data.message);
+      //setMessage(res.data.message);
+      swal({
+        title: 'Configurar Proyecto',
+        text: res.data.message,
+        icon: 'success',
+        button: 'Aceptar',
+      });
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
-        setProjecterrors(error.response.data.message);
-        console.log(error.response.data.message);
+        //setProjecterrors(error.response.data.message);
+        swal({
+          title: 'Configurar Proyecto',
+          text: error.response.data.message,
+          icon: 'warning',
+          button: 'Aceptar',
+        });
+        //console.log(error.response.data.message);
       } else {
-        setProjecterrors("Error del servidor");
+        swal({
+          title: 'Configurar Proyecto',
+          text: "Error del servidor",
+          icon: 'error',
+          button: 'Aceptar',
+        });
+        //setProjecterrors("Error del servidor");
       }
     }
   }
 
 
   const getTasksProject = async (project) => {
-    try{
+    try {
       const res = await requestTasksProject(project);
       setEntregasProject(res.data);
-    }catch(error){
+      
+    } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
-        setProjecterrors(error.response.data.message);
+        //setProjecterrors(error.response.data.message);
+        swal({
+          title: 'Extraer tareas del proyecto',
+          text: error.response.data.message,
+          icon: 'warning',
+          button: 'Aceptar',
+        });
       } else {
-        setProjecterrors("Error del servidor");
+        //setProjecterrors("Error del servidor");
+        swal({
+          title: 'Extraer tareas del proyecto',
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
       }
     }
   }
@@ -207,24 +292,55 @@ export const ProjectProvider = ({ children }) => {
     try {
       const res = await requestCreate(project);
       setMessage(res.data.message);
+      swal({
+        title: 'Crear proyecto',
+        text: res.data.message,
+        icon: 'success',
+        button: 'Aceptar',
+      });
+
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
-        setProjecterrors(error.response.data.message);
+        //setProjecterrors(error.response.data.message);
+        swal({
+          title: 'Crear proyecto',
+          text: error.response.data.message,
+          icon: 'warning',
+          button: 'Aceptar',
+        });
       } else {
-        setProjecterrors("Error del servidor");
+        //setProjecterrors("Error del servidor");
+        swal({
+          title: 'Crear Proyecto',
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
       }
     }
   };
 
   const createMessages = async (message) => {
-    try{
+    try {
       const res = await requestAddMessage(message);
-      console.log(res.data); 
-    }catch(error){
-      if(error.response && error.response.data && error.response.data.message){
-        setProjecterrors(error.response.data.message);
-      }else{
-        setProjecterrors("Error del servidor");
+      console.log(res.data);
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.message) {
+        swal({
+          title: 'Crear mensajes',
+          text: error.response.data.message,
+          icon: 'warning',
+          button: 'Aceptar',
+        });
+        //setProjecterrors(error.response.data.message);
+      } else {
+        //setProjecterrors("Error del servidor");
+        swal({
+          title: 'Crear mensajes',
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
       }
     }
   };
@@ -233,16 +349,28 @@ export const ProjectProvider = ({ children }) => {
     try {
       //const cookies = Cookies.get();
       //console.log('iteracion pcontext: ' + iteracion.ID_ITERACION);
-      console.log(iteracion);
+      //console.log(iteracion);
       const res = await requestMessages(iteracion);
-      console.log('pcontext: ' + res);
+      //console.log('pcontext: ' + res);
       setMessagesChat(res.data);
       //setIsCreated(true);
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
-        setProjecterrors(error.response.data.message);
+        //setProjecterrors(error.response.data.message);
+        swal({
+          title: 'Extraer mensajes',
+          text: error.response.data.message,
+          icon: 'warning',
+          button: 'Aceptar',
+        });
       } else {
-        setProjecterrors("Error del servidor");
+        //setProjecterrors("Error del servidor");
+        swal({
+          title: 'Extraer mensajes',
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
       }
     }
   };
@@ -250,12 +378,30 @@ export const ProjectProvider = ({ children }) => {
   const joinProject = async (joinable) => {
     try {
       const res = await requestJoin(joinable);
-      setMessage(res.data.message);
+      //setMessage(res.data.message);
+      swal({
+        title: 'Enlazar participante',
+        text: res.data.message,
+        icon: 'success',
+        button: 'Aceptar',
+      });
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
-        setProjecterrors(error.response.data.message);
+        //setProjecterrors(error.response.data.message);
+        swal({
+          title: 'Enlazar participante',
+          text: error.response.data.message,
+          icon: 'warning',
+          button: 'Aceptar',
+        });
       } else {
-        setProjecterrors("Error del servidor");
+        //setProjecterrors("Error del servidor");
+        swal({
+          title: 'Enlazar participante',
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
       }
     }
   }
@@ -263,12 +409,30 @@ export const ProjectProvider = ({ children }) => {
   const addParticipant = async (participant) => {
     try {
       const res = await requestAdd(participant);
-      setMessage(res.data.message);
+      //setMessage(res.data.message);
+      swal({
+        title: 'Agregar participante',
+        text: res.data.message,
+        icon: 'success',
+        button: 'Aceptar',
+      });
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
-        setProjecterrors(error.response.data.message);
+        swal({
+          title: 'Agregar participante',
+          text: error.response.data.message,
+          icon: 'warning',
+          button: 'Aceptar',
+        });
+        //setProjecterrors(error.response.data.message);
       } else {
-        setProjecterrors("Error del servidor");
+        swal({
+          title: 'Agregar participante',
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
+        //setProjecterrors("Error del servidor");
       }
     }
   }
@@ -276,24 +440,37 @@ export const ProjectProvider = ({ children }) => {
   const createRequirements = async (project) => {
     try {
       const res = await requestAddRequirement(project);
-      console.log(res.data);
+      //console.log(res.data);
       swal({
-        title: 'Requerimiento Agregado',
+        title: 'Crear Requerimiento',
         text: res.data.message,
-        icon: (res.data.status === "OK" ? 'success' : 'error'),
+        icon: 'success',
         button: 'Aceptar',
       });
       //setMessage(res.data.message);
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
-        setProjecterrors(error.response.data.message);
+        swal({
+          title: 'Crear Requerimiento',
+          text: error.response.data.message,
+          icon: 'error',
+          button: 'Aceptar',
+        });
+        //setProjecterrors(error.response.data.message);
       } else {
-        setProjecterrors("Error del servidor");
+        swal({
+          title: 'Crear Requerimiento',
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
+        //setProjecterrors("Error del servidor");
       }
     }
   }
 
   const getProject = async (project) => {
+    let counter = 0;
     try {
       const res = await requestgetProject(project);
       setParticipants(res.data.participants);
@@ -302,45 +479,225 @@ export const ProjectProvider = ({ children }) => {
       setFechasiteraciones(res.data.fechasIteraciones);
       setEntregaactual(res.data.entregaActual);
       setiteracionactual(res.data.iteracionactual);
-      
       setRequerimientos(res.data.requerimientos);
       setTareas(res.data.tasks);
       setTareasKanban(res.data.tasksKanban);
       setProjectInfo(res.data.projectInfo);
+      if(fechasproject[0].ID_CATEGORIA_CRYSTAL === 2 ){
+        participants.map((participant)=>{
+          if(participant.ROLE === 1){
+            counter++;
+          }
+        })
+      }
+      if(counter === 2){
+        setTwoAdmins(true);
+        counter = 0;
+      }
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
         setProjecterrors(error.response.data.message);
+        swal({
+          title: 'Extraer proyecto',
+          text: error.response.data.message,
+          icon: 'error',
+          button: 'Aceptar',
+        });
       } else {
         setProjecterrors("Error del servidor");
+        swal({
+          title: 'Extraer proyecto',
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
       }
     }
   }
 
   const deleteParticipant = async (id) => {
     try {
-      const res = await requestDelete(id);
-      setMessage(res.data.message);
+      //const res = await requestDelete(id);
+      //setMessage(res.data.message);
+      if(participants.length === 9 && twoAdmins){
+        swal({
+          title: 'Eliminar un participante',
+          text: 'Degradar a un administrador para continuar',
+          icon: 'warning',
+          button: 'Aceptar',
+        });
+      }else{
+        swal({
+          title: "Eliminar un participante",
+          text: "¿Quieres eliminar al participante?",
+          icon: "warning",
+          buttons: true,
+          dangerMode: true,
+        })
+          .then(async (willDelete) => {
+            if (willDelete) {
+              const res = await requestDelete(id);
+              swal({
+                title: 'Eliminar un participante',
+                text: res.data.message,
+                icon: 'success',
+                button: 'Aceptar',
+              });
+            }
+          });
+      }
+      
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
-        setProjecterrors(error.response.data.message);
+        swal({
+          title: 'Eliminar un participante',
+          text: error.response.data.message,
+          icon: 'warning',
+          button: 'Aceptar',
+        });
+        //setProjecterrors(error.response.data.message);
       } else {
-        setProjecterrors("Error del servidor");
+        swal({
+          title: 'Eliminar un participante',
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
+        //setProjecterrors("Error del servidor");
       }
     }
   }
 
+
   const delegarParticipant = async (id) => {
     try {
-      const res = await requestDelegar(id);
-      setMessage(res.data.message);
+      //const res = await requestDelegar(id);
+      //setMessage(res.data.message);
+      swal({
+        title: "Delegar a un participante",
+        text: "¿Quieres delegar al participante?",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+      })
+        .then(async (willDelete) => {
+          if (willDelete) {
+            const res = await requestDelegar(id);
+            swal({
+              title: 'Delegar a un participante',
+              text: res.data.message,
+              icon: 'success',
+              button: 'Aceptar',
+            });
+          }
+        });
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
-        setProjecterrors(error.response.data.message);
+        swal({
+          title: 'Delegar a un participante',
+          text: error.response.data.message,
+          icon: 'warning',
+          button: 'Aceptar',
+        });
+        //setProjecterrors(error.response.data.message);
       } else {
-        setProjecterrors("Error del servidor");
+        swal({
+          title: 'Delegar a un participante',
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
+        //setProjecterrors("Error del servidor");
       }
     }
   }
+
+  const degradarParticipant = async (id) => {
+    try {
+      //const res = await requestDelegar(id);
+      //setMessage(res.data.message);
+      swal({
+        title: "Degradar a un administrador",
+        text: "¿Quieres degradar al administrador?",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+      })
+        .then(async (willDelete) => {
+          if (willDelete) {
+            const res = await requestDegradar(id);
+            swal({
+              title: "Degradar a un administrador",
+              text: res.data.message,
+              icon: 'success',
+              button: 'Aceptar',
+            });
+          }
+        });
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.message) {
+        swal({
+          title: "Degradar a un administrador",
+          text: error.response.data.message,
+          icon: 'warning',
+          button: 'Aceptar',
+        });
+        //setProjecterrors(error.response.data.message);
+      } else {
+        swal({
+          title: "Degradar a un administrador",
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
+        //setProjecterrors("Error del servidor");
+      }
+    }
+  }
+
+  const ascenderParticipant = async (id) => {
+    try {
+      //const res = await requestDelegar(id);
+      //setMessage(res.data.message);
+      swal({
+        title: "Ascender a un administrador",
+        text: "¿Quieres ascender al administrador?",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+      })
+        .then(async (willDelete) => {
+          if (willDelete) {
+            const res = await requestAscender(id);
+            swal({
+              title: "Ascender a un administrador",
+              text: res.data.message,
+              icon: 'success',
+              button: 'Aceptar',
+            });
+          }
+        });
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.message) {
+        swal({
+          title: "Ascender a un administrador",
+          text: error.response.data.message,
+          icon: 'warning',
+          button: 'Aceptar',
+        });
+        //setProjecterrors(error.response.data.message);
+      } else {
+        swal({
+          title: "Ascender a un administrador",
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
+        //setProjecterrors("Error del servidor");
+      }
+    }
+  }
+
 
   const getPermissions = async (id) => {
     try {
@@ -368,31 +725,48 @@ export const ProjectProvider = ({ children }) => {
       } else {
         setIsParticipant(false);
         if (error.response && error.response.data && error.response.data.message) {
-          setProjecterrors(error.response.data.message);
+          //setProjecterrors(error.response.data.message);
+          swal({
+            title: 'Permisos del proyecto',
+            text: error.response.data.message,
+            icon: 'error',
+            button: 'Aceptar',
+          });
         } else {
-          setProjecterrors("Error del servidor");
+          //setProjecterrors("Error del servidor");
+          swal({
+            title: 'Permisos del proyecto',
+            text: 'Error del servidor',
+            icon: 'error',
+            button: 'Aceptar',
+          });
         }
       }
     }
   }
 
-   const vaciarProject = async () =>{
+  const vaciarProject = async () => {
     try {
-      setIsParticipant(true)
-        setUserRole(false)
-        setFechasproject([])
-        setFechasentregas([])
-        setFechasiteraciones([])
-        setTareas([])
-        setScheduleData([])
-        setTareasKanban([])
-        setEntregaactual([])
-        setiteracionactual([])
-        setRequerimientos([])
-        setMessagesChat([])
-        setEntregasProject([])
+      setIsParticipant(true);
+      setUserRole(false);
+      setFechasproject([]);
+      setFechasentregas([]);
+      setFechasiteraciones([]);
+      setTareas([]);
+      setScheduleData([]);
+      setTareasKanban([]);
+      setEntregaactual([]);
+      setiteracionactual([]);
+      setRequerimientos([]);
+      setMessagesChat([]);
+      setEntregasProject([]);
     } catch (error) {
-      setProjecterrors("Error del servidor");
+      swal({
+        title: 'Vaciar el proyecto',
+        text: 'Error del servidor',
+        icon: 'error',
+        button: 'Aceptar',
+      });
     }
   }
 
@@ -421,32 +795,32 @@ export const ProjectProvider = ({ children }) => {
 
   return (
     <ProjectContext.Provider
-      value={{        
-        message,projecterrors,
-        
+      value={{
+        message, projecterrors,
+
         participants,
         entregasproject,
         tareasKanban,
-        
+
         fechasproject,
         fechasentregas,
         fechasiteraciones,
         scheduleData,
-        
+
         entregaactual,
         iteracionactual,
         projectInfo,
-        
+
         userRole,
-        IsParticipant,
-        
-        requerimientos,tareas,
-        
+        IsParticipant,twoAdmins,
+
+        requerimientos, tareas,
+
         chaterrors,
         messagesChat,
 
         setProjecterrors,
-        setMessage,setIsParticipant, setScheduleData,
+        setMessage, setIsParticipant, setScheduleData,
 
         create,
         configProyect,
@@ -457,7 +831,7 @@ export const ProjectProvider = ({ children }) => {
         createRequirements,
         createTask,
         addParticipant,
-        delegarParticipant,
+        delegarParticipant,degradarParticipant,ascenderParticipant,
         createMessages,
         getMessages,
         getTasksProject,
