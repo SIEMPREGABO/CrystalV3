@@ -1,3 +1,4 @@
-.e-kanban .e-kanban-content {
-    height: 100px;
-  }
+.gantt-id {
+  white-space: normal;
+  word-break: break-word;
+}

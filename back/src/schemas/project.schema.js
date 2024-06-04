@@ -91,7 +91,9 @@ export const requerimientoSchema = z.object({
     }).regex(
         new RegExp(/^[A-Za-zÑñÁáÉéÍíÓóÚúÜü\s0-9.,!?¿¡-]+$/), { message: "Descripción invalida" }
     ),
-    TIPO_REQ: z.string().nonempty({
+    TIPO: z.string().nonempty({
         message: 'El tipo es requerido'
+    }).refine(value => value !== "0", {
+        message: 'Selecciona un tipo de requerimiento'
     })
 })

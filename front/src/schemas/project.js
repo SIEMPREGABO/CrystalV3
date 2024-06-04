@@ -46,12 +46,12 @@ export const addSchema = z.object({
 
 export const taskSchema = z.object({
     NOMBRE: z.string().nonempty({
-        message: 'El nombre es requerido'
+        message: 'El nombre de la tarea es requerido'
     }).regex(
         new RegExp(/^[A-Za-zÑñÁáÉéÍíÓóÚúÜü\s0-9.,!?¿¡-]+$/), { message: "Nombre inválido" }
     ),
     DESCRIPCION: z.string().nonempty({
-        message: 'El descripcion del proyecto es requerido'
+        message: 'La descripción de la tarea es requerida'
     }).regex(
         new RegExp(/^[A-Za-zÑñÁáÉéÍíÓóÚúÜü\s0-9.,!?¿¡-]+$/), { message: "Descripción inválida" }
     ),
@@ -59,24 +59,29 @@ export const taskSchema = z.object({
         message: 'La fecha de inicio es requerida'
     }),
     FECHA_MAX_TERMINO:z.string().nonempty({
-        message: 'La fecha maxima de termino es requerida'
+        message: 'La fecha de termino es requerida'
     }),
     HORAINICIO:z.string().nonempty({
         message: 'La hora inicio es requerida'
     }),
     HORAMAXIMA:z.string().nonempty({
-        message: 'La hora maxima de termino es requerida'
+        message: 'La hora de termino es requerida'
     }),
     ID_REQUERIMIENTO:z.string().nonempty({
         message: 'El requerimiento es requerido'
+    }).refine(value => value !== "0", {
+        message: 'Selecciona un tipo de requerimiento'
     }),
     ROLPARTICIPANTE:z.string().nonempty({
         message: 'El rol es requerido'
+    }).refine(value => value !== "0", {
+        message: 'Selecciona un tipo de rol'
     }),
     ID_USUARIO:z.string().nonempty({
         message: 'El usuario es requerido'
+    }).refine(value => value !== "0", {
+        message: 'Selecciona un usuario'
     }),ID_TAREA_DEPENDIENTE: z.string().optional()
-
 });
 
 export const requerimientoSchema = z.object({
@@ -90,8 +95,10 @@ export const requerimientoSchema = z.object({
     }).regex(
         new RegExp(/^[A-Za-zÑñÁáÉéÍíÓóÚúÜü\s0-9.,!?¿¡-]+$/), { message: "Descripción invalida" }
     ),
-    TIPO_REQ: z.string().nonempty({
+    TIPO: z.string().nonempty({
         message: 'El tipo es requerido'
+    }).refine(value => value !== "0", {
+        message: 'Selecciona un tipo de requerimiento'
     })
 })
 

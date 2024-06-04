@@ -1,52 +1,42 @@
-import React, { useState } from 'react';
-import { useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/authContext';
-import moment from "moment";
 import { Chart } from "react-google-charts";
-import { cartData, earningData } from '../data/dummy';
 import { useStateContext } from '../context/Provider';
 import { Button } from '../components';
+import  PDF  from "../components/PDF.jsx";
+import {PDFDownloadLink} from "@react-pdf/renderer";
 import { useProject } from "../context/projectContext";
 import { BsBoxSeam } from 'react-icons/bs';
 import { MdOutlineSupervisorAccount } from 'react-icons/md';
 import { FiBarChart } from 'react-icons/fi';
 import { HiOutlineRefresh } from 'react-icons/hi';
-{/* el data es para los datos de la grafica y el option pues basicamente para el estilo de la grafica*/ }
-
-const data = [
-  ["Task", "Hours per Day"],
-  ["Work", 11],
-  ["Eat", 2],
-  ["Commute", 2],
-  ["Watch TV", 2],
-  ["Sleep", 7],
-];
+import '../css/kanban.module.css';
 
 const options = {
-  title: "",
-  is3D: true,
-
-  titleTextStyle: {
-    fontSize: 20,
-    color: '#333',
-    textAlign: 'center'
+  gantt: {
+    criticalPathEnabled: false,
+    criticalPathStyle: {
+      stroke: '#e64a19',
+      strokeWidth: 5,
+    },
+    trackHeight: 30,
+    labelStyle: {
+      fontName: 'Arial',
+      fontSize: 12,
+      color: '#757575',
+    },
   },
   chartArea: {
+    left: 200,
     width: '100%',
-    height: '80%',
   },
-  legend: {
-    textStyle: {
-      fontSize: 14,
-      color: '#666',
-    },
-    position: 'bottom',
-    alignment: 'center',
-  },
+  tooltip: { isHtml: true }, // Ensure HTML tooltips are enabled
 };
+
 const Inicio = () => {
   const { currentColor } = useStateContext();
-  const { getProject, project, fechasproject, participants, projectInfo } = useProject();
+  const [entregas, setEntregas] = useState([]);
+  const { getProject, project, fechasproject, participants, projectInfo, tareasGantt, entregasproject, getTasksProject } = useProject();
   const [earningData, setEarningData] = useState([]);
   const [dataChart, setDataChart] = useState([]);
   const { user } = useAuth();
@@ -92,25 +82,135 @@ const Inicio = () => {
         },
       ];
 
-      const datac = [
-        ["Tareas", "Estado"],
-        ["En espera", (projectInfo[0].NUMTAREASESP > 0 ? projectInfo[0].NUMTAREASESP : 0)],
-        ["En desarrollo", (projectInfo[0].NUMTAREASDES > 0 ? projectInfo[0].NUMTAREASDES : 0)],
-        ["Por Revisar", (projectInfo[0].NUMTAREASREV > 0 ? projectInfo[0].NUMTAREASREV : 0)],
-        ["Completadas", (projectInfo[0].NUMTAREASCMP > 0 ? projectInfo[0].NUMTAREASCMP : 0)]
-      ];
-
-      setDataChart(datac);
       setEarningData(carddata);
     }
   }, [projectInfo]);
 
   useEffect(() => {
-    console.log(fechasproject);
-    console.log(projectInfo);
+    if(fechasproject.length > 0){
+      const project = {
+          ID_PROYECTO: fechasproject[0].ID,
+      }
+
+      getTasksProject(project);
+      //setEntregas(entregasproject);
+  }
   }, [fechasproject]);
 
+  useEffect(() => {
+    if(entregasproject !== undefined && entregasproject.length > 0){
+        setEntregas(entregasproject);
+        //setShowIteraciones((JSON.parse(entregasproject[0].ITERACIONES)));
+        console.log(entregasproject);
+        
+        }
+  }, [entregasproject]);
 
+  useEffect(() => {
+    if (tareasGantt && tareasGantt.length > 0) {
+      const columnsGantt = [
+        { type: "string", label: "Task ID" },
+        { type: "string", label: "Task Name" },
+        { type: "string", label: "Resource" },
+        { type: "date", label: "Start Date" },
+        { type: "date", label: "End Date" },
+        { type: "number", label: "Duration" },
+        { type: "number", label: "Percent Complete" },
+        { type: "string", label: "Dependencies" },
+        { type: "string", role: "tooltip", p: { html: true } } // Add tooltip column
+      ];
+
+      const rows = [];
+
+      tareasGantt.forEach((tarea, index) => {
+        let percent = 0;
+
+        switch (tarea.ESTADO_DESARROLLO) {
+          case "En espera":
+            percent = 0;
+            break;
+          case "En desarrollo":
+          case "Atrasada":
+            percent = 40;
+            break;
+          case "Por Revisar":
+            percent = 75;
+            break;
+          case "Cerrada":
+            percent = 100;
+            break;
+          default:
+            break;
+        }
+
+        const taskId = `Tarea ${tarea.ID}: ${tarea.NOMBRE}`;
+        const taskName = `Tarea ${tarea.ID}: ${tarea.NOMBRE}`;
+
+        const tooltipContent = `
+          <div style="padding:10px;">
+            <h4>${taskName}</h4>
+            <p><strong>Inicio:</strong> ${new Date(tarea.FECHA_INICIO).toLocaleDateString()}</p>
+            <p><strong>Fin:</strong> ${new Date(tarea.FECHA_MAX_TERMINO).toLocaleDateString()}</p>
+            <p><strong>Porcentaje Completado:</strong> ${percent}%</p>
+            <p><strong>Entrega:</strong> ${tarea.ENTREGA}</p>
+          </div>
+        `;
+        let arrayDependencias =[];
+        
+        let dependencies = "";
+if (tarea.DEPENDENCIAS) {
+    let arrayDependencias = tarea.DEPENDENCIAS.split(",");
+    //console.log(arrayDependencias);
+    
+    arrayDependencias.map((dependencia, index) => {
+        let startIndex = 0;
+        let foundIndex = -1;
+        
+        // Seguimos buscando hasta encontrar un índice válido
+        while (true) {
+            foundIndex = tareasGantt.findIndex((element, idx) => idx >= startIndex && typeof element.NOMBRE === 'string' && element.NOMBRE.includes(dependencia));
+            
+            if (foundIndex > -1) {
+                startIndex = foundIndex + 1; // Actualizamos startIndex para la siguiente búsqueda
+                break; // Salimos del bucle while si encontramos un índice válido
+            } else {
+                break; // Salimos del bucle while si no encontramos más coincidencias
+            }
+        }
+        
+        //console.log(foundIndex);
+        if (foundIndex > -1) {
+            if (index < arrayDependencias.length - 1) {
+                dependencies += `Tarea ${tareasGantt[foundIndex].ID}: ${tareasGantt[foundIndex].NOMBRE},`;
+            } else {
+                dependencies += `Tarea ${tareasGantt[foundIndex].ID}: ${tareasGantt[foundIndex].NOMBRE}`;
+            }
+        }
+        //console.log(dependencies);
+    });
+}
+        
+        //console.log(dependencies);
+        //
+        //console.log(arrayDependencias);
+        rows.push([
+          taskId,
+          taskName,
+          tarea.ENTREGA,
+          new Date(tarea.FECHA_INICIO),
+          new Date(tarea.FECHA_MAX_TERMINO),
+          null,
+          percent,
+          dependencies,
+          tooltipContent // Add tooltip content
+        ]);
+      });
+
+      const data = [columnsGantt, ...rows];
+      setDataChart(data);
+      //console.log(tareasGantt);
+    }
+  }, [tareasGantt]);
 
   return (
     <div className="mt-24">
@@ -119,23 +219,28 @@ const Inicio = () => {
           <div className="flex justify-between items-center">
             <div>
               <p className='font-bold text-gray-700'>{fechasproject && fechasproject.length > 0 ? `Proyecto: ${fechasproject[0].NOMBRE}` : 'Cargando...'}</p>
-              <p className='text-2xl'>{fechasproject && fechasproject.length > 0 ? `Objetivo:  ${fechasproject[0].OBJETIVO}` : 'Cargando...'}
-                {/* aca deberia de mostrarse aparte de los ID, el nombre del proyecto, la descripcion ya */}
-              </p>
+              <p className='text-2xl'>{fechasproject && fechasproject.length > 0 ? `Objetivo:  ${fechasproject[0].OBJETIVO}` : 'Cargando...'}</p>
               <p className='text-xl'>Color Crystal: {fechasproject && fechasproject.length > 0 ? (fechasproject[0].ID_CATEGORIA_CRYSTAL == 1 ? 'Clear' : 'other') : 'Cargando...'}</p>
             </div>
           </div>
           <div className='mt-6'>
-            <Button color="black" bgColor={currentColor} text="Download" borderRadius="10px" size="md" />
+          <PDFDownloadLink document={<PDF project={fechasproject && fechasproject.length > 0 ? fechasproject[0].NOMBRE : 'Cargando...'} descproject={fechasproject && fechasproject.length > 0 ? fechasproject[0].OBJETIVO : 'Cargando...'} fcreate={fechasproject && fechasproject.length > 0 ? fechasproject[0].FECHA_CREACION : 'Cargando...'} finicio={fechasproject && fechasproject.length > 0 ? fechasproject[0].FECHA_INICIO : 'Cargando...'} ftermino={fechasproject && fechasproject.length > 0 ? fechasproject[0].FECHA_TERMINO : 'Cargando...'} eterm={projectInfo && projectInfo.length > 0 ? projectInfo[0].NUMENTREGASCMP : 'Cargando...'} iterm={projectInfo && projectInfo.length > 0 ? projectInfo[0].NUMITERACIONESCMP : 'Cargando...'} taskterm={projectInfo && projectInfo.length > 0 ? projectInfo[0].NUMTAREASCMP : 'Cargando...'} taskData={entregas}/>} fileName="myFirstPDF.pdf">
+                {
+                    ({loading, url, error, blob}) => 
+                        loading ? (
+                            <Button color="black" bgColor={currentColor} text="Loading Doc ..." borderRadius="10px" size="md" />
+                        ) : (
+                            <Button color="black" bgColor={currentColor} text="Download" borderRadius="10px" size="md" />
+                        )
+                }
+            </PDFDownloadLink>
+            
           </div>
         </div>
         <div className='flex m-3 flex-wrap justify-center gap-1 items-center'>
-          {/* este map recorre el grid que tengo en el data yummi, ahi podris modificar las consultas o traer directamente el lo del data yummi y tomar solo los iconos e insertar lo de las consulta, para que mues
-        muestre las entregas, los participantes, la itercion y ya*/}
           {earningData.map((item) => (
             <div key={item.title} className='bg-white dark:text-gray-200 dark:bg-secondary-dark-bg md=:w-56 p-4 pt-9 rounded-2xl justify-center'>
               <button type='button' style={{ color: item.iconColor, backgroundColor: item.iconBg }} className='text -2xl opacity-0.9 rounded-full p-4 hover:drop-shadow-xl'>
-
                 {item.icon}
               </button>
               <p className='mt-3 text-center'>
@@ -145,7 +250,7 @@ const Inicio = () => {
               </p>
               <p className='text-center'>
                 <span className={`text-sm text-${item.pcColor} ml-2`}>
-                  {item.percentage} 
+                  {item.percentage}
                 </span>
               </p>
               <p className='text-sm text-gray-400 mt-1 text-center'>{item.title}</p>
@@ -154,19 +259,19 @@ const Inicio = () => {
         </div>
       </div>
       <div className='flex gap-10 flex-wrap justify-center'>
-        <div className='mt-3 flex-gap w-800  justify-center flex flex-wrap items-center'>
-          <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg w-800" style={{ textAlign: 'center', fontSize: '20px', color: '#333' }} >
+        <div className='mt-3 flex-gap w-1000 justify-center flex flex-wrap items-center'>
+          <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg w-1000" style={{ textAlign: 'center', fontSize: '20px', color: '#333' }}>
             Estado General de Tareas
           </div>
-          {/* aca basicamente es el uso del componente de graficas we, tienes que instalar la dependencia que basicamente es esta
-  npm install --save react-google-charts */}
-          <Chart
-            chartType="PieChart"
-            data={dataChart}
-            options={options}
-            width={"100%"}
-            height={"400px"}
-          />
+          <div style={{ overflowX: 'scroll', overflowY: 'scroll', height: '600px', width: '100%', scrollbarGutter: 'stable'}}>
+            <Chart
+              chartType="Gantt"
+              data={dataChart}
+              options={options}
+              width={"150%"}
+              height={"150%"}
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -40,6 +40,7 @@ function AsignarTarea() {
   useEffect(() => {
     setProjecterrors([]);
     setMessage([]);
+    console.log(requerimientos);
     //console.log(fechasproject);
   }, [])
 
@@ -59,13 +60,13 @@ function AsignarTarea() {
 
       {fechasproject[0].ESTADO === "En desarrollo" &&
         <div>
-          {message && <div class=" items-center bg-green-100 border-l-4 border-green-500 text-green-700  rounded-lg m-2 shadow-md" style={{ maxWidth: '600px' }}>
+          {/*message && <div class=" items-center bg-green-100 border-l-4 border-green-500 text-green-700  rounded-lg m-2 shadow-md" style={{ maxWidth: '600px' }}>
             <p class="text-lg font-semibold m-2">{message}</p>
           </div>
           }
           {projecterrors && <div class=" items-center bg-red-100 border-l-4 border-red-500 text-red-700  rounded-lg m-2 shadow-md" style={{ maxWidth: '600px' }}>
             <p class="text-lg font-semibold m-2">{projecterrors}</p>
-          </div>
+          </div>*/
           }
           {iteracionactual !== "" &&
 
@@ -88,7 +89,7 @@ function AsignarTarea() {
                   />
                   {errors.NOMBRE &&
                     <div className="p-2">
-                      <div className=" bg-danger mt-2 text-white shadow ">{errors.NOMBRE.message}</div>
+                      <div className=" items-center bg-red-100 text-red-700  rounded-lg m-2 shadow-md ">{errors.NOMBRE.message}</div>
                     </div>
                   }
                 </div>
@@ -106,13 +107,13 @@ function AsignarTarea() {
                   ></textarea>
                   {errors.DESCRIPCION &&
                     <div className="p-2">
-                      <div className=" bg-danger mt-2 text-white shadow ">{errors.DESCRIPCION.message}</div>
+                      <div className=" items-center bg-red-100 text-red-700  rounded-lg m-2 shadow-md ">{errors.DESCRIPCION.message}</div>
                     </div>
                   }
                 </div>
 
                 <div className="mb-2">
-                  <div className="flex flex-col md:flex-row justify-around items-center gap-4">
+                  <div className="flex flex-col md:flex-row justify-around items-center">
                     <div>
                       <label htmlFor="FECHA_INICIO" className="block text-sm font-semibold text-gray-800">
                         Fecha de inicio <span className='text-sm font-semibold text-red-800'>*</span>
@@ -121,19 +122,19 @@ function AsignarTarea() {
                         type="date"
                         id="FECHA_INICIO"
                         name="FECHA_INICIO"
-                        className="block w-full px-4 py-2 mt-6 text-indigo-400 bg-white border rounded-md focus:border-indigo-400 focus:ring-indigo-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                        className="block w-full px-2 py-2 mt-2 text-indigo-400 bg-white border rounded-md focus:border-indigo-400 focus:ring-indigo-300 focus:outline-none focus:ring focus:ring-opacity-40"
                         {...register("FECHA_INICIO", { required: true, message: "campo requerido" })}
                       />
                       {errors.FECHA_INICIO &&
                         <div className="p-2">
-                          <div className=" bg-danger mt-2 text-white shadow ">{errors.FECHA_INICIO.message}</div>
+                          <div className=" items-center bg-red-100 text-red-700  rounded-lg m-2 shadow-md ">{errors.FECHA_INICIO.message}</div>
                         </div>
                       }
                     </div>
 
                     <div>
                       <label htmlFor="FECHA_MAX_TERMINO" className="block text-sm font-semibold text-gray-800">
-                        Fecha máxima de entrega <span className='text-sm font-semibold text-red-800'>*</span>
+                        Fecha de entrega <span className=' text-sm font-semibold text-red-800'>*</span>
                       </label>
                       <input
                         type="date"
@@ -144,7 +145,7 @@ function AsignarTarea() {
                       />
                       {errors.FECHA_MAX_TERMINO &&
                         <div className="p-2">
-                          <div className=" bg-danger mt-2 text-white shadow ">{errors.FECHA_MAX_TERMINO.message}</div>
+                          <div className=" items-center bg-red-100 text-red-700  rounded-lg m-2 shadow-md ">{errors.FECHA_MAX_TERMINO.message}</div>
                         </div>
                       }
                     </div>
@@ -162,14 +163,13 @@ function AsignarTarea() {
                         type="time"
                         id="HORAINICIO"
                         name="HORAINICIO"
-                        required
                         className="block w-full px-2 py-2 mt-2 text-indigo-400 bg-white border rounded-md focus:border-indigo-400 focus:ring-indigo-300 focus:outline-none focus:ring focus:ring-opacity-40"
                         {...register("HORAINICIO", { required: true, message: "campo requerido" })}
 
                       />
                       {errors.HORAINICIO &&
                         <div className="p-2">
-                          <div className=" bg-danger mt-2 text-white shadow ">{errors.HORAINICIO.message}</div>
+                          <div className=" items-center bg-red-100 text-red-700  rounded-lg m-2 shadow-md ">{errors.HORAINICIO.message}</div>
                         </div>
                       }
                     </div>
@@ -183,13 +183,12 @@ function AsignarTarea() {
                         type="time"
                         id="HORAMAXIMA"
                         name="HORAMAXIMA"
-                        required
                         className="block w-full px-2 py-2 mt-2 text-indigo-400 bg-white border rounded-md focus:border-indigo-400 focus:ring-indigo-300 focus:outline-none focus:ring focus:ring-opacity-40"
                         {...register("HORAMAXIMA", { required: true, message: "campo requerido" })}
                       />
                       {errors.HORAMAXIMA &&
                         <div className="p-2">
-                          <div className=" bg-danger mt-2 text-white shadow ">{errors.HORAMAXIMA.message}</div>
+                          <div className=" items-center bg-red-100 text-red-700  rounded-lg m-2 shadow-md ">{errors.HORAMAXIMA.message}</div>
                         </div>
                       }
                     </div>
@@ -207,7 +206,7 @@ function AsignarTarea() {
                     className="block w-full px-4 py-2 mt-2 text-indigo-400 bg-white border rounded-md focus:border-indigo-400 focus:ring-indigo-300 focus:outline-none focus:ring focus:ring-opacity-40"
                     {...register("ID_REQUERIMIENTO", { required: true, message: "campo requerido" })}
                   >
-                    <option value="">Selecciona requerimiento</option>
+                    <option value="0">Selecciona requerimiento</option>
                     {requerimientos.map((requerimiento) => (
                       <option key={requerimiento.ID} value={requerimiento.ID}>
                         {requerimiento.OBJETIVO}
@@ -216,7 +215,7 @@ function AsignarTarea() {
                   </select>
                   {errors.ID_REQUERIMIENTO &&
                     <div className="p-2">
-                      <div className=" bg-danger mt-2 text-white shadow ">{errors.ID_REQUERIMIENTO.message}</div>
+                      <div className=" items-center bg-red-100 text-red-700  rounded-lg m-2 shadow-md ">{errors.ID_REQUERIMIENTO.message}</div>
                     </div>
                   }
                 </div>
@@ -224,7 +223,7 @@ function AsignarTarea() {
                 {/* Tarea Dependiente */}
                 <div className="mb-2">
                   <label htmlFor="ID_TAREA_DEPENDIENTE " className="block text-sm font-semibold text-gray-800">
-                    Esta tarea depende de otra? (seleccione la tarea)
+                    ¿Está tarea depende de otra? (Seleccione la tarea)
                   </label>
                   <select
                     id="ID_TAREA_DEPENDIENTE "
@@ -232,17 +231,18 @@ function AsignarTarea() {
                     className="block w-full px-4 py-2 mt-2 text-indigo-400 bg-white border rounded-md focus:border-indigo-400 focus:ring-indigo-300 focus:outline-none focus:ring focus:ring-opacity-40"
                     {...register("ID_TAREA_DEPENDIENTE", { required: true, message: "campo requerido" })}
                   >
-                    <option value="">Selecciona una tarea dependiente</option>
+                    <option value="0">Selecciona una tarea dependiente</option>
                     {tareas.map((tarea) => (
                       <option value={tarea.ID}>{tarea.NOMBRE}</option>
                     ))}
                   </select>
+                  
                 </div>
 
                 {/* Rol del Participante */}
                 <div className="mb-2">
                   <label htmlFor="ROLPARTICIPANTE" className="block text-sm font-semibold text-gray-800">
-                    Rol del Participante
+                    Rol del Participante <span className=' text-sm font-semibold text-red-800'>*</span>
                   </label>
                   <select
                     id="ROLPARTICIPANTE"
@@ -250,14 +250,14 @@ function AsignarTarea() {
                     className="block w-full px-4 py-2 mt-2 text-indigo-400 bg-white border rounded-md focus:border-indigo-400 focus:ring-indigo-300 focus:outline-none focus:ring focus:ring-opacity-40"
                     {...register("ROLPARTICIPANTE", { required: true, message: "campo requerido" })}
                   >
-                    <option value="">Selecciona un rol</option>
+                    <option value="0">Selecciona un rol</option>
                     <option value="Diseñador Principal">Diseñador Principal</option>
                     <option value="Diseñador">Diseñador</option>
                     <option value="Embajador">Embajador</option>
                   </select>
                   {errors.ROLPARTICIPANTE &&
                     <div className="p-2">
-                      <div className=" bg-danger mt-2 text-white shadow ">{errors.ROLPARTICIPANTE.message}</div>
+                      <div className=" items-center bg-red-100 text-red-700  rounded-lg m-2 shadow-md ">{errors.ROLPARTICIPANTE.message}</div>
                     </div>
                   }
                 </div>
@@ -265,7 +265,7 @@ function AsignarTarea() {
                 {/* Participante Asignado */}
                 <div className="mb-2">
                   <label htmlFor="ID_USUARIO" className="block text-sm font-semibold text-gray-800">
-                    Participante Asignado
+                    Participante Asignado <span className=' text-sm font-semibold text-red-800'>*</span>
                   </label>
                   <select
                     id="ID_USUARIO"
@@ -273,7 +273,7 @@ function AsignarTarea() {
                     className="block w-full px-4 py-2 mt-2 text-indigo-400 bg-white border rounded-md focus:border-indigo-400 focus:ring-indigo-300 focus:outline-none focus:ring focus:ring-opacity-40"
                     {...register("ID_USUARIO", { required: true, message: "campo requerido" })}
                   >
-                    <option value="">Asigna un participante</option>
+                    <option value="0">Asigna un participante</option>
                     {participants.map((participant) => (
                       <option key={participant.ID_USUARIO} value={participant.ID_USUARIO}>
                         {participant.NOMBRE_USUARIO}
@@ -283,7 +283,7 @@ function AsignarTarea() {
                   </select>
                   {errors.ID_USUARIO &&
                     <div className="p-2">
-                      <div className=" bg-danger mt-2 text-white shadow ">{errors.ID_USUARIO.message}</div>
+                      <div className=" items-center bg-red-100 text-red-700  rounded-lg m-2 shadow-md ">{errors.ID_USUARIO.message}</div>
                     </div>
                   }
                 </div>

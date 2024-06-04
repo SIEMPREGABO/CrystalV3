@@ -3,6 +3,8 @@ import { createContext, useContext, useState } from "react";
 import { requestLogin, requestRegister, requestLogout, requestVerify, requestReset, requestPass, requestUpdate } from "../requests/auth.js";
 import Cookies from "js-cookie";
 import {requestProjects} from "../requests/projectReq.js";
+import swal from 'sweetalert';
+
 
 const AuthContext = createContext();
 

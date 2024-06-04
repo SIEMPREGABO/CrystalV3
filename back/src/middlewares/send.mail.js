@@ -63,10 +63,8 @@ export async function sendemailAdd(CORREO, PROYECTO){
     return await transporter.sendMail({
         from: '"Clear 👻" <clear@gmail.com>', 
         to: CORREO, 
-        subject: `Te han agregado al proyecto ${PROYECTO.NOMBRE} `, 
+        subject: `Te han agregado a un proyecto, visualiza tu panel `, 
         html: `<div>
-        <p>Tu proyecto '${PROYECTO.NOMBRE}'</p>
-        <p>Objetivo: ${PROYECTO.OBJETIVO}. </p>
         <p>Fecha Inicial: ${PROYECTO.FECHA_INICIO}. </p>
         <p>Fecha Final: ${PROYECTO.FECHA_TERMINO}.</p>
         <p> =D </p>
@@ -163,6 +161,21 @@ export async function sendemailEndProject(NOMBRE, CORREO, OBJETIVO, DESCRIPCION_
         </div>`
     });
 }
+
+export async function sendemailDeleteProject(NOMBRE, CORREO, OBJETIVO, DESCRIPCION_GNRL){
+    return await transporter.sendMail({
+        from: '"Clear 👻" <clear@gmail.com>', 
+        to: CORREO, 
+        subject: `Tu proyecto '${NOMBRE}' ha sido eliminado`, 
+        html: `<div>
+        <p>Tu proyecto en clear ha sido eliminado</p>
+        <p>Descripción: ${DESCRIPCION_GNRL}</p>
+        <p>Objetivo: ${OBJETIVO}</p>
+        <p> =D </p>
+        </div>`
+    });
+}
+
 
 export async function sendemailFaseProject(NOMBRE, CORREO, OBJETIVO, DESCRIPCION_GNRL){
     return await transporter.sendMail({

@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Header } from '../components';
-import { KanbanComponent, ColumnsDirective, ColumnDirective } from '@syncfusion/ej2-react-kanban';
-import '@syncfusion/ej2-base/styles/material.css';
+import { KanbanComponent, ColumnsDirective, ColumnDirective, StackedHeadersDirective, StackedHeaderDirective } from '@syncfusion/ej2-react-kanban';import '@syncfusion/ej2-base/styles/material.css';
 import { L10n } from '@syncfusion/ej2-base';
 import { useProject } from '../context/projectContext';
 import { DialogComponent } from '@syncfusion/ej2-react-popups';
 import { ButtonComponent } from '@syncfusion/ej2-react-buttons';
-
-import '../css/kanban.module.css';
+import styles from '../css/kanban.module.css';
 
 L10n.load({
   'esp': {
@@ -28,8 +26,7 @@ L10n.load({
 });
 
 const Kanban = () => {
-  const { tareasKanban, setTareasKanban, deleteTask, updateTask, updateTaskState } = useProject();
-  const [dialogVisible, setDialogVisible] = useState(false);
+  const { tareasKanban, setTareasKanban, deleteTask, updateTask, updateTaskState, iteracionactual, entregaactual } = useProject();  const [dialogVisible, setDialogVisible] = useState(false);
   const [selectedTarea, setSelectedTarea] = useState(null);
   const [idTarea, setIDTarea] = useState(0);
   const [nombreTarea, setNomTarea] = useState("Tarea Defecto ");
@@ -40,10 +37,13 @@ const Kanban = () => {
 
   useEffect(() => {
     console.log(tareasKanban);
+    console.log(iteracionactual);
+    console.log(entregaactual);
+    setDialogVisible(false);
   }, []);
 
   useEffect(() => {
-
+    setDialogVisible(false);
   }, [tareasKanban]);
 
   useEffect(() => {
@@ -131,7 +131,7 @@ const Kanban = () => {
 
   const onDragStop = (args) => {
     console.log(args.data);
-    
+
     const dragTask = {
       ESTADO_DESARROLLO: args.data[0].ESTADO_DESARROLLO,
       ID: args.data[0].ID,
@@ -203,7 +203,7 @@ const Kanban = () => {
         dataSource={tareasKanban}
         cardSettings={{ contentField: "DESCRIPCION", headerField: "NOMBRE" }}
         enableTooltip={true}
-        swimlaneSettings={{ keyField: "Desarrollador" }}
+        swimlaneSettings={{ keyField: "Desarrollador", enableFrozenRows: true}}        
         locale='esp'
         dialogOpen={DialogOpen.bind(this)}
         tooltipTemplate={tooltipTemplate.bind(this)}
@@ -213,11 +213,19 @@ const Kanban = () => {
         dragStop={onDragStop}
       >
         <ColumnsDirective>
-          <ColumnDirective headerText="Pendiente" keyField="En espera" allowToggle={true} cssClass="e-column-key-Open" />
+          <ColumnDirective headerText="Pendiente" keyField="En espera" allowToggle={true} />
           <ColumnDirective headerText="En desarrollo" keyField="En desarrollo" allowToggle={true} cssClass='in-progress-column' />
+          <ColumnDirective headerText="Atrasada" keyField="Atrasada" allowToggle={true} cssClass='testing-column' />
           <ColumnDirective headerText="Por Revisar" keyField="Por Revisar" allowToggle={true} cssClass='testing-column' />
           <ColumnDirective headerText="Cerrada" keyField="Cerrada" cssClass='done-column' />
         </ColumnsDirective>
+
+        <StackedHeadersDirective>
+          <StackedHeaderDirective text='Por Hacer' keyFields='En espera'></StackedHeaderDirective>
+          <StackedHeaderDirective text='Fase de Desarrollo' keyFields='En desarrollo, Atrasada'></StackedHeaderDirective>
+          <StackedHeaderDirective text='Fase Final' keyFields='Por Revisar, Cerrada'></StackedHeaderDirective>
+        </StackedHeadersDirective>
+
       </KanbanComponent>
       <DialogComponent
         id="kanban_dialog"

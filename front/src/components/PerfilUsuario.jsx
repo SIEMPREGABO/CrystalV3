@@ -19,8 +19,6 @@ const PerfilUsuario = () => {
   const { logout } = useAuth();
   const { vaciarProject } = useProject();
 
-
-
   return (
     <div className="nav-item absolute right-1 top-16 bg-white dark:bg-[#42464D] p-8 rounded-lg w-96">
       <div className="flex justify-between items-center">
@@ -48,7 +46,9 @@ const PerfilUsuario = () => {
             to={`/configurar-perfil`}
             style={{ color: '#03C9D7', backgroundColor: '#E5FAFB' }}
             className=" text-xl rounded-lg p-3 hover:bg-light-gray"
-            onClick={() => { vaciarProject(); }}>
+            onClick={() => { 
+              vaciarProject(); 
+            }}>
             <BsCurrencyDollar />
           </Link>
 
@@ -65,7 +65,9 @@ const PerfilUsuario = () => {
             to={`/panel`}
             style={{ color: 'rgb(0, 194, 146)', backgroundColor: 'rgb(235, 250, 242)' }}
             className=" text-xl rounded-lg p-3 hover:bg-light-gray"
-            onClick={() => { vaciarProject(); }}
+            onClick={() => { 
+              vaciarProject(); 
+            }}
           >
             <FiCreditCard />
           </Link>
@@ -106,7 +108,10 @@ const PerfilUsuario = () => {
             padding: '10px 20px'
           }}
           to="/"
-          onClick={() => { vaciarProject();logout(); }}>Cerrar Sesión</Link>
+          onClick={() => { 
+            vaciarProject();
+            logout(); 
+            }}>Cerrar Sesión</Link>
 
 
       </div>

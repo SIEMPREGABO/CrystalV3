@@ -31,10 +31,7 @@ export const Config = () => {
     }
     deleteProjectFunction(data);
 
-    const timer = setTimeout(() => {
-      window.location.href = '/';
-    }, 5000);
-    return () => clearTimeout(timer);
+    
   };
 
   useEffect(() => {
@@ -46,7 +43,7 @@ export const Config = () => {
         Id: contador,
         Id_project: project.ID,
         State: project.ESTADO,
-        Subject: `Inicio del Proyecto: ${project.NOMBRE}`,
+        Subject: `${project.NOMBRE}`,
         StartTime: new Date(project.FECHA_INICIO),
         EndTime: new Date(project.FECHA_TERMINO),
         IsAllDay: true

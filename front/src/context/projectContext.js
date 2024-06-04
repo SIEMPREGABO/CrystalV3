@@ -49,6 +49,7 @@ export const ProjectProvider = ({ children }) => {
 
   const [entregasproject, setEntregasProject] = useState([]);
   const [projectInfo, setProjectInfo] = useState([]);
+  const [tareasGantt, setTareasGantt] = useState([]);
 
   useEffect(() => {
     if (message.length > 0) {
@@ -84,7 +85,7 @@ export const ProjectProvider = ({ children }) => {
           icon: 'warning',
           button: 'Aceptar',
         });
-        setProjecterrors(error.response.data.message);
+        //setProjecterrors(error.response.data.message);
         console.log(error.response.data.message);
 
       } else {
@@ -94,7 +95,7 @@ export const ProjectProvider = ({ children }) => {
           icon: 'error',
           button: 'Aceptar',
         });
-        setProjecterrors("Error del servidor");
+        //setProjecterrors("Error del servidor");
       }
     }
   }
@@ -149,6 +150,11 @@ export const ProjectProvider = ({ children }) => {
               icon: 'success',
               button: 'Aceptar',
             });
+            vaciarProject();
+            const timer = setTimeout(() => {
+              window.location.href = '/';
+            }, 5000);
+            return () => clearTimeout(timer);
           }
         });
       //setMessage(res.data.message);
@@ -440,7 +446,6 @@ export const ProjectProvider = ({ children }) => {
   const createRequirements = async (project) => {
     try {
       const res = await requestAddRequirement(project);
-      //console.log(res.data);
       swal({
         title: 'Crear Requerimiento',
         text: res.data.message,
@@ -483,8 +488,10 @@ export const ProjectProvider = ({ children }) => {
       setTareas(res.data.tasks);
       setTareasKanban(res.data.tasksKanban);
       setProjectInfo(res.data.projectInfo);
-      if(fechasproject[0].ID_CATEGORIA_CRYSTAL === 2 ){
-        participants.map((participant)=>{
+      setTareasGantt(res.data.tareasGantt);
+      
+      if(res.data.fechasProyecto[0].ID_CATEGORIA_CRYSTAL === 2 ){
+        res.data.participants.map((participant)=>{
           if(participant.ROLE === 1){
             counter++;
           }
@@ -747,6 +754,7 @@ export const ProjectProvider = ({ children }) => {
 
   const vaciarProject = async () => {
     try {
+      console.log("me activaron")
       setIsParticipant(true);
       setUserRole(false);
       setFechasproject([]);
@@ -760,6 +768,7 @@ export const ProjectProvider = ({ children }) => {
       setRequerimientos([]);
       setMessagesChat([]);
       setEntregasProject([]);
+      setProjectInfo([]);
     } catch (error) {
       swal({
         title: 'Vaciar el proyecto',
@@ -814,9 +823,8 @@ export const ProjectProvider = ({ children }) => {
         userRole,
         IsParticipant,twoAdmins,
 
-        requerimientos, tareas,
+        requerimientos, tareas,tareasGantt,
 
-        chaterrors,
         messagesChat,
 
         setProjecterrors,

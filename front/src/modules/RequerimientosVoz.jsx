@@ -16,9 +16,9 @@ import Paper from '@mui/material/Paper';
 import { RestoreFromTrash } from '@mui/icons-material';
 import { } from '@mui/material/styles';
 import { create } from '@mui/material/styles/createTransitions';
-import { useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form';
 import { useProject } from "../context/projectContext.js";
-import { zodResolver } from '@hookform/resolvers/zod'
+import { zodResolver } from '@hookform/resolvers/zod';
 import styles from '../css/voicereq.module.css';
 import { requerimientoxVozSchema } from '../schemas/project.js';
 
@@ -47,7 +47,6 @@ export const RequerimientoVoz = () => {
             TIPO: type,
             ID_ENTREGA: entregaactual.ID
         };
-
         createRequirements(data);
     });
 

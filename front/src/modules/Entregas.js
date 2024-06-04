@@ -65,7 +65,6 @@ const Entregas = () => {
 
     return (
         <div className="container">
-            <h1 style={{ color: "black" }}>Proyecto</h1>
             {entregas.map((entrega, index) => (
                 <div key={entrega.ID} className="mb-3">
                     <div className="dropdown bg-gray-200" style={{ boxShadow: "0 0 5px rgba(0, 0, 0, 0.1)" }}>

@@ -22,7 +22,7 @@ export const Requerimientos = () => {
         const data = {
             OBJETIVO: values.OBJETIVO,
             DESCRIPCION: values.DESCRIPCION,
-            TIPO: values.TIPO_REQ,
+            TIPO: values.TIPO,
             ID_ENTREGA: entregaactual.ID
         };
 
@@ -63,7 +63,7 @@ export const Requerimientos = () => {
                                             {...register("OBJETIVO", { required: true, message: "Campo Requerido" })} />
                                         {errors.OBJETIVO &&
                                             <div className="p-2">
-                                                <div className=" bg-danger mt-2 text-white shadow ">{errors.OBJETIVO.message}</div>
+                                                <div className=" items-center bg-red-100 text-red-700  rounded-lg m-2 shadow-md ">{errors.OBJETIVO.message}</div>
                                             </div>
                                         }
                                     </div>
@@ -75,13 +75,13 @@ export const Requerimientos = () => {
                                         </textarea>
                                         {errors.DESCRIPCION &&
                                             <div className="p-2">
-                                                <div className=" bg-danger mt-2 text-white shadow ">{errors.DESCRIPCION.message}</div>
+                                                <div className=" items-center bg-red-100 text-red-700  rounded-lg m-2 shadow-md ">{errors.DESCRIPCION.message}</div>
                                             </div>
                                         }
                                     </div>
                                     <div className="mb-1">
                                         <label className={styles.labels}>Tipo de Requerimiento: </label>
-                                        <select {...register("TIPO_REQ", { required: true, message: "Campo Requerido" })} className='form-select' defaultValue="0">
+                                        <select {...register("TIPO", { required: true, message: "Campo Requerido" })} className='form-select' defaultValue="0">
                                             <option value="0" >Selecciona el tipo de requerimiento</option>
                                             <option value="1">Requerimiento Funcional</option>
                                             <option value="2">Requerimiento No Funcional</option>
@@ -90,9 +90,9 @@ export const Requerimientos = () => {
                                             <option value="5">Requerimiento de Calidad</option>
                                             <option value="6">Solicitud de Cambio</option>
                                         </select>
-                                        {errors.TIPO_REQ &&
+                                        {errors.TIPO &&
                                             <div className="p-2">
-                                                <div className=" bg-danger mt-2 text-white shadow ">{errors.TIPO_REQ.message}</div>
+                                                <div className=" items-center bg-red-100 text-red-700  rounded-lg m-2 shadow-md ">{errors.TIPO.message}</div>
                                             </div>
                                         }
                                     </div>
