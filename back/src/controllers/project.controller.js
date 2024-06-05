@@ -706,25 +706,31 @@ export const deleteProject = async (req, res) => {
 
         const correosNotificacion = await IdUsuarios(ID_PROYECTO);
         const idParticipantes = correosNotificacion.participantes;
-        
+        console.log("xd")
+        const FECHA_ACTUAL = moment().tz(zonaHoraria);
         await Promise.all(idParticipantes.map(async (id) => {
+            console.log(id.ID_USUARIO);
             const projectinfo = await getProjectName(ID_PROYECTO);
+            console.log(projectinfo)
+            console.log(projectinfo[0].NOMBRE);
             const FECHA_ACTUAL_REGISTRAR = FECHA_ACTUAL.format('YYYY-MM-DD HH:mm:ss');
+            
             const meterNotificacion = registarNotificacion(
                 id.ID_USUARIO,
                 `Tu proyecto ${projectinfo[0].NOMBRE} ha sido eliminado`,
                 10,
                 FECHA_ACTUAL_REGISTRAR
             )
-            if (!meterNotificacion) return res.status(500).json({ message: ['Error al registrar la notificación'] });
-
+            if (!meterNotificacion) return res.status(500).json({ message: 'Error al registrar la notificación' });
+            console.log("xddd")
             const correoParticipante = await getUser(id.ID_USUARIO);
             await sendemailDeleteProject(projectinfo[0].NOMBRE, correoParticipante[0].CORREO, projectinfo[0].OBJETIVO, projectinfo[0].DESCRIPCION_GNRL);
         }));
+        console.log("xd2")
         const eliminado = await eliminarProyecto(ID_PROYECTO);
         //console.log(eliminado)
         if (!eliminado.success) return res.status(500).json({ message: "Error al eliminar proyecto" });
-        
+        console.log("xd3")        
 
         return res.status(200).json({ message: "Proyecto eliminado, redirigiendo" });
     } catch (error) {

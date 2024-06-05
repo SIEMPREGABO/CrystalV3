@@ -200,7 +200,7 @@ export function eliminarProyecto(ID_PROYECTO) {
     return new Promise(async (resolve, reject) => {
         const conn = await getConnection();
         try {
-            conn.beginTransaction();
+            //conn.beginTransaction();
             console.log("primer")
             const selectTareasDependientesQuery = `
                 SELECT * FROM T_DEPENDE_T WHERE ID_TAREA_DEPENDIENTE IN(
@@ -223,17 +223,17 @@ export function eliminarProyecto(ID_PROYECTO) {
             `;
             conn.query(selectTareasDependientesQuery, [ID_PROYECTO], (err, results) => {
                 if (err) {
-                    conn.rollback(() => {
+                    //conn.rollback(() => {
                         reject({ success: false });
-                    });
+                    //});
                 } else {
                     console.log(results);
                     if (results.length > 0) {
                         conn.query(deleteTareasDependenciasQuery, [ID_PROYECTO], (err, results) => {
                             if (err) {
-                                conn.rollback(() => {
+                                //conn.rollback(() => {
                                     reject({ success: false });
-                                });
+                                //});
                             }
                             else {
                                 console.log("xd");
@@ -267,18 +267,18 @@ export function eliminarProyecto(ID_PROYECTO) {
 
             conn.query(selectColaboracionesQuery, [ID_PROYECTO], (err, results) => {
                 if (err) {
-                    conn.rollback(() => {
+                    //conn.rollback(() => {
                         reject({ success: false });
-                    });
+                    //});
                 } else {
                     console.log(results);
                     if (results.length > 0) {
                         conn.query(deleteColaboracionesQuery, [ID_PROYECTO], (err, results) => {
                             if (err) {
                                 console.log(err)
-                                conn.rollback(() => {
+                                //conn.rollback(() => {
                                     reject({ success: false });
-                                });
+                                //});
                             }
                             else {
                                 console.log("xd");
@@ -312,17 +312,17 @@ export function eliminarProyecto(ID_PROYECTO) {
 
             conn.query(selectChatsQuery, [ID_PROYECTO], (err, results) => {
                 if (err) {
-                    conn.rollback(() => {
+                    //conn.rollback(() => {
                         reject({ success: false });
-                    });
+                    //});
                 } else {
                     console.log(results);
                     if (results.length > 0) {
                         conn.query(deleteChatsQuery, [ID_PROYECTO], (err, results) => {
                             if (err) {
-                                conn.rollback(() => {
+                                //conn.rollback(() => {
                                     reject({ success: false });
-                                });
+                                //});
                             } else {
                                 console.log("xd");
                                 console.log("borrados chats: ", results.affectedRows);
@@ -354,17 +354,17 @@ export function eliminarProyecto(ID_PROYECTO) {
             conn.query(selectTareasQuery, [ID_PROYECTO], async (err, results) => {
                 if (err) {
                     console.log(err)
-                    conn.rollback(() => {
+                    //conn.rollback(() => {
                         reject({ success: false });
-                    });
+                    //});
                 } else {
                     console.log(results);
                     if (results.length > 0) {
                         conn.query(deleteTareasQuery, [ID_PROYECTO], (err, results) => {
                             if (err) {
-                                conn.rollback(() => {
+                                //conn.rollback(() => {
                                     reject({ success: false });
-                                });
+                                //});
                             }
                             else {
                                 console.log("xd");
@@ -396,17 +396,17 @@ export function eliminarProyecto(ID_PROYECTO) {
             conn.query(selectRequerimientosQuery, [ID_PROYECTO], (err, results) => {
                 if (err) {
 
-                    conn.rollback(() => {
+                    //conn.rollback(() => {
                         reject({ success: false });
-                    });
+                    //});
                 } else {
                     console.log(results);
                     if (results.length > 0) {
                         conn.query(deleteRequerimientosQuery, [ID_PROYECTO], (err, results) => {
                             if (err) {
-                                conn.rollback(() => {
+                                //conn.rollback(() => {
                                     reject({ success: false });
-                                });
+                                //});
                             }
                             else {
                                 console.log("xd");
@@ -429,9 +429,9 @@ export function eliminarProyecto(ID_PROYECTO) {
 
             conn.query(deleteIteracionesQuery, [ID_PROYECTO],  (err, results) => {
                 if (err) {
-                    conn.rollback(() => {
+                    //conn.rollback(() => {
                         reject({ success: false });
-                    });
+                    //});
                 } else {
                     console.log("xd");
                     console.log("borrados iteraciones: ", results.affectedRows);
@@ -442,9 +442,9 @@ export function eliminarProyecto(ID_PROYECTO) {
             const deleteEntregasQuery = 'DELETE FROM ENTREGAS WHERE ID_PROYECTO = ?';
             conn.query(deleteEntregasQuery, [ID_PROYECTO],  (err, results) => {
                 if (err) {
-                    conn.rollback(() => {
+                    //conn.rollback(() => {
                         reject({ success: false });
-                    });
+                    //});
                 }
                 else {
                     console.log("xd");
@@ -457,9 +457,9 @@ export function eliminarProyecto(ID_PROYECTO) {
             const deleteUsuariosQuery = 'DELETE FROM U_SeUne_P WHERE ID_PROYECTO = ?';
             conn.query(deleteUsuariosQuery, [ID_PROYECTO],  (err, results) => {
                 if (err) {
-                    conn.rollback(() => {
+                    //conn.rollback(() => {
                         reject({ success: false });
-                    });
+                    //});
                 }
                 else {
                     console.log("xd");
@@ -472,9 +472,9 @@ export function eliminarProyecto(ID_PROYECTO) {
 
             conn.query(deleteProyectoQuery, [ID_PROYECTO],  (err, results) => {
                 if (err) {
-                    conn.rollback(() => {
+                    //conn.rollback(() => {
                         reject({ success: false });
-                    });
+                    //});
                 }else {
                     console.log("xd");
                     console.log("borrados proyecto: ", results.affectedRows);
@@ -482,17 +482,17 @@ export function eliminarProyecto(ID_PROYECTO) {
             });
             console.log("9")
             //await conn.rollback();
-            conn.commit();
+            //conn.commit();
             resolve({ success: true });
         } catch (error) {
             console.log("no pude")
-            conn.rollback();
+            //conn.rollback();
             reject({ success: false })
         } finally {
             // Cerrar la conexión
             console.log("si pude")
             //conn.rollback();
-            conn.end();
+            //conn.end();
         }
 
     })
@@ -558,11 +558,14 @@ export function registarNotificacion(id_usuario, contenido, tipo, fecha) {
             const connection = await getConnection();
             const query = 'INSERT INTO NOTIFICACIONES (CONTENIDO, FECHA_ENVIO ,ID_TIPO_NOTIFICACION ) VALUES (?,?,?)';
             const queryRecibe = 'INSERT INTO U_RECIBE_N (ID_USUARIO, ID_NOTIFICACION , ESTADO_VISUALIZACION) VALUES (?,?,?)';
+            console.log("xxxx")
             connection.query(query, [contenido, fecha, tipo], (err, results) => {
                 if (err) {
+                    //console.log(err);
                     reject(err)
                 } else {
                     if (results.affectedRows > 0) {
+                        console.log("pasa")
                         const idNotificacion = results.insertId;
                         connection.query(queryRecibe, [id_usuario, idNotificacion, false], (err, results) => {
                             if (err) {

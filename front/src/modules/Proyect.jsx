@@ -69,16 +69,19 @@ export const Proyecto = () => {
                             : 'bg-main-bg dark:bg-main-dark-bg w-full min-h-screen flex-2'
                     }
                 >
-                    <div className="fixed md:static bg-main-bg dark:bg-main-dark-bg navbar w-full">
+                
+                    {/*<div className="fixed md:static bg-main-bg dark:bg-main-dark-bg navbar w-full md:w-auto">*/}
                         <Navbar />
-                    </div>
+                    {/*</div>*/}
+                    
+                    
 
                     <div>
                         <Routes>
                             <Route element={<ProtectProject />}>
                                 {themeSettings && <ThemeSettings />}
                                 {/* Proteger las rutas autorizadas */}
-                                {userRole && <Route path="" element={<Dashboard />} />}
+                                {userRole && <Route path="Home" element={<Dashboard />} />}
                                 {userRole && <Route path="Participantes" element={<Participantes />} />}
                                 {userRole && <Route path="Asignar-tarea" element={<AsignarTarea />} />}
                                 {userRole && <Route path="Calendario" element={<Calendario />} />}
@@ -91,7 +94,7 @@ export const Proyecto = () => {
                                 {userRole && <Route path="Requerimientos" element={<Requerimientos />}/>}
 
 
-                                {!userRole && <Route path="" element={<Dashboard />} />}
+                                {!userRole && <Route path="Home" element={<Dashboard />} />}
                                 {!userRole && <Route path="Calendario" element={<Calendario />} />}
                                 {!userRole && <Route path="ChatIteracion" element={<ChatIteracion />} />}                                {!userRole && <Route path="Kanban" element={<Kanban />} />}
                                 {!userRole && <Route path="VideoChat" element={<VideoChat />} />}

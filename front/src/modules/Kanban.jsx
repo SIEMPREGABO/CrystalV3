@@ -34,6 +34,7 @@ const Kanban = () => {
   const [estadoTarea, setEstadoTarea] = useState("");
   const [fechaiTarea, setFechaITarea] = useState("2000-01-01");
   const [fechamTarea, setFechaMTarea] = useState("2000-01-01");
+  //const [idUsuario, setIdUsuario] = useState(0);
 
   useEffect(() => {
     console.log(tareasKanban);
@@ -147,7 +148,8 @@ const Kanban = () => {
 
   const handleDelete = () => {
     const deletedTask = {
-      ID: idTarea
+      ID: idTarea, 
+      //IDUSUARIO: IdUsuario
     }
 
     deleteTask(deletedTask);
@@ -178,7 +180,8 @@ const Kanban = () => {
       DESCRIPCION: descTarea,
       ESTADO_DESARROLLO: estadoTarea,
       FECHA_INICIO: fechaiTarea,
-      FECHA_MAX_TERMINO: fechamTarea
+      FECHA_MAX_TERMINO: fechamTarea, 
+      //IDUSUARIO: idUsuario,
     }
 
     updateTask(updatedTask);
@@ -213,7 +216,8 @@ const Kanban = () => {
         dragStop={onDragStop}
       >
         <ColumnsDirective>
-          <ColumnDirective headerText="Pendiente" keyField="En espera" allowToggle={true} />
+          <ColumnDirective headerText="Por Hacer" keyField="En espera" allowToggle={true} />
+          <ColumnDirective headerText="Pausadas" keyField="En pausa" allowToggle={true} />
           <ColumnDirective headerText="En desarrollo" keyField="En desarrollo" allowToggle={true} cssClass='in-progress-column' />
           <ColumnDirective headerText="Atrasada" keyField="Atrasada" allowToggle={true} cssClass='testing-column' />
           <ColumnDirective headerText="Por Revisar" keyField="Por Revisar" allowToggle={true} cssClass='testing-column' />
@@ -221,7 +225,7 @@ const Kanban = () => {
         </ColumnsDirective>
 
         <StackedHeadersDirective>
-          <StackedHeaderDirective text='Por Hacer' keyFields='En espera'></StackedHeaderDirective>
+          <StackedHeaderDirective text='Fase Inicial' keyFields='En espera, En pausa'></StackedHeaderDirective>
           <StackedHeaderDirective text='Fase de Desarrollo' keyFields='En desarrollo, Atrasada'></StackedHeaderDirective>
           <StackedHeaderDirective text='Fase Final' keyFields='Por Revisar, Cerrada'></StackedHeaderDirective>
         </StackedHeadersDirective>
