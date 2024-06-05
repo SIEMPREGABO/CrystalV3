@@ -4,26 +4,28 @@ export const createSchema = z.object({
     NOMBRE_PROYECTO: z.string().nonempty({
         message: 'El nombre del proyecto es requerido'
     }).regex(
-        new RegExp(/^[A-Za-zÑñÁáÉéÍíÓóÚúÜü\s]+$/), { message: "Nombre de proyecto invalido" }
+        new RegExp(/^[A-Za-zÑñÁáÉéÍíÓóÚúÜü\s0-9.,!?¿¡-]+$/), { message: "Nombre de proyecto inválido" }
     ),
     OBJETIVO: z.string().nonempty({
         message: 'El objetivo del proyecto es requerido'
     }).regex(
-        new RegExp(/^[A-Za-zÑñÁáÉéÍíÓóÚúÜü\s]+$/), { message: "Objetivo invalido" }
+        new RegExp(/^[A-Za-zÑñÁáÉéÍíÓóÚúÜü\s0-9.,!?¿¡-]+$/), { message: "Objetivo inválido" }
     ),
     DESCRIPCION_GNRL: z.string().nonempty({
-        message: 'El descripcion del proyecto es requerido'
+        message: 'La descripción del proyecto es requerido'
     }).regex(
-        new RegExp(/^[A-Za-zÑñÁáÉéÍíÓóÚúÜü\s]+$/), { message: "Descripción invalida" }
+        new RegExp(/^[A-Za-zÑñÁáÉéÍíÓóÚúÜü\s0-9.,!?¿¡-]+$/), { message: "Descripción invalida" }
     ),
     FECHA_INICIO: z.string().nonempty({
         message: 'La fecha de inicio es requerida'
     }),
     FECHA_TERMINO: z.string().nonempty({
-        message: 'La fecha de termino es requerda'
+        message: 'La fecha de termino es requerida'
     }),
     ENTREGAS: z.string().nonempty({
         message: 'Las entregas son requeridas'
+    }).refine(value => value !== "0", {
+        message: 'Selecciona un número de entregas'
     })
 })
 

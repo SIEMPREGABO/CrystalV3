@@ -17,7 +17,7 @@ import {
     delegarParticipante,
     eliminarProyecto, getProjectInfo,
     IdUsuarios,
-    registarNotificacion,
+    registrarNotificacion,
     getTask,
     getProjectName,
     getProjectWithIter,
@@ -26,12 +26,13 @@ import {
     degradarParticipante,
     getProjectWithEntrega,
     eliminarChats,
-    getTareasGantt
+    getTareasGantt,
+    getAdmins
 } from '../querys/projectquerys.js';
 import jwt from 'jsonwebtoken'
 import { zonaHoraria } from '../config.js';
 import { createProjectToken } from '../libs/jwt.js';
-import { sendemailAdd, sendemailConfig, sendemailDeleteProject, sendemailDeleteTask, sendemailEndProject, sendemailFaseProject, sendemailJoin, sendemailProject, sendemailStartProject, sendemailTask, sendemailUpdateTask } from '../middlewares/send.mail.js';
+import { sendemailAdd, sendemailAdmin, sendemailConfig, sendemailDeleteProject, sendemailDeleteTask, sendemailEndProject, sendemailFaseProject, sendemailJoin, sendemailProject, sendemailStartProject, sendemailTask, sendemailUpdateTask } from '../middlewares/send.mail.js';
 
 export const createProject = async (req, res) => {
     const FECHA_ACTUAL = moment().tz(zonaHoraria);
@@ -41,13 +42,13 @@ export const createProject = async (req, res) => {
         const FECHA_INICIAL = moment(FECHA_INICIO).tz(zonaHoraria).add(1, 'days');
         const FECHA_FINAL = moment(FECHA_TERMINO).tz(zonaHoraria).endOf('day');
 
-        if (FECHA_INICIAL.isBefore(FECHA_ACTUAL)) return res.status(400).json({ message: ["Fecha inicial incorrecta"] });
-        if (FECHA_FINAL.isBefore(FECHA_INICIAL)) return res.status(400).json({ message: ["Fecha final incorrecta"] });
+        if (FECHA_INICIAL.isBefore(FECHA_ACTUAL)) return res.status(400).json({ message: "Fecha inicial incorrecta" });
+        if (FECHA_FINAL.isBefore(FECHA_INICIAL)) return res.status(400).json({ message: "Fecha final incorrecta" });
 
         const DIAS_PROYECTO = FECHA_FINAL.diff(FECHA_INICIAL, 'days') + 1;
 
-        if (DIAS_PROYECTO < 90) return res.status(400).json({ message: ["El proyecto debe durar minimo 3 meses"] });
-        if (DIAS_PROYECTO > 365) return res.status(400).json({ message: ["El proyecto debe durar maximo 1 año"] });
+        if (DIAS_PROYECTO < 90) return res.status(400).json({ message: "El proyecto debe durar minimo 3 meses" });
+        if (DIAS_PROYECTO > 365) return res.status(400).json({ message: "El proyecto debe durar maximo 1 año" });
 
         let REGISTRO_ACTUAL = moment(FECHA_ACTUAL).format('YYYY-MM-DD HH:mm:ss');
         let REGISTRO_INICIAL = moment(FECHA_INICIAL).format('YYYY-MM-DD HH:mm:ss');
@@ -56,17 +57,17 @@ export const createProject = async (req, res) => {
         const CODIGO_UNICO = await generarCodigo();
 
         const generarProyecto = await crearProyecto(NOMBRE_PROYECTO, OBJETIVO, DESCRIPCION_GNRL, REGISTRO_ACTUAL, REGISTRO_INICIAL, REGISTRO_FINAL, ENTREGAS, CODIGO_UNICO, ID);
-        if (!generarProyecto.success) return res.status(400).json({ message: ["Error al crear el proyecto"] });
+        if (!generarProyecto.success) return res.status(400).json({ message: "Error al crear el proyecto" });
 
         const ARREGLOPROYECTO = generarEntregas(ENTREGAS, FECHA_INICIAL, FECHA_FINAL, generarProyecto.ID_P);
-        if (!ARREGLOPROYECTO) return res.status(400).json({ message: ["Error al crear las entregas e iteraciones"] });
+        if (!ARREGLOPROYECTO) return res.status(400).json({ message: "Error al crear las entregas e iteraciones" });
 
         const emailsendend = await sendemailProject(CORREO, NOMBRE_PROYECTO, OBJETIVO, REGISTRO_INICIAL, REGISTRO_FINAL, CODIGO_UNICO);
-        if (!emailsendend) return res.status(400).json({ message: ["Error inesperado, intente nuevamente"] })
+        if (!emailsendend) return res.status(400).json({ message: "Error inesperado, intente nuevamente"})
 
-        return res.status(200).json({ message: ["Proyecto creado con exito"] });
+        return res.status(200).json({ message: "Proyecto creado con exito" });
     } catch (error) {
-        res.status(500).json({ message: [error.message] });
+        res.status(500).json({ message: "Error inesperado, intentalo de nuevo" });        
         //destruirProyecto(idProyecto,ID);  
     }
 }
@@ -112,37 +113,48 @@ export const joinProject = async (req, res) => {
     try {
         let mensaje = 'Enlazado al proyecto correctamente';
         const { CODIGO_UNIRSE, ID_USUARIO } = req.body;
+
         const proyecto = await verificarCodigo(CODIGO_UNIRSE);
+        if (!proyecto.success) return res.status(404).json({ message: "Proyecto no existente" });
+
         const Admins = await getAdmins(proyecto.project[0].ID);
+
         const ES_CREADOR = false;
         let REGISTRO_ACTUAL = moment(FECHA_ACTUAL).format('YYYY-MM-DD HH:mm:ss');
-        if (!proyecto) return res.status(404).json({ message: ["Proyecto no existente"] });
+        
+
         const numeroParticipantes = await verificarNumeroParticipantes(proyecto.project[0].ID);
-        if (!numeroParticipantes.success) return res.status(400).json({ message: ["Numero maximo de participantes alcanzado"] });
+        if (!numeroParticipantes.success) return res.status(400).json({ message: "Numero maximo de participantes alcanzado" });
         if (numeroParticipantes.participantes.length === 8) {
             const actualizarCrystal = await actualizarCrystal(2, proyecto.project[0].ID);
         }
         const registrado = await verificarUnion(proyecto.project[0].ID, ID_USUARIO);
-        if (registrado.success) return res.status(400).json({ message: ["Ya estas participando en el proyecto"] })
+        if (registrado.success) return res.status(400).json({ message: "Ya estas participando en el proyecto" })
         const union = await agregarUsuario(REGISTRO_ACTUAL, ES_CREADOR, proyecto.project[0].ID, ID_USUARIO);
-        if (!union.success) return res.status(500).json({ message: ["Usuario agregado con exito"] });
+        if (!union.success) return res.status(500).json({ message: "Usuario agregado con exito" });
 
 
         await Promise.all(Admins.map(async (adminID) => {
-            const meterNotificacion = registarNotificacion(
-                adminID,
+            const meterNotificacion = registrarNotificacion(
+                adminID.ID_USUARIO,
                 `Se ha unido un usuario a tu proyecto`,
                 9,
                 REGISTRO_ACTUAL
             )
+            const correoParticipante = await getUser(adminID.ID_USUARIO);
+
+            await sendemailAdmin(proyecto.project[0],  correoParticipante[0].CORREO);
+
         }));
 
-        const emailsendend = await sendemailJoin(CORREO, proyecto.project[0]);
-        if (!emailsendend) return res.status(400).json({ message: ["Error inesperado, intente nuevamente"] })
+        const correoParticipante = await getUser(ID_USUARIO);
+
+        const emailsendend = await sendemailJoin(correoParticipante[0].CORREO, proyecto.project[0]);
+        if (!emailsendend) return res.status(400).json({ message: "Error inesperado, intente nuevamente" })
 
         return res.status(200).json({ message: 'Enlazado al proyecto correctamente' });
     } catch (error) {
-        return res.status(500).json({ message: ["Error inesperado, intentalo de nuevo"] });
+        return res.status(500).json({ message: "Error inesperado, intentalo de nuevo" });
     }
 }
 
@@ -482,7 +494,7 @@ export const configurarProyecto = async (req, res) => {
         await Promise.all(idParticipantes.map(async (id) => {
             //meter la notificacion a la base
             const FECHA_ACTUAL_REGISTRAR = FECHA_ACTUAL.format('YYYY-MM-DD HH:mm:ss');
-            const meterNotificacion = registarNotificacion(
+            const meterNotificacion = registrarNotificacion(
                 id.ID_USUARIO,
                 "Se han actualizado las fechas del proyecto, revisalas en el calendario",
                 4,
@@ -511,7 +523,7 @@ export const deleteTask = async (req, res) => {
 
     const FECHA_ACTUAL = moment().tz(zonaHoraria);
     const FECHA_ACTUAL_REGISTRAR = FECHA_ACTUAL.format('YYYY-MM-DD HH:mm:ss');
-    const meterNotificacion = registarNotificacion(
+    const meterNotificacion = registrarNotificacion(
         id_usuario,
         `Se ha eliminado la tarea ${req.body.NOMBRE}`,
         3,
@@ -534,7 +546,7 @@ export const updateTask = async (req, res) => {
 
     const FECHA_ACTUAL = moment().tz(zonaHoraria);
     const FECHA_ACTUAL_REGISTRAR = FECHA_ACTUAL.format('YYYY-MM-DD HH:mm:ss');
-    const meterNotificacion = registarNotificacion(
+    const meterNotificacion = registrarNotificacion(
         id_usuario,
         `Se ha actualizado la tarea ${req.body.NOMBRE}`,
         2,
@@ -593,7 +605,7 @@ export const createTask = async (req, res) => {
         if (!tareacreada.success) return res.status(400).json({ message: "Error al crear la tarea" });
         const usuario = await getUser(ID_USUARIO);
         const registro = moment(FECHA_ACTUAL).format('YYYY-MM-DD HH:mm:ss');
-        const meterNotificacion = registarNotificacion(
+        const meterNotificacion = registrarNotificacion(
             ID_USUARIO,
             `Se te ha asignado una tarea ${NOMBRE}`,
             1,
@@ -617,29 +629,34 @@ export const addParticipant = async (req, res) => {
         let REGISTRO_ACTUAL = moment(FECHA_ACTUAL).format('YYYY-MM-DD HH:mm:ss');
         const ES_CREADOR = false;
         const registrado = await verificarUnionCorreo(ID_PROYECTO, CORREO);
-        if (!registrado.isRegister) return res.status(400).json({ message: ["Usuario no registrado en el sistema"] })
-        if (registrado.success) return res.status(400).json({ message: ["Ya esta participando en el proyecto"] })
+        if (!registrado.isRegister) return res.status(400).json({ message: "Usuario no registrado en el sistema" })
+        if (registrado.success) return res.status(400).json({ message: "Ya esta participando en el proyecto" })
         const numeroParticipantes = await verificarNumeroParticipantes(ID_PROYECTO);
-        if (!numeroParticipantes.success) return res.status(400).json({ message: ["Numero maximo de participantes alcanzado"] });
+        if (!numeroParticipantes.success) return res.status(400).json({ message: "Numero maximo de participantes alcanzado" });
+
+
         if (numeroParticipantes.participantes.length === 8) {
-            const actualizarCrystal = await actualizarCrystal(2, ID_PROYECTO);
+            const actualizarCrystalVar = await actualizarCrystal(2, ID_PROYECTO);
+            if (!actualizarCrystalVar.success) return res.status(500).json({ message: "Error al actualizar el crystal" });
         }
+
+
         const union = await agregarUsuario(REGISTRO_ACTUAL, ES_CREADOR, ID_PROYECTO, registrado.ID_USUARIO);
-        if (!union.success) return res.status(500).json({ message: ["Usuario no agregado con exito"] });
+        if (!union.success) return res.status(500).json({ message: "Usuario no agregado con exito" });
         const FECHAS_PROYECTO = await obtenerFechasID("PROYECTOS", ID_PROYECTO);
-        const meterNotificacion = registarNotificacion(
+        const meterNotificacion = registrarNotificacion(
             registrado.ID_USUARIO,
-            `Se te ha asignado añadido a un proyecto, visualízalo en tu panel`,
+            `Se te ha añadido a un proyecto, visualízalo en tu panel`,
             8,
             REGISTRO_ACTUAL
         )
-        if (!meterNotificacion) return res.status(500).json({ message: ['Error al registrar la notificación'] });
+        if (!meterNotificacion) return res.status(500).json({ message: 'Error al registrar la notificación' });
         const emailsendend = await sendemailAdd(CORREO, FECHAS_PROYECTO[0]);
-        if (!emailsendend) return res.status(400).json({ message: ["Error inesperado, intente nuevamente"] })
-
-        return res.status(200).json({ message: ["Enlazado a proyecto correctamente"] });
+        if (!emailsendend) return res.status(400).json({ message: "Error inesperado, intente nuevamente" })
+            
+        return res.status(200).json({ message: "Enlazado a proyecto correctamente" });
     } catch (error) {
-        res.status(500).json({ mensaje: ["Error inesperado, intentalo nuevamente"] });
+        res.status(500).json({ mensaje: "Error inesperado, intentalo nuevamente" });
     }
 }
 
@@ -679,10 +696,10 @@ export const ascenderParticipant = async (req, res) => {
     const { ID, ID_PROYECTO, ID_admin } = req.body;
     try {
         const delegado = await ascenderParticipante(ID_PROYECTO, ID);
-        if (!delegado.success) return res.status(500).json({ message: ["Error al ascender al participante"] });
-        return res.status(200).json({ message: ["Usuario ascendido con exito"] });
+        if (!delegado.success) return res.status(500).json({ message: "Error al ascender al participante" });
+        return res.status(200).json({ message: "Usuario ascendido con exito" });
     } catch (error) {
-        res.status(500).json({ mensaje: ["Error inesperado, intentalo nuevamente"] });
+        res.status(500).json({ message: "Error inesperado, intentalo nuevamente" });
     }
 }
 
@@ -690,10 +707,10 @@ export const degradarParticipant = async (req, res) => {
     const { ID, ID_PROYECTO, ID_admin } = req.body;
     try {
         const delegado = await degradarParticipante(ID_PROYECTO, ID);
-        if (!delegado.success) return res.status(500).json({ message: ["Error al degradar al participante"] });
-        return res.status(200).json({ message: ["Usuario degradado con exito"] });
+        if (!delegado.success) return res.status(500).json({ message: "Error al degradar al participante" });
+        return res.status(200).json({ message: "Usuario degradado con exito" });
     } catch (error) {
-        res.status(500).json({ mensaje: ["Error inesperado, intentalo nuevamente"] });
+        res.status(500).json({ message: "Error inesperado, intentalo nuevamente" });
     }
 }
 
@@ -706,17 +723,18 @@ export const deleteProject = async (req, res) => {
 
         const correosNotificacion = await IdUsuarios(ID_PROYECTO);
         const idParticipantes = correosNotificacion.participantes;
-        
+        const FECHA_ACTUAL = moment().tz(zonaHoraria);
+
         await Promise.all(idParticipantes.map(async (id) => {
             const projectinfo = await getProjectName(ID_PROYECTO);
             const FECHA_ACTUAL_REGISTRAR = FECHA_ACTUAL.format('YYYY-MM-DD HH:mm:ss');
-            const meterNotificacion = registarNotificacion(
+            const meterNotificacion = registrarNotificacion(
                 id.ID_USUARIO,
                 `Tu proyecto ${projectinfo[0].NOMBRE} ha sido eliminado`,
                 10,
                 FECHA_ACTUAL_REGISTRAR
             )
-            if (!meterNotificacion) return res.status(500).json({ message: ['Error al registrar la notificación'] });
+            if (!meterNotificacion) return res.status(500).json({ message: 'Error al registrar la notificación' });
 
             const correoParticipante = await getUser(id.ID_USUARIO);
             await sendemailDeleteProject(projectinfo[0].NOMBRE, correoParticipante[0].CORREO, projectinfo[0].OBJETIVO, projectinfo[0].DESCRIPCION_GNRL);
@@ -758,7 +776,7 @@ export const activarTareasInactivas = async (req, res) => {
                     await Promise.all(idParticipantes.map(async (id) => {
                         const projectinfo = await getProjectName(fecha.ID);
                         const FECHA_ACTUAL_REGISTRAR = FECHA_ACTUAL.format('YYYY-MM-DD HH:mm:ss');
-                        const meterNotificacion = registarNotificacion(
+                        const meterNotificacion = registrarNotificacion(
                             id.ID_USUARIO,
                             `Ha iniciado tu proyecto ${projectinfo[0].NOMBRE}, date una vuelta`,
                             5,
@@ -781,7 +799,7 @@ export const activarTareasInactivas = async (req, res) => {
                     await Promise.all(idParticipantes.map(async (id) => {
                         const projectinfo = await getProjectName(fecha.ID);
                         const FECHA_ACTUAL_REGISTRAR = FECHA_ACTUAL.format('YYYY-MM-DD HH:mm:ss');
-                        const meterNotificacion = registarNotificacion(
+                        const meterNotificacion = registrarNotificacion(
                             id.ID_USUARIO,
                             `Ha finalizado tu proyecto ${projectinfo[0].NOMBRE}`,
                             6,
@@ -801,7 +819,7 @@ export const activarTareasInactivas = async (req, res) => {
                     await Promise.all(idParticipantes.map(async (id) => {
                         const projectinfo = await getProjectName(idProyecto[0].ProyectoID);
                         const FECHA_ACTUAL_REGISTRAR = FECHA_ACTUAL.format('YYYY-MM-DD HH:mm:ss');
-                        const meterNotificacion = registarNotificacion(
+                        const meterNotificacion = registrarNotificacion(
                             id.ID_USUARIO,
                             `Ha cambiado el estado de tu proyecto, date una vuelta`,
                             7,
@@ -823,7 +841,7 @@ export const activarTareasInactivas = async (req, res) => {
                     await Promise.all(idParticipantes.map(async (id) => {
                         const projectinfo = await getProjectName(idProyecto[0].ProyectoID);
                         const FECHA_ACTUAL_REGISTRAR = FECHA_ACTUAL.format('YYYY-MM-DD HH:mm:ss');
-                        const meterNotificacion = registarNotificacion(
+                        const meterNotificacion = registrarNotificacion(
                             id.ID_USUARIO,
                             `Ha cambiado el estado de tu proyecto, date una vuelta`,
                             7,

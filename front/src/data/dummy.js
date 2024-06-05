@@ -482,7 +482,7 @@ export const links = [
     links: [
       {
         name: 'Dashboard',
-        url: '',
+        url: 'Home',
         icon: <IoHome />,
         isAdmin: false,
       },

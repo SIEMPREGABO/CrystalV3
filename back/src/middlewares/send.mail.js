@@ -63,7 +63,7 @@ export async function sendemailAdd(CORREO, PROYECTO){
     return await transporter.sendMail({
         from: '"Clear 👻" <clear@gmail.com>', 
         to: CORREO, 
-        subject: `Te han agregado a un proyecto, visualiza tu panel `, 
+        subject: `Te han agregado a un proyecto ${PROYECTO.NOMBRE}, visualiza tu panel `, 
         html: `<div>
         <p>Fecha Inicial: ${PROYECTO.FECHA_INICIO}. </p>
         <p>Fecha Final: ${PROYECTO.FECHA_TERMINO}.</p>
@@ -98,6 +98,19 @@ export async function sendemailConfig(Proyecto, CORREO){
         html: `<div>
         <p>Se han actualizado las fechas de tu proyecto</p>
         <p>Revisalas en la pestaña calendario de tu proyecto en Clear/p>
+        <p> =D </p>
+        </div>`
+    });
+}
+
+export async function sendemailAdmin(Proyecto, CORREO){
+    return await transporter.sendMail({
+        from: '"Clear 👻" <clear@gmail.com>', 
+        to: CORREO, 
+        subject: `Se ha unido un usuario a tu proyecto '${Proyecto.NOMBRE}'`, 
+        html: `<div>
+        <p>Dale un vistazo a tus participantes en tu proyecto</p>
+        <p>En Clear/p>
         <p> =D </p>
         </div>`
     });

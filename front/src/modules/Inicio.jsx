@@ -220,7 +220,7 @@ if (tarea.DEPENDENCIAS) {
             <div>
               <p className='font-bold text-gray-700'>{fechasproject && fechasproject.length > 0 ? `Proyecto: ${fechasproject[0].NOMBRE}` : 'Cargando...'}</p>
               <p className='text-2xl'>{fechasproject && fechasproject.length > 0 ? `Objetivo:  ${fechasproject[0].OBJETIVO}` : 'Cargando...'}</p>
-              <p className='text-xl'>Color Crystal: {fechasproject && fechasproject.length > 0 ? (fechasproject[0].ID_CATEGORIA_CRYSTAL == 1 ? 'Clear' : 'other') : 'Cargando...'}</p>
+              <p className='text-xl'>Color Crystal: {fechasproject && fechasproject.length > 0 ? (fechasproject[0].ID_CATEGORIA_CRYSTAL == 1 ? 'Clear' : 'Yellow') : 'Cargando...'}</p>
             </div>
           </div>
           <div className='mt-6'>

@@ -501,6 +501,7 @@ export const ProjectProvider = ({ children }) => {
         setTwoAdmins(true);
         counter = 0;
       }
+      console.log(twoAdmins);
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
         setProjecterrors(error.response.data.message);
@@ -639,6 +640,7 @@ export const ProjectProvider = ({ children }) => {
               icon: 'success',
               button: 'Aceptar',
             });
+            setTwoAdmins(false);
           }
         });
     } catch (error) {

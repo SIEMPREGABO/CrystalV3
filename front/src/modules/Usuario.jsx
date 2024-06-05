@@ -12,28 +12,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { addSchema } from '../schemas/project';
 import { useAuth } from '../context/authContext';
 
-const employeesGrid = [
-  { field: 'NOMBRE_USUARIO', headerText: 'Nombre de Usuario', width: '150', textAlign: 'Center' },
-  { field: 'ID_USUARIO', headerText: 'ID Usuario', width: '120', textAlign: 'Center' },
-  { field: 'FECHA_UNION', headerText: 'Fecha de Unión', width: '130', textAlign: 'Center', format: 'yMd' },
-  { field: 'NUMERO_BOLETA', headerText: 'Número Boleta', width: '130', textAlign: 'Center' },
-  /*{
-    field: 'eliminar',
-    headerText: 'Eliminar',
-    width: '130',
-    textAlign: 'Center',
-    template: '<button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-full">Eliminar</button>',
-    click: (args) => {
-      console.log('Eliminar usuarios boton:', args.data.NOMBRE_USUARIO);
-    }
-  }*/
-];
+
+
+
 
 const Usuario = () => {
 
   const { id } = useParams();
   const { user } = useAuth();
-
+  const idint = parseInt(id, 10).toString();
   const {
     register,
     handleSubmit,
@@ -43,7 +30,7 @@ const Usuario = () => {
   });
 
   const { projecterrors, message, fechasproject, addParticipant, participants, deleteParticipant, delegarParticipant,
-    ascenderParticipant, degradarParticipant, twoAdmins } = useProject();
+    ascenderParticipant, degradarParticipant, twoAdmins, getProject, getPermissions } = useProject();
 
   const onSubmit = handleSubmit(async (values) => {
     const data = {
@@ -53,7 +40,7 @@ const Usuario = () => {
     addParticipant(data);
 
     const timer = setTimeout(() => {
-      window.location.reload();
+      window.location.href = `/Proyecto/${id}/Home`;
     }, 5000);
     return () => clearTimeout(timer);
 
@@ -67,9 +54,10 @@ const Usuario = () => {
     deleteParticipant(data);
 
     const timer = setTimeout(() => {
-      window.location.reload();
+      window.location.href = `/Proyecto/${id}/Home`;
     }, 5000);
     return () => clearTimeout(timer);
+
 
   };
 
@@ -77,14 +65,14 @@ const Usuario = () => {
     const data = {
       ID: args.ID_USUARIO,
       ID_PROYECTO: id,
-      ID_admin: user.ID
     }
     delegarParticipant(data);
 
     const timer = setTimeout(() => {
-      window.location.href = '/';
+      window.location.href = `/Proyecto/${id}/Home`;
     }, 5000);
     return () => clearTimeout(timer);
+
 
   };
 
@@ -92,15 +80,20 @@ const Usuario = () => {
     const data = {
       ID: args.ID_USUARIO,
       ID_PROYECTO: id,
-      ID_admin: user.ID
     }
+    //console.log("Hola desde degradar")
     degradarParticipant(data);
-
-    //const timer = setTimeout(() => {
-    //  window.location.href = '/';
-    //}, 5000);
-    //return () => clearTimeout(timer);
-
+    if(data.ID === user.ID){
+      const timer = setTimeout(() => {
+        window.location.href = `/panel`;
+      }, 5000);
+      return () => clearTimeout(timer);
+    }else{
+      const timer = setTimeout(() => {
+        window.location.href = `/Proyecto/${id}/Home`;
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
   };
 
   const handleAscenderClick = async (args) => {
@@ -109,14 +102,97 @@ const Usuario = () => {
       ID_PROYECTO: id,
       ID_admin: user.ID
     }
+    //console.log("Hola desde ascender");
     ascenderParticipant(data);
 
-    //const timer = setTimeout(() => {
-    //  window.location.href = '/';
-    //}, 5000);
-    //return () => clearTimeout(timer);
+    const timer = setTimeout(() => {
+      window.location.href = `/Proyecto/${id}/Home`;
+    }, 5000);
+    return () => clearTimeout(timer);
+
 
   };
+
+  useEffect(() => {
+    const data = {
+      ID: idint
+    }
+    getPermissions(data);
+    console.log(fechasproject);
+  }, [])
+
+
+  const employeesGrid = [
+  { field: 'NOMBRE_USUARIO', headerText: 'Nombre de Usuario', width: '150', textAlign: 'Center' },
+  { field: 'ID_USUARIO', headerText: 'ID Usuario', width: '120', textAlign: 'Center' },
+  { field: 'FECHA_UNION', headerText: 'Fecha de Unión', width: '130', textAlign: 'Center', format: 'yMd' },
+  { field: 'NUMERO_BOLETA', headerText: 'Número Boleta', width: '130', textAlign: 'Center' },
+  { 
+    field: 'Eliminar',
+    headerText: 'Eliminar',
+    width: '120',
+    textAlign: 'Center',
+    template: (props) => (
+      props.ROLE === 0 && (
+        <button
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded-full"
+          onClick={() => handleDeleteClick(props)}>Eliminar
+        </button>
+      )
+    )
+  },
+  ...(fechasproject[0].ID_CATEGORIA_CRYSTAL === 1 ? 
+    [
+      {
+        field: 'Delegar',
+        headerText: 'Delegar',
+        width: '120',
+        textAlign: 'Center',
+        template: (props) => (
+          props.ROLE === 0 && (
+            <button
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded-full"
+              onClick={() => handleDelegarClick(props)}>Delegar
+            </button>
+          )
+        )
+      }
+    ] : []),
+  ...(fechasproject[0].ID_CATEGORIA_CRYSTAL === 2 && twoAdmins ? 
+    [
+      {
+        field: 'Degradar',
+        headerText: 'Degradar',
+        width: '120',
+        textAlign: 'Center',
+        template: (props) => (
+          props.ROLE === 1 && (
+            <button
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded-full"
+              onClick={() => handleDegradarClick(props)}>Degradar
+            </button>
+          )
+        )
+      }
+    ] : []),
+  ...(fechasproject[0].ID_CATEGORIA_CRYSTAL === 2 && !twoAdmins ? 
+    [
+      {
+        field: 'Ascender',
+        headerText: 'Ascender',
+        width: '120',
+        textAlign: 'Center',
+        template: (props) => (
+          props.ROLE === 0 && (
+            <button
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded-full"
+              onClick={() => handleAscenderClick(props)}>Ascender
+            </button>
+          )
+        )
+      }
+    ] : [])
+];
 
 
   return (
@@ -146,74 +222,8 @@ const Usuario = () => {
             {employeesGrid.map((item, index) => (
               <ColumnDirective key={index}{...item} />
             ))}
-            <ColumnDirective
-              headerText='Eliminar'
-              field='Eliminar'
-              width='120'
-              textAlign='Center'
-              template={(props) => (
-                props.ROLE === 0 && (
-                  <button
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded-full"
-                    onClick={() => handleDeleteClick(props)}>Eliminar
-                  </button>
-                )
-              )}
-            />
-            {fechasproject[0].ID_CATEGORIA_CRYSTAL === 1 &&
-              <ColumnDirective
-                headerText='Delegar'
-                field='Delegar'
-                width='120'
-                textAlign='Center'
-                template={(props) => (
-                  props.ROLE === 0 && (
-                    <button
-                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded-full"
-                      onClick={() => handleDelegarClick(props)}>Delegar
-                    </button>
-                  )
-                )}
-              />}
-            {fechasproject[0].ID_CATEGORIA_CRYSTAL === 2 &&
-              <div>
-                {twoAdmins &&
-                  <div>
-                    <ColumnDirective
-                      headerText='Degradar'
-                      field='Degradar'
-                      width='120'
-                      textAlign='Center'
-                      template={(props) => (
-                        props.ROLE === 1 && (
-                          <button
-                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded-full"
-                            onClick={() => handleDegradarClick(props)}>Degradar
-                          </button>
-                        )
-                      )}
-                    />
-                  </div>}
-                {!twoAdmins &&
-                  <div>
-                    <ColumnDirective
-                      headerText='Ascender'
-                      field='Ascender'
-                      width='120'
-                      textAlign='Center'
-                      template={(props) => (
-                        props.ROLE === 0 && (
-                          <button
-                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded-full"
-                            onClick={() => handleAscenderClick(props)}>Ascender
-                          </button>
-                        )
-                      )}
-                    />
-                  </div>
-                }
-              </div>
-            }
+            
+            
 
           </ColumnsDirective>
           <Inject services={[Page, Search, Toolbar]} />

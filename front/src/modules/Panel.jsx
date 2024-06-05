@@ -31,23 +31,16 @@ export const Panel = () => {
             CODIGO_UNIRSE: values.CODIGO_UNIRSE
         }
         joinProject(data);
+        const timer = setTimeout(() => {
+            window.location.reload();
+        }, 5000);
+        return () => clearTimeout(timer);
     })
 
     useEffect(() => {
         getProjects();
 
     }, []);
-
-    useEffect(() => {
-        if (message.length > 0) {
-            const timer = setTimeout(() => {
-                window.location.reload();
-            }, 5000);
-            return () => clearTimeout(timer);
-        }
-    }, [message]);
-
-
 
     return (
         <div>
@@ -111,7 +104,7 @@ export const Panel = () => {
                                         <ColumnDirective headerText='Proyecto' field='UNIRSE' width='120' textAlign='Center' template={(props) => (
                                             <Link
                                                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded-full"
-                                                to={`/Proyecto/${(props.ID).toString().padStart(5, '0')}`}>
+                                                to={`/Proyecto/${(props.ID).toString().padStart(5, '0')}/Home`}>
                                                 Ir al proyecto </Link>)}
                                         />
                                     </ColumnsDirective>

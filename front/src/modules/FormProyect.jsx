@@ -49,14 +49,7 @@ export const FormProyect = () => {
             <div className="relative flex flex-col justify-center min-h-svh overflow-hidden">
 
                 <div className="w-full p-3 m-auto bg-white rounded-md shadow-xl ring-indigo-600 lg:max-w-xl">
-                    {message && <div class=" items-center bg-green-100 border-l-4 border-green-500 text-green-700  rounded-lg m-2 shadow-md" style={{ maxWidth: '600px' }}>
-                        <p class="text-lg font-semibold m-2">{message}</p>
-                    </div>
-                    }
-                    {projecterrors && <div class=" items-center bg-red-100 border-l-4 border-red-500 text-red-700  rounded-lg m-2 shadow-md" style={{ maxWidth: '600px' }}>
-                        <p class="text-lg font-semibold m-2">{projecterrors}</p>
-                    </div>
-                    }
+                    
                     <h1 className="text-3xl font-semibold text-center text-indigo-700 underline uppercase mt-3">
                         Crea tu Proyecto
                     </h1>
@@ -72,7 +65,7 @@ export const FormProyect = () => {
                                 placeholder='Título'
                                 {...register("NOMBRE_PROYECTO", { required: true, message: "Campo requerido" })}
                             />
-                            {errors.NOMBRE_PROYECTO && <div className=" bg-danger mt-2 me-2 text-white shadow">{errors.NOMBRE_PROYECTO.message}</div>}
+                            {errors.NOMBRE_PROYECTO && <div className=" items-center bg-red-100 text-red-700  rounded-lg m-2 shadow-md">{errors.NOMBRE_PROYECTO.message}</div>}
                         </div>
                         <div className="mb-2">
                             <label className="block text-sm font-semibold text-gray-800">
@@ -85,7 +78,7 @@ export const FormProyect = () => {
                                 name="DESCRIPCION_GNRL"
                                 {...register("DESCRIPCION_GNRL", { required: true, message: "Campo requerido" })}
                             />
-                            {errors.DESCRIPCION_GNRL && <div className=" bg-danger mt-2 me-2 text-white shadow">{errors.DESCRIPCION_GNRL.message}</div>}
+                            {errors.DESCRIPCION_GNRL && <div className=" items-center bg-red-100 text-red-700  rounded-lg m-2 shadow-md">{errors.DESCRIPCION_GNRL.message}</div>}
                         </div>
                         <div className="mb-2">
                             <label className="block text-sm font-semibold text-gray-800">
@@ -98,7 +91,7 @@ export const FormProyect = () => {
                                 name="OBJETIVO"
                                 {...register("OBJETIVO", { required: true, message: "Campo requerido" })}
                             />
-                            {errors.OBJETIVO && <div className=" bg-danger mt-2 me-2 text-white shadow">{errors.OBJETIVO.message}</div>}
+                            {errors.OBJETIVO && <div className=" items-center bg-red-100 text-red-700  rounded-lg m-2 shadow-md">{errors.OBJETIVO.message}</div>}
                         </div>
 
                         <div className="mb-2 items-center">
@@ -114,7 +107,7 @@ export const FormProyect = () => {
                                         {...register("FECHA_INICIO", { required: true, message: "Campo requerido" })}
 
                                     />
-                                    {errors.FECHA_INICIO && <div className=" bg-danger mt-2 me-2 text-white shadow">{errors.FECHA_INICIO.message}</div>}
+                                    {errors.FECHA_INICIO && <div className=" items-center bg-red-100 text-red-700  rounded-lg m-2 shadow-md">{errors.FECHA_INICIO.message}</div>}
 
                                 </div>
                                 <div className="flex-row mr-2">
@@ -127,7 +120,7 @@ export const FormProyect = () => {
                                         name="FECHA_TERMINO"
                                         {...register("FECHA_TERMINO", { required: true, message: "Campo requerido" })}
                                     />
-                                    {errors.FECHA_TERMINO && <div className=" bg-danger mt-2 me-2 text-white shadow">{errors.FECHA_TERMINO.message}</div>}
+                                    {errors.FECHA_TERMINO && <div className=" items-center bg-red-100 text-red-700  rounded-lg m-2 shadow-md">{errors.FECHA_TERMINO.message}</div>}
                                 </div>
                                 <div className="flex-row  mr-2">
                                     <label htmlFor="ENTREGAS" className="block text-sm font-semibold text-gray-800">
@@ -138,12 +131,14 @@ export const FormProyect = () => {
                                         name="ENTREGAS"
                                         {...register("ENTREGAS", { required: true, message: "Campo requerido" })}
                                     >
-                                        <option selected>Entregas</option>
+                                        <option value="0">Entregas</option>
                                         <option value="3">3</option>
                                         <option value="4">4</option>
                                         <option value="5">5</option>
                                         <option value="6">6</option>
                                     </select>
+                                    {errors.ENTREGAS && <div className=" items-center bg-red-100 text-red-700  rounded-lg m-2 shadow-md">{errors.ENTREGAS.message}</div>}
+
                                 </div>
                             </div>
                         </div>

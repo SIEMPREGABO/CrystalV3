@@ -30,6 +30,7 @@ const Navbar = () => {
 
       window.addEventListener('resize', handleResize);
       handleResize();
+      setIsClicked(false);
       return () => window.removeEventListener('resize', handleResize);
   }, []);
 
@@ -43,9 +44,11 @@ const Navbar = () => {
 
   const handleActiveMenu = () => setActiveMenu(!activeMenu);
   return (
-    <div className='flex justify-between p-2 md:mx-6 relative'>
+    <div className='flex w-full p-2 md:mx-6 relative'>
+      <div className='flex justify-start w-1/12'>
         <NavButton title="Menu" customFunc={handleActiveMenu} color= {currentColor} icon= {<AiOutlineMenu/>} />
-        <div className='flex'> 
+      </div>
+      <div className='flex justify-end w-11/12 mr-5'> 
             <NavButton title="Chat" customFunc={() => handleClick('chat')} color= {currentColor} icon= {<BsChatLeft/>} />  
             <NavButton title="Notificaciones" customFunc={() => handleClick("notificacion")} color= {currentColor} icon= {<RiNotification3Line/>} />
             <TooltipComponent content= "Profile" position='BottomCenter'>

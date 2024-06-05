@@ -85,7 +85,7 @@ export function verificarCodigo(CODIGO) {
                 if (results.length > 0) {
                     resolve({ success: true, project: results });
                 } else {
-                    resolve(false);
+                    resolve({success: false});
                 }
             }
         });
@@ -200,8 +200,8 @@ export function eliminarProyecto(ID_PROYECTO) {
     return new Promise(async (resolve, reject) => {
         const conn = await getConnection();
         try {
-            conn.beginTransaction();
-            console.log("primer")
+            //conn.beginTransaction();
+            //console.log("primer")
             const selectTareasDependientesQuery = `
                 SELECT * FROM T_DEPENDE_T WHERE ID_TAREA_DEPENDIENTE IN(
                     SELECT ID FROM TAREAS WHERE ID_ITERACION IN(
@@ -223,20 +223,20 @@ export function eliminarProyecto(ID_PROYECTO) {
             `;
             conn.query(selectTareasDependientesQuery, [ID_PROYECTO], (err, results) => {
                 if (err) {
-                    conn.rollback(() => {
+                    //conn.rollback(() => {
                         reject({ success: false });
-                    });
+                    //});
                 } else {
                     console.log(results);
                     if (results.length > 0) {
                         conn.query(deleteTareasDependenciasQuery, [ID_PROYECTO], (err, results) => {
                             if (err) {
-                                conn.rollback(() => {
+                                //conn.rollback(() => {
                                     reject({ success: false });
-                                });
+                                //});
                             }
                             else {
-                                console.log("xd");
+                                //console.log("xd");
                                 console.log("borrados tareas depes: ", results.affectedRows);
                             }
                         });
@@ -247,7 +247,7 @@ export function eliminarProyecto(ID_PROYECTO) {
             });
 
 
-            console.log("1")
+            //console.log("1")
 
             const selectColaboracionesQuery = `
             SELECT ID_TAREA_REALIZADA FROM COLABORACIONES WHERE ID_ITERACION IN
@@ -267,21 +267,21 @@ export function eliminarProyecto(ID_PROYECTO) {
 
             conn.query(selectColaboracionesQuery, [ID_PROYECTO], (err, results) => {
                 if (err) {
-                    conn.rollback(() => {
+                    //conn.rollback(() => {
                         reject({ success: false });
-                    });
+                    //});
                 } else {
                     console.log(results);
                     if (results.length > 0) {
                         conn.query(deleteColaboracionesQuery, [ID_PROYECTO], (err, results) => {
                             if (err) {
                                 console.log(err)
-                                conn.rollback(() => {
+                                //conn.rollback(() => {
                                     reject({ success: false });
-                                });
+                                //});
                             }
                             else {
-                                console.log("xd");
+                                //console.log("xd");
                                 console.log("borrados colabs: ", results.affectedRows);
                             }
                         });
@@ -291,7 +291,7 @@ export function eliminarProyecto(ID_PROYECTO) {
                 }
             });
 
-            console.log("2")
+            //console.log("2")
 
 
             const selectChatsQuery = `
@@ -312,19 +312,19 @@ export function eliminarProyecto(ID_PROYECTO) {
 
             conn.query(selectChatsQuery, [ID_PROYECTO], (err, results) => {
                 if (err) {
-                    conn.rollback(() => {
+                    //conn.rollback(() => {
                         reject({ success: false });
-                    });
+                    //});
                 } else {
                     console.log(results);
                     if (results.length > 0) {
                         conn.query(deleteChatsQuery, [ID_PROYECTO], (err, results) => {
                             if (err) {
-                                conn.rollback(() => {
+                                //conn.rollback(() => {
                                     reject({ success: false });
-                                });
+                                //});
                             } else {
-                                console.log("xd");
+                                //console.log("xd");
                                 console.log("borrados chats: ", results.affectedRows);
                             }
                         });
@@ -333,7 +333,7 @@ export function eliminarProyecto(ID_PROYECTO) {
                     }
                 }
             });
-            console.log("3")
+            //console.log("3")
 
             const selectTareasQuery = `
                 SELECT ID FROM TAREAS WHERE ID_ITERACION IN (
@@ -354,20 +354,20 @@ export function eliminarProyecto(ID_PROYECTO) {
             conn.query(selectTareasQuery, [ID_PROYECTO], async (err, results) => {
                 if (err) {
                     console.log(err)
-                    conn.rollback(() => {
+                    //conn.rollback(() => {
                         reject({ success: false });
-                    });
+                    //});
                 } else {
                     console.log(results);
                     if (results.length > 0) {
                         conn.query(deleteTareasQuery, [ID_PROYECTO], (err, results) => {
                             if (err) {
-                                conn.rollback(() => {
+                                //conn.rollback(() => {
                                     reject({ success: false });
-                                });
+                                //});
                             }
                             else {
-                                console.log("xd");
+                                //console.log("xd");
                                 console.log("borrados tareas: ", results.affectedRows);
                             }
                         });
@@ -377,7 +377,7 @@ export function eliminarProyecto(ID_PROYECTO) {
                 }
             });
 
-            console.log("4")
+            //console.log("4")
 
             const selectRequerimientosQuery = `
                 SELECT ID FROM REQUERIMIENTOS WHERE ID_ENTREGA IN (
@@ -396,17 +396,17 @@ export function eliminarProyecto(ID_PROYECTO) {
             conn.query(selectRequerimientosQuery, [ID_PROYECTO], (err, results) => {
                 if (err) {
 
-                    conn.rollback(() => {
+                    //conn.rollback(() => {
                         reject({ success: false });
-                    });
+                    //});
                 } else {
                     console.log(results);
                     if (results.length > 0) {
                         conn.query(deleteRequerimientosQuery, [ID_PROYECTO], (err, results) => {
                             if (err) {
-                                conn.rollback(() => {
+                                //conn.rollback(() => {
                                     reject({ success: false });
-                                });
+                                //});
                             }
                             else {
                                 console.log("xd");
@@ -419,7 +419,7 @@ export function eliminarProyecto(ID_PROYECTO) {
                 }
             });
 
-            console.log("5")
+            //console.log("5")
 
             const deleteIteracionesQuery = `
                 DELETE FROM ITERACIONES WHERE ID_ENTREGA IN (
@@ -429,71 +429,71 @@ export function eliminarProyecto(ID_PROYECTO) {
 
             conn.query(deleteIteracionesQuery, [ID_PROYECTO],  (err, results) => {
                 if (err) {
-                    conn.rollback(() => {
+                    //conn.rollback(() => {
                         reject({ success: false });
-                    });
+                    //});
                 } else {
                     console.log("xd");
                     console.log("borrados iteraciones: ", results.affectedRows);
                 }
             });
-            console.log("6")
+            //console.log("6")
 
             const deleteEntregasQuery = 'DELETE FROM ENTREGAS WHERE ID_PROYECTO = ?';
             conn.query(deleteEntregasQuery, [ID_PROYECTO],  (err, results) => {
                 if (err) {
-                    conn.rollback(() => {
+                    //conn.rollback(() => {
                         reject({ success: false });
-                    });
+                    //});
                 }
                 else {
-                    console.log("xd");
+                    //console.log("xd");
                     console.log("borrados entregas: ", results.affectedRows);
                 }
                 console.log("Se eliminaron las entregas.");
             });
-            console.log("7")
+            //console.log("7")
 
             const deleteUsuariosQuery = 'DELETE FROM U_SeUne_P WHERE ID_PROYECTO = ?';
             conn.query(deleteUsuariosQuery, [ID_PROYECTO],  (err, results) => {
                 if (err) {
-                    conn.rollback(() => {
+                    //conn.rollback(() => {
                         reject({ success: false });
-                    });
+                    //});
                 }
                 else {
-                    console.log("xd");
+                    //console.log("xd");
                     console.log("borrados participantes: ", results.affectedRows);
                 }
             });
-            console.log("8")
+            //console.log("8")
 
             const deleteProyectoQuery = 'DELETE FROM PROYECTOS WHERE ID = ?';
 
             conn.query(deleteProyectoQuery, [ID_PROYECTO],  (err, results) => {
                 if (err) {
-                    conn.rollback(() => {
+                    //conn.rollback(() => {
                         reject({ success: false });
-                    });
+                    //});
                 }else {
-                    console.log("xd");
+                    //console.log("xd");
                     console.log("borrados proyecto: ", results.affectedRows);
                 }
             });
-            console.log("9")
+            //console.log("9")
             //await conn.rollback();
-            conn.commit();
+            //conn.commit();
             resolve({ success: true });
         } catch (error) {
-            console.log("no pude")
-            conn.rollback();
-            reject({ success: false })
-        } finally {
-            // Cerrar la conexión
-            console.log("si pude")
+            //console.log("no pude")
             //conn.rollback();
-            conn.end();
-        }
+            reject({ success: false })
+        } //finally {
+            // Cerrar la conexión
+            //console.log("si pude")
+            //conn.rollback();
+            //conn.end();
+        //}
 
     })
 }
@@ -552,7 +552,7 @@ export function verificarUnionCorreo(ID_PROYECTO, CORREO) {
     });
 }
 
-export function registarNotificacion(id_usuario, contenido, tipo, fecha) {
+export function registrarNotificacion(id_usuario, contenido, tipo, fecha) {
     return new Promise(async (resolve, reject) => {
         try {
             const connection = await getConnection();
@@ -734,8 +734,9 @@ export function getAdmins(ID) {
     return new Promise(async (resolve, reject) => {
         const connection = await getConnection();
         const query = ' SELECT ID_USUARIO FROM U_SEUNE_P WHERE ID_PROYECTO = ? AND ES_CREADOR = 1';
-        connection.query(query, [CRYSTAL, ID], (err, results) => {
+        connection.query(query, [ID], (err, results) => {
             if (err) {
+                console.log(err)
                 reject(err);
             } else {
                 resolve(results);
