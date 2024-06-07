@@ -481,20 +481,20 @@ export const links = [
     title: 'Páginas',
     links: [
       {
-        name: 'Dashboard',
+        name: 'Home',
         url: 'Home',
         icon: <IoHome />,
         isAdmin: false,
       },
       {
-        name: 'Asignar tarea',
-        url:'Asignar-tarea',
-        icon: <IoMdContacts />,
-        isAdmin: true,
+        name: 'Kanban',
+        url: 'Kanban',
+        icon: <BsKanban />,
+        isAdmin: false,
       },
       {
-        name: 'Entregas',
-        url: 'Entregas',
+        name: 'Informes',
+        url: 'Informes',
         icon: <GoFileSubmodule />,
         isAdmin: true,
       },
@@ -522,12 +522,7 @@ export const links = [
         icon: <FaCalendarAlt />,
         isAdmin: false,
       },
-      {
-        name: 'Kanban',
-        url: 'Kanban',
-        icon: <BsKanban />,
-        isAdmin: false,
-      },
+      
       {
         name: 'Chat',
         url: 'ChatIteracion',

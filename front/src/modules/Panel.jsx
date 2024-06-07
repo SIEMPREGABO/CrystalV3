@@ -14,9 +14,9 @@ import {
 import { Header } from './Header';
 
 export const Panel = () => {
-    const { user ,getProjects,projects,autherrors} = useAuth();
+    const { user ,getProjects,projects} = useAuth();
     const fecha = moment.utc(user.FECHA_CREACION).format('DD-MM-YYYY');
-    const {  projecterrors, joinProject, message } = useProject();
+    const { joinProject } = useProject();
     const {
         register,
         handleSubmit,
@@ -46,18 +46,8 @@ export const Panel = () => {
         <div>
             <Header />
             <div className="container-fluid position-relative p-4">
-                {message && <div class=" items-center bg-green-100 border-l-4 border-green-500 text-green-700  rounded-lg m-2 shadow-md" style={{ maxWidth: '600px' }}>
-                    <p class="text-lg font-semibold m-2">{message}</p>
-                </div>
-                }
-                {projecterrors && <div class=" items-center bg-red-100 border-l-4 border-red-500 text-red-700  rounded-lg m-2 shadow-md" style={{ maxWidth: '600px' }}>
-                    <p class="text-lg font-semibold m-2">{projecterrors}</p>
-                </div>
-                }            
-                {autherrors && <div class=" items-center bg-red-100 border-l-4 border-red-500 text-red-700  rounded-lg m-2 shadow-md" style={{ maxWidth: '600px' }}>
-                    <p class="text-lg font-semibold m-2">{autherrors}</p>
-                </div>
-                }          
+                         
+                        
                 <div className="container-sm">
                     <div className="row justify-content-evenly d-md-flex flex-md-equal w-100 my-md-3 p-md-3 mx-auto">
                         <div className="text-bg-dark overflow-hidden col">

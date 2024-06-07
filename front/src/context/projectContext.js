@@ -86,8 +86,6 @@ export const ProjectProvider = ({ children }) => {
           button: 'Aceptar',
         });
         //setProjecterrors(error.response.data.message);
-        console.log(error.response.data.message);
-
       } else {
         swal({
           title: 'Asignación de tarea',
@@ -134,29 +132,19 @@ export const ProjectProvider = ({ children }) => {
 
   const deleteProjectFunction = async (id) => {
     try {
+      const res = await requestDeleteProject(id);
       swal({
         title: "Eliminar proyecto",
-        text: "¿Quieres eliminar el proyecto?",
-        icon: "warning",
-        buttons: true,
-        dangerMode: true,
-      })
-        .then(async (willDelete) => {
-          if (willDelete) {
-            const res = await requestDeleteProject(id);
-            swal({
-              title: "Eliminar proyecto",
-              text: res.data.message,
-              icon: 'success',
-              button: 'Aceptar',
-            });
-            vaciarProject();
-            const timer = setTimeout(() => {
-              window.location.href = '/';
-            }, 5000);
-            return () => clearTimeout(timer);
-          }
-        });
+        text: res.data.message,
+        icon: 'success',
+        button: 'Aceptar',
+      });
+      vaciarProject();
+      const timer = setTimeout(() => {
+        window.location.href = '/';
+      }, 5000);
+      return () => clearTimeout(timer);
+
       //setMessage(res.data.message);
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
@@ -272,7 +260,7 @@ export const ProjectProvider = ({ children }) => {
     try {
       const res = await requestTasksProject(project);
       setEntregasProject(res.data);
-      
+
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
         //setProjecterrors(error.response.data.message);
@@ -474,6 +462,10 @@ export const ProjectProvider = ({ children }) => {
     }
   }
 
+  useEffect(() => {
+    console.log('Participantes actualizados:', participants);
+  }, [participants]);
+
   const getProject = async (project) => {
     let counter = 0;
     try {
@@ -489,15 +481,15 @@ export const ProjectProvider = ({ children }) => {
       setTareasKanban(res.data.tasksKanban);
       setProjectInfo(res.data.projectInfo);
       setTareasGantt(res.data.tareasGantt);
-      
-      if(res.data.fechasProyecto[0].ID_CATEGORIA_CRYSTAL === 2 ){
-        res.data.participants.map((participant)=>{
-          if(participant.ROLE === 1){
+
+      if (res.data.fechasProyecto[0].ID_CATEGORIA_CRYSTAL === 2) {
+        res.data.participants.map((participant) => {
+          if (participant.ROLE === 1) {
             counter++;
           }
         })
       }
-      if(counter === 2){
+      if (counter === 2) {
         setTwoAdmins(true);
         counter = 0;
       }
@@ -525,36 +517,22 @@ export const ProjectProvider = ({ children }) => {
 
   const deleteParticipant = async (id) => {
     try {
-      //const res = await requestDelete(id);
-      //setMessage(res.data.message);
-      if(participants.length === 9 && twoAdmins){
+      if (participants.length === 9 && twoAdmins) {
         swal({
           title: 'Eliminar un participante',
-          text: 'Degradar a un administrador para continuar',
+          text: 'Degrada a un administrador para continuar',
           icon: 'warning',
           button: 'Aceptar',
         });
-      }else{
+      } else {
+        const res = await requestDelete(id);
         swal({
-          title: "Eliminar un participante",
-          text: "¿Quieres eliminar al participante?",
-          icon: "warning",
-          buttons: true,
-          dangerMode: true,
-        })
-          .then(async (willDelete) => {
-            if (willDelete) {
-              const res = await requestDelete(id);
-              swal({
-                title: 'Eliminar un participante',
-                text: res.data.message,
-                icon: 'success',
-                button: 'Aceptar',
-              });
-            }
-          });
+          title: 'Eliminar un participante',
+          text: res.data.message,
+          icon: 'success',
+          button: 'Aceptar',
+        });
       }
-      
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
         swal({
@@ -579,26 +557,14 @@ export const ProjectProvider = ({ children }) => {
 
   const delegarParticipant = async (id) => {
     try {
-      //const res = await requestDelegar(id);
-      //setMessage(res.data.message);
+      const res = await requestDelegar(id);
       swal({
-        title: "Delegar a un participante",
-        text: "¿Quieres delegar al participante?",
-        icon: "warning",
-        buttons: true,
-        dangerMode: true,
-      })
-        .then(async (willDelete) => {
-          if (willDelete) {
-            const res = await requestDelegar(id);
-            swal({
-              title: 'Delegar a un participante',
-              text: res.data.message,
-              icon: 'success',
-              button: 'Aceptar',
-            });
-          }
-        });
+        title: 'Delegar a un participante',
+        text: res.data.message,
+        icon: 'success',
+        button: 'Aceptar',
+      });
+
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
         swal({
@@ -622,27 +588,14 @@ export const ProjectProvider = ({ children }) => {
 
   const degradarParticipant = async (id) => {
     try {
-      //const res = await requestDelegar(id);
-      //setMessage(res.data.message);
+      const res = await requestDegradar(id);
       swal({
         title: "Degradar a un administrador",
-        text: "¿Quieres degradar al administrador?",
-        icon: "warning",
-        buttons: true,
-        dangerMode: true,
-      })
-        .then(async (willDelete) => {
-          if (willDelete) {
-            const res = await requestDegradar(id);
-            swal({
-              title: "Degradar a un administrador",
-              text: res.data.message,
-              icon: 'success',
-              button: 'Aceptar',
-            });
-            setTwoAdmins(false);
-          }
-        });
+        text: res.data.message,
+        icon: 'success',
+        button: 'Aceptar',
+      });
+      setTwoAdmins(false);
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
         swal({
@@ -664,28 +617,28 @@ export const ProjectProvider = ({ children }) => {
     }
   }
 
+  const actualizarParticipantes = async () => {
+    return participants;
+  }
+
+  const actualizarTareas = async () => {
+    return tareas;
+  }
+
+  const actualizarRequerimientos = async () => {
+    return requerimientos;
+  }
+
+
   const ascenderParticipant = async (id) => {
     try {
-      //const res = await requestDelegar(id);
-      //setMessage(res.data.message);
+      const res = await requestAscender(id);
       swal({
         title: "Ascender a un administrador",
-        text: "¿Quieres ascender al administrador?",
-        icon: "warning",
-        buttons: true,
-        dangerMode: true,
-      })
-        .then(async (willDelete) => {
-          if (willDelete) {
-            const res = await requestAscender(id);
-            swal({
-              title: "Ascender a un administrador",
-              text: res.data.message,
-              icon: 'success',
-              button: 'Aceptar',
-            });
-          }
-        });
+        text: res.data.message,
+        icon: 'success',
+        button: 'Aceptar',
+      });
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
         swal({
@@ -754,6 +707,16 @@ export const ProjectProvider = ({ children }) => {
     }
   }
 
+  useEffect(() => {
+    console.log('Participantes actualizados:', participants);
+  }, [participants]);
+
+  useEffect(() => {
+    console.log('Proyecto actualizado:', fechasproject);
+  }, [fechasproject]);
+
+
+
   const vaciarProject = async () => {
     try {
       console.log("me activaron")
@@ -804,6 +767,8 @@ export const ProjectProvider = ({ children }) => {
     checkLogin();
   }, []);
 
+
+
   return (
     <ProjectContext.Provider
       value={{
@@ -823,14 +788,16 @@ export const ProjectProvider = ({ children }) => {
         projectInfo,
 
         userRole,
-        IsParticipant,twoAdmins,
+        IsParticipant, twoAdmins,
 
-        requerimientos, tareas,tareasGantt,
+        requerimientos, tareas, tareasGantt,
 
         messagesChat,
 
         setProjecterrors,
         setMessage, setIsParticipant, setScheduleData,
+
+        actualizarParticipantes, actualizarTareas, actualizarRequerimientos,
 
         create,
         configProyect,
@@ -841,7 +808,7 @@ export const ProjectProvider = ({ children }) => {
         createRequirements,
         createTask,
         addParticipant,
-        delegarParticipant,degradarParticipant,ascenderParticipant,
+        delegarParticipant, degradarParticipant, ascenderParticipant,
         createMessages,
         getMessages,
         getTasksProject,

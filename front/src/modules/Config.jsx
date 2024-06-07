@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { ScheduleComponent, Inject, Day, Week, WorkWeek, Month, Agenda, Resize, DragAndDrop } from '@syncfusion/ej2-react-schedule';
 import { useProject } from '../context/projectContext';
 import { Header } from '../components';
+import swal from 'sweetalert';
 
 export const Config = () => {
   const { id } = useParams();
@@ -12,26 +13,35 @@ export const Config = () => {
     fechasiteraciones,
     configProyect,
     deleteProjectFunction,
-    message,
-    projecterrors
+    getProject
   } = useProject();
   const [scheduleData, setScheduleData] = useState([]);
 
 
-  const handleSaveChanges = () => {
-    //console.log(scheduleData)
-
-    configProyect(scheduleData);
+  const handleSaveChanges = async () => {
+    const idnt = {
+      ID: id
+    }
+    await configProyect(scheduleData);
+    await getProject(idnt);
   };
 
   const handleDeleteProject = () => {
-    //console.log(scheduleData)
-    const data = {
-      ID_PROYECTO: id
-    }
-    deleteProjectFunction(data);
-
-    
+    swal({
+      title: "Eliminar proyecto",
+      text: "¿Quieres eliminar el proyecto?",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    })
+      .then(async (willDelete) => {
+        if (willDelete) {
+          const data = {
+            ID_PROYECTO: id
+          }
+          deleteProjectFunction(data);
+        }
+      });
   };
 
   useEffect(() => {
@@ -84,7 +94,6 @@ export const Config = () => {
     });
 
     setScheduleData(events);
-    //console.log(contador);
 
   }, [fechasproject, fechasentregas, fechasiteraciones]);
 
