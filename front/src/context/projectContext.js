@@ -50,6 +50,7 @@ export const ProjectProvider = ({ children }) => {
   const [entregasproject, setEntregasProject] = useState([]);
   const [projectInfo, setProjectInfo] = useState([]);
   const [tareasGantt, setTareasGantt] = useState([]);
+  const [notificaciones, setNotificaciones] = useState([]);
 
   useEffect(() => {
     if (message.length > 0) {
@@ -481,6 +482,7 @@ export const ProjectProvider = ({ children }) => {
       setTareasKanban(res.data.tasksKanban);
       setProjectInfo(res.data.projectInfo);
       setTareasGantt(res.data.tareasGantt);
+      setNotificaciones(res.data.notificaciones);
 
       if (res.data.fechasProyecto[0].ID_CATEGORIA_CRYSTAL === 2) {
         res.data.participants.map((participant) => {
@@ -734,6 +736,7 @@ export const ProjectProvider = ({ children }) => {
       setMessagesChat([]);
       setEntregasProject([]);
       setProjectInfo([]);
+      setNotificaciones([]);
     } catch (error) {
       swal({
         title: 'Vaciar el proyecto',
@@ -792,7 +795,7 @@ export const ProjectProvider = ({ children }) => {
 
         requerimientos, tareas, tareasGantt,
 
-        messagesChat,
+        messagesChat,notificaciones,
 
         setProjecterrors,
         setMessage, setIsParticipant, setScheduleData,

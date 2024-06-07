@@ -8,6 +8,7 @@ import { useAuth } from '../context/authContext';
 
 function AsignarTarea() {
   const { id } = useParams();
+  
   const {
     register,
     handleSubmit,
@@ -36,7 +37,8 @@ function AsignarTarea() {
       CORREO: user.CORREO
     }
     const idnt = {
-      ID: id
+      ID: id,
+      USER : user.ID
     }
     await createTask(data);
     await getProject(idnt);

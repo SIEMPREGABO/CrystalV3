@@ -40,7 +40,8 @@ const Usuario = () => {
       ID_PROYECTO: fechasproject[0].ID
     }
     const idnt = {
-      ID: id
+      ID: id,
+      USER: user.ID
     }
     await addParticipant(data);
     await getProject(idnt);
@@ -59,7 +60,10 @@ const Usuario = () => {
       .then(async (willDelete) => {
         if (willDelete) {
           const data = { ID: args.ID_USUARIO, ID_PROYECTO: id }
-          const idnt = { ID: id }
+          const idnt = {
+            ID: id,
+            USER: user.ID
+          }
           await deleteParticipant(data);
           await getProject(idnt);
           const participantes = await actualizarParticipantes();
@@ -83,7 +87,8 @@ const Usuario = () => {
             ID_PROYECTO: id,
           }
           const idnt = {
-            ID: id
+            ID: id,
+            USER: user.ID
           }
           await delegarParticipant(data);
           await getProject(idnt);
@@ -108,7 +113,8 @@ const Usuario = () => {
             ID_PROYECTO: id,
           }
           const idnt = {
-            ID: id
+            ID: id,
+            USER: user.ID
           }
           await degradarParticipant(data);
           if (data.ID === user.ID) {
@@ -144,7 +150,8 @@ const Usuario = () => {
             ID_admin: user.ID
           }
           const idnt = {
-            ID: id
+            ID: id,
+            USER: user.ID
           }
           await ascenderParticipant(data);
           await getProject(idnt);
