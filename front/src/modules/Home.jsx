@@ -7,6 +7,7 @@ import users from "../images/Users.jpg"
 import Header from "./Header.jsx"
 import { useAuth } from "../context/authContext.js"
 import { useEffect } from "react"
+import Footer from "./Footer.jsx";
 
 export const Home = () => {
     const { message, autherrors, setMessage, setAutherrors } = useAuth();
@@ -96,6 +97,7 @@ export const Home = () => {
 
 
             </main>
+            <Footer />
         </div>
     );
 }

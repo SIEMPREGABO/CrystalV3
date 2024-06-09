@@ -3,8 +3,8 @@ import { useAuth } from '../context/authContext';
 import { Chart } from "react-google-charts";
 import { useStateContext } from '../context/Provider';
 import { Button } from '../components';
-import  PDF  from "../components/PDF.jsx";
-import {PDFDownloadLink} from "@react-pdf/renderer";
+import PDF from "../components/PDF.jsx";
+import { PDFDownloadLink } from "@react-pdf/renderer";
 import { useProject } from "../context/projectContext";
 import { BsBoxSeam } from 'react-icons/bs';
 import { MdOutlineSupervisorAccount } from 'react-icons/md';
@@ -55,7 +55,7 @@ const Inicio = () => {
         },
         {
           icon: <BsBoxSeam />,
-          amount: projectInfo[0].NUMENTREGAS,
+          amount: `${projectInfo[0].NUMENTREGASCMP}/${projectInfo[0].NUMENTREGAS}`,
           percentage: `${Math.floor((projectInfo[0].NUMENTREGASCMP * 100) / projectInfo[0].NUMENTREGAS)} % completado`,
           title: 'Entregas',
           iconColor: 'rgb(255, 244, 229)',
@@ -64,7 +64,7 @@ const Inicio = () => {
         },
         {
           icon: <HiOutlineRefresh />,
-          amount: projectInfo[0].NUMITERACIONES,
+          amount: `${projectInfo[0].NUMITERACIONESCMP} / ${projectInfo[0].NUMITERACIONES}`,
           percentage: `${Math.floor((projectInfo[0].NUMITERACIONESCMP * 100) / projectInfo[0].NUMITERACIONES)} % completado`,
           title: 'Iteraciones',
           iconColor: 'rgb(0, 194, 146)',
@@ -87,23 +87,23 @@ const Inicio = () => {
   }, [projectInfo]);
 
   useEffect(() => {
-    if(fechasproject.length > 0){
+    if (fechasproject.length > 0) {
       const project = {
-          ID_PROYECTO: fechasproject[0].ID,
+        ID_PROYECTO: fechasproject[0].ID,
       }
 
       getTasksProject(project);
       //setEntregas(entregasproject);
-  }
+    }
   }, [fechasproject]);
 
   useEffect(() => {
-    if(entregasproject !== undefined && entregasproject.length > 0){
-        setEntregas(entregasproject);
-        //setShowIteraciones((JSON.parse(entregasproject[0].ITERACIONES)));
-        console.log(entregasproject);
-        
-        }
+    if (entregasproject !== undefined && entregasproject.length > 0) {
+      setEntregas(entregasproject);
+      //setShowIteraciones((JSON.parse(entregasproject[0].ITERACIONES)));
+      console.log(entregasproject);
+
+    }
   }, [entregasproject]);
 
   useEffect(() => {
@@ -155,41 +155,41 @@ const Inicio = () => {
             <p><strong>Entrega:</strong> ${tarea.ENTREGA}</p>
           </div>
         `;
-        let arrayDependencias =[];
-        
+        let arrayDependencias = [];
+
         let dependencies = "";
-if (tarea.DEPENDENCIAS) {
-    let arrayDependencias = tarea.DEPENDENCIAS.split(",");
-    //console.log(arrayDependencias);
-    
-    arrayDependencias.map((dependencia, index) => {
-        let startIndex = 0;
-        let foundIndex = -1;
-        
-        // Seguimos buscando hasta encontrar un índice válido
-        while (true) {
-            foundIndex = tareasGantt.findIndex((element, idx) => idx >= startIndex && typeof element.NOMBRE === 'string' && element.NOMBRE.includes(dependencia));
-            
-            if (foundIndex > -1) {
+        if (tarea.DEPENDENCIAS) {
+          let arrayDependencias = tarea.DEPENDENCIAS.split(",");
+          //console.log(arrayDependencias);
+
+          arrayDependencias.map((dependencia, index) => {
+            let startIndex = 0;
+            let foundIndex = -1;
+
+            // Seguimos buscando hasta encontrar un índice válido
+            while (true) {
+              foundIndex = tareasGantt.findIndex((element, idx) => idx >= startIndex && typeof element.NOMBRE === 'string' && element.NOMBRE.includes(dependencia));
+
+              if (foundIndex > -1) {
                 startIndex = foundIndex + 1; // Actualizamos startIndex para la siguiente búsqueda
                 break; // Salimos del bucle while si encontramos un índice válido
-            } else {
+              } else {
                 break; // Salimos del bucle while si no encontramos más coincidencias
+              }
             }
-        }
-        
-        //console.log(foundIndex);
-        if (foundIndex > -1) {
-            if (index < arrayDependencias.length - 1) {
+
+            //console.log(foundIndex);
+            if (foundIndex > -1) {
+              if (index < arrayDependencias.length - 1) {
                 dependencies += `Tarea ${tareasGantt[foundIndex].ID}: ${tareasGantt[foundIndex].NOMBRE},`;
-            } else {
+              } else {
                 dependencies += `Tarea ${tareasGantt[foundIndex].ID}: ${tareasGantt[foundIndex].NOMBRE}`;
+              }
             }
+            //console.log(dependencies);
+          });
         }
-        //console.log(dependencies);
-    });
-}
-        
+
         //console.log(dependencies);
         //
         //console.log(arrayDependencias);
@@ -218,29 +218,30 @@ if (tarea.DEPENDENCIAS) {
         <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg h-44 rounded-xl w-full h-auto lg:w-80 p-8 pt-9 m-3 bg-gradient-to-r from-cyan-500 to-blue-500 bg-no-repeat bg-cover bg-center">
           <div className="flex justify-between items-center">
             <div>
-              <p className='font-bold text-gray-700'>{fechasproject && fechasproject.length > 0 ? `Proyecto: ${fechasproject[0].NOMBRE}` : 'Cargando...'}</p>
-              <p className='text-2xl'>{fechasproject && fechasproject.length > 0 ? `Objetivo:  ${fechasproject[0].OBJETIVO}` : 'Cargando...'}</p>
-              <p className='text-xl'>Color Crystal: {fechasproject && fechasproject.length > 0 ? (fechasproject[0].ID_CATEGORIA_CRYSTAL == 1 ? 'Clear' : 'Yellow') : 'Cargando...'}</p>
+              <p className=' text-2xl font-bold text-white'>{fechasproject && fechasproject.length > 0 ? `Proyecto ${fechasproject[0].NOMBRE}` : 'Cargando...'}</p>
+              <p className='text-xl text-white'>Crystal {fechasproject && fechasproject.length > 0 ? (fechasproject[0].ID_CATEGORIA_CRYSTAL == 1 ? 'Clear' : 'Yellow') : 'Cargando...'}</p>
+              <p className='text-xl text-white'>Código {fechasproject && fechasproject.length > 0 ? fechasproject[0].CODIGO_UNIRSE : 'Cargando...'}</p>
+              <p className=' text-white'>{fechasproject && fechasproject.length > 0 ? `Objetivo:  ${fechasproject[0].OBJETIVO}` : 'Cargando...'}</p>
             </div>
           </div>
           <div className='mt-6'>
-          <PDFDownloadLink document={<PDF project={fechasproject && fechasproject.length > 0 ? fechasproject[0].NOMBRE : 'Cargando...'} descproject={fechasproject && fechasproject.length > 0 ? fechasproject[0].OBJETIVO : 'Cargando...'} fcreate={fechasproject && fechasproject.length > 0 ? fechasproject[0].FECHA_CREACION : 'Cargando...'} finicio={fechasproject && fechasproject.length > 0 ? fechasproject[0].FECHA_INICIO : 'Cargando...'} ftermino={fechasproject && fechasproject.length > 0 ? fechasproject[0].FECHA_TERMINO : 'Cargando...'} eterm={projectInfo && projectInfo.length > 0 ? projectInfo[0].NUMENTREGASCMP : 'Cargando...'} iterm={projectInfo && projectInfo.length > 0 ? projectInfo[0].NUMITERACIONESCMP : 'Cargando...'} taskterm={projectInfo && projectInfo.length > 0 ? projectInfo[0].NUMTAREASCMP : 'Cargando...'} taskData={entregas}/>} fileName="myFirstPDF.pdf">
-                {
-                    ({loading, url, error, blob}) => 
-                        loading ? (
-                            <Button color="black" bgColor={currentColor} text="Loading Doc ..." borderRadius="10px" size="md" />
-                        ) : (
-                            <Button color="black" bgColor={currentColor} text="Download" borderRadius="10px" size="md" />
-                        )
-                }
+            <PDFDownloadLink document={<PDF project={fechasproject && fechasproject.length > 0 ? fechasproject[0].NOMBRE : 'Cargando...'} descproject={fechasproject && fechasproject.length > 0 ? fechasproject[0].OBJETIVO : 'Cargando...'} fcreate={fechasproject && fechasproject.length > 0 ? fechasproject[0].FECHA_CREACION : 'Cargando...'} finicio={fechasproject && fechasproject.length > 0 ? fechasproject[0].FECHA_INICIO : 'Cargando...'} ftermino={fechasproject && fechasproject.length > 0 ? fechasproject[0].FECHA_TERMINO : 'Cargando...'} eterm={projectInfo && projectInfo.length > 0 ? projectInfo[0].NUMENTREGASCMP : 'Cargando...'} iterm={projectInfo && projectInfo.length > 0 ? projectInfo[0].NUMITERACIONESCMP : 'Cargando...'} taskterm={projectInfo && projectInfo.length > 0 ? projectInfo[0].NUMTAREASCMP : 'Cargando...'} taskData={entregas} />} fileName="myFirstPDF.pdf">
+              {
+                ({ loading, url, error, blob }) =>
+                  loading ? (
+                    <Button color="black" bgColor={currentColor} text="Loading Doc ..." borderRadius="10px" size="md" />
+                  ) : (
+                    <Button color="black" bgColor={currentColor} text="Download" borderRadius="10px" size="md" />
+                  )
+              }
             </PDFDownloadLink>
-            
+
           </div>
         </div>
         <div className='flex m-3 flex-wrap justify-center gap-1 items-center'>
           {earningData.map((item) => (
             <div key={item.title} className='bg-white dark:text-gray-200 dark:bg-secondary-dark-bg md=:w-56 p-4 pt-9 rounded-2xl justify-center'>
-              <button type='button' style={{ color: item.iconColor, backgroundColor: item.iconBg }} className='text -2xl opacity-0.9 rounded-full p-4 hover:drop-shadow-xl'>
+              <button type='button' style={{ color: item.iconColor, backgroundColor: item.iconBg }} className='text -2xl opacity-0.9 rounded-full  p-4 hover:drop-shadow-xl flex justify-center'>
                 {item.icon}
               </button>
               <p className='mt-3 text-center'>
@@ -263,15 +264,21 @@ if (tarea.DEPENDENCIAS) {
           <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg w-1000" style={{ textAlign: 'center', fontSize: '20px', color: '#333' }}>
             Estado General de Tareas
           </div>
-          <div style={{ overflowX: 'scroll', overflowY: 'scroll', height: '600px', width: '100%', scrollbarGutter: 'stable'}}>
-            <Chart
-              chartType="Gantt"
-              data={dataChart}
-              options={options}
-              width={"150%"}
-              height={"150%"}
-            />
-          </div>
+          {
+            tareasGantt && tareasGantt.length > 0 ?
+              <div style={{ overflowX: 'scroll', overflowY: 'scroll', height: '600px', width: '100%', scrollbarGutter: 'stable' }}>
+                <Chart
+                  chartType="Gantt"
+                  data={dataChart}
+                  options={options}
+                  width={"150%"}
+                  height={"150%"}
+                />
+              </div> :
+              <div>
+                <p>No hay tareas para mostrar</p>
+              </div>
+          }
         </div>
       </div>
     </div>

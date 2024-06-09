@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import { useProject } from "../context/projectContext.js";
 import { useAuth } from "../context/authContext";
 import Header from "./Header.jsx";
+import Footer from "./Footer.jsx";
 
 export const FormProyect = () => {
 
@@ -152,7 +153,9 @@ export const FormProyect = () => {
                     </form>
                 </div>
             </div >
+            <Footer />
         </div >
+        
     );
 }
 

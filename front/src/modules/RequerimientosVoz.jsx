@@ -146,8 +146,8 @@ export const RequerimientoVoz = () => {
                     <p>{messagev}</p>
                     <p>{type}</p>
                     <TableContainer component={Paper} >
-                        <Table sx={{ minWidth: 400 }} aria-label="simple table">
-                            <TableHead sx={{ bgcolor: "blue" }}>
+                        <Table sx={{ minWidth: 400 }} aria-label="simple table" >
+                            <TableHead sx={{ bgcolor: "skyblue" }}>
                                 <TableRow>
                                     <TableCell>N°</TableCell>
                                     <TableCell>Tipo Requerimiento</TableCell>

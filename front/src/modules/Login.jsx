@@ -6,7 +6,7 @@ import { useAuth } from '../context/authContext.js';
 import Header from './Header.jsx';
 import { useEffect } from 'react';
 import styles from '../css/login.module.css';
-
+import Footer from "./Footer.jsx";
 
 export const Login = () => {
     const {
@@ -97,6 +97,7 @@ export const Login = () => {
                     </div>
                 </div>
             </div>
+            <Footer />
         </div>
     );
 };

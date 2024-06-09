@@ -8,7 +8,7 @@ import ResetPass from './modules/ResetPass.jsx';
 import './/css/App.css';
 import { AuthProvider } from './context/authContext.js';
 import ProtectedRoute from './ProtectedRoute';
-import Footer from "./modules/Footer.jsx";
+
 import Proyecto from "./modules/Proyect.jsx";
 import FormProyect from './modules/FormProyect.jsx';
 import ConfigProfile from './modules/ConfigProfile.jsx';
@@ -36,7 +36,7 @@ function App() {
             </Route>
           </Route>
         </Routes>
-        <Footer />
+
         </ContextProvider>
       </ProjectProvider>
     </AuthProvider>

@@ -23,7 +23,7 @@ export const Config = () => {
   const handleSaveChanges = async () => {
     const idnt = {
       ID: id,
-      USER : user.ID
+      USER: user.ID
     }
     await configProyect(scheduleData);
     await getProject(idnt);
@@ -101,35 +101,37 @@ export const Config = () => {
   }, [fechasproject, fechasentregas, fechasiteraciones]);
 
   return (
-    <div className="relative flex flex-col justify-center min-h-screen overflow-hidden">
-      <div className="w-full p-6 m-auto bg-white rounded-md shadow-xl ring-indigo-600 lg:max-w-xl">
-        <h1 className="text-3xl font-semibold text-center text-indigo-700 underline uppercase">
+    <div className="relative flex flex-col justify-center min-h-screen ">
+      <div className=" p-6 m-7 bg-gray rounded-md  ring-indigo-600 ">
+        <h1 className="text-3xl pb-3  font-semibold text-center text-indigo-700 underline uppercase">
           Ajustes del proyecto
         </h1>
 
 
-        <Header title="Calendario" />
-
-        <ScheduleComponent height="850px" width="600px" eventSettings={{ dataSource: scheduleData }}>
+        <ScheduleComponent height="850px" width="1700px" eventSettings={{ dataSource: scheduleData }}>
           <Inject services={[Day, Month, Agenda, Resize, DragAndDrop]} />
         </ScheduleComponent>
 
 
 
         {/* Botón para guardar los cambios */}
-        <div className="mt-6">
-          <button onClick={handleSaveChanges} className="w-full px-4 py-2 tracking-wide text-white transition-colors duration-200 transform bg-indigo-700 rounded-md hover:bg-indigo-600 focus:outline-none focus:bg-indigo-600">
-            Guardar cambios
-          </button>
-        </div>
+        <div className="row mt-6">
+          <div className=" col">
+            <button onClick={handleSaveChanges} className=" px-4 py-2 tracking-wide text-white transition-colors duration-200 transform bg-indigo-700 rounded-md hover:bg-indigo-600 focus:outline-none focus:bg-indigo-600">
+              Guardar cambios
+            </button>
+          </div>
 
-        <div className="mt-6">
-          <button onClick={handleDeleteProject} className="w-full px-4 py-2 tracking-wide text-white transition-colors duration-200 transform bg-indigo-700 rounded-md hover:bg-indigo-600 focus:outline-none focus:bg-indigo-600">
-            Eliminar proyecto
-          </button>
+          <div className=" col">
+            <button onClick={handleDeleteProject} className=" px-4 py-2 tracking-wide text-white transition-colors duration-200 transform bg-indigo-700 rounded-md hover:bg-indigo-600 focus:outline-none focus:bg-indigo-600">
+              Eliminar proyecto
+            </button>
+          </div>
         </div>
       </div>
     </div>
+
+
   );
 };
 

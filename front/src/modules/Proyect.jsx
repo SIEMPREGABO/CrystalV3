@@ -18,12 +18,13 @@ import { useProject } from "../context/projectContext.js";
 import { useStateContext } from '../context/Provider.js';
 import ProtectProject from './ProtectProject.jsx';
 import { useAuth } from "../context/authContext.js";
+import Footer from "../components/Footer.jsx";
 
 export const Proyecto = () => {
     const { id } = useParams();
     const idint = parseInt(id, 10).toString();
     const { activeMenu, themeSettings, setthemeSettings, currentColor, currentMode } = useStateContext();
-    const {user} = useAuth();
+    const { user } = useAuth();
     const { getPermissions, userRole } = useProject();
 
     const navigate = useNavigate();
@@ -32,7 +33,7 @@ export const Proyecto = () => {
 
         const data = {
             ID: idint,
-            USER : user.ID
+            USER: user.ID
         }
         getPermissions(data);
         console.log(userRole);
@@ -71,7 +72,7 @@ export const Proyecto = () => {
                             : 'bg-main-bg dark:bg-main-dark-bg w-full min-h-screen flex-2'
                     }
                 >
-                        <Navbar />
+                    <Navbar />
 
                     <div>
                         <Routes>
@@ -87,20 +88,22 @@ export const Proyecto = () => {
                                 {userRole && <Route path="Configuracion" element={<Configuracion />} />}
                                 {userRole && <Route path="Kanban" element={<Kanban />} />}
                                 {userRole && <Route path="VideoChat" element={<VideoChat />} />}
-                                {userRole && <Route path="Requerimientos-x-voz" element={<RequerimientoVoz />}/>}
-                                {userRole && <Route path="Requerimientos" element={<Requerimientos />}/>}
+                                {userRole && <Route path="Requerimientos-x-voz" element={<RequerimientoVoz />} />}
+                                {userRole && <Route path="Requerimientos" element={<Requerimientos />} />}
 
 
                                 {!userRole && <Route path="Home" element={<Dashboard />} />}
                                 {!userRole && <Route path="Calendario" element={<Calendario />} />}
-                                {!userRole && <Route path="ChatIteracion" element={<ChatIteracion />} />}                                
+                                {!userRole && <Route path="ChatIteracion" element={<ChatIteracion />} />}
                                 {!userRole && <Route path="Kanban" element={<Kanban />} />}
                                 {!userRole && <Route path="VideoChat" element={<VideoChat />} />}
                             </Route>
                         </Routes>
                     </div>
+                    
                 </div>
             </div>
+            <Footer/>
         </div>
     );
 }

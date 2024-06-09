@@ -111,7 +111,7 @@ export const ChatIteracion = () => {
   return (
     <div className="h-screen bg-white text-black flex items-center justify-center">
       <div className='w-2/4 h-3/4 border-2 rounded-lg shadow-md'>
-        <h1 className='text-2xl font-bold my-2 underline text-center mb-4 text-5xl text-blue-700'>Chat De Iteración</h1>
+        <h1 className='text-2xl font-bold my-2 underline text-center mb-4 text-5xl text-blue-700'>Chat de Iteración</h1>
         <form onSubmit={handleSubmit(onSubmit)} className="bg-slate-100 p-10 w-full h-full rounded-lg overflow-y-scroll" action="POST">
         <div className='sticky'>
         <ul>

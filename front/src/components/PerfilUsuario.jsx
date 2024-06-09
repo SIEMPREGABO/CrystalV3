@@ -40,61 +40,44 @@ const PerfilUsuario = () => {
         </div>
       </div>
 
-      <div>
+      <Link to={`/configurar-perfil`} onClick={() => { vaciarProject(); }}>
         <div className="flex gap-5 border-b-1 border-color p-4 hover:bg-light-gray cursor-pointer  dark:hover:bg-[#42464D]">
-          <Link
-            to={`/configurar-perfil`}
-            style={{ color: '#03C9D7', backgroundColor: '#E5FAFB' }}
-            className=" text-xl rounded-lg p-3 hover:bg-light-gray"
-            onClick={() => { 
-              vaciarProject(); 
-            }}>
+          <div style={{ color: '#03C9D7', backgroundColor: '#E5FAFB' }} className=" text-xl rounded-lg p-3 hover:bg-light-gray">
             <BsCurrencyDollar />
-          </Link>
+          </div>
 
           <div>
             <p className="font-semibold dark:text-gray-200 ">Configurar Perfil</p>
             <p className="text-gray-500 text-sm dark:text-gray-400"> Configuración de tu cuenta  </p>
           </div>
         </div>
-      </div>
+      </Link>
 
-      <div>
+      <Link to={`/panel`} onClick={() => { vaciarProject();}}>
         <div className="flex gap-5 border-b-1 border-color p-4 hover:bg-light-gray cursor-pointer  dark:hover:bg-[#42464D]">
-          <Link
-            to={`/panel`}
-            style={{ color: 'rgb(0, 194, 146)', backgroundColor: 'rgb(235, 250, 242)' }}
-            className=" text-xl rounded-lg p-3 hover:bg-light-gray"
-            onClick={() => { 
-              vaciarProject(); 
-            }}
-          >
+          <div style={{ color: 'rgb(0, 194, 146)', backgroundColor: 'rgb(235, 250, 242)' }} className=" text-xl rounded-lg p-3 hover:bg-light-gray">
             <FiCreditCard />
-          </Link>
+          </div>
 
           <div>
             <p className="font-semibold dark:text-gray-200 ">Panel</p>
             <p className="text-gray-500 text-sm dark:text-gray-400">Proyectos del usuario</p>
           </div>
         </div>
-      </div>
+      </Link>
 
-      <div>
+      <Link to={`/Proyecto/${id}/Kanban`}>
         <div className="flex gap-5 border-b-1 border-color p-4 hover:bg-light-gray cursor-pointer  dark:hover:bg-[#42464D]">
-          <Link
-            to={`/Proyecto/${id}/Kanban`}
-            style={{ color: 'rgb(255, 244, 229)', backgroundColor: 'rgb(254, 201, 15)' }}
-            className=" text-xl rounded-lg p-3 hover:bg-light-gray"
-          >
+          <div style={{ color: 'rgb(255, 244, 229)', backgroundColor: 'rgb(254, 201, 15)' }} className=" text-xl rounded-lg p-3 hover:bg-light-gray">
             <BsShield />
-          </Link>
+          </div>
 
           <div>
             <p className="font-semibold dark:text-gray-200 ">Tareas</p>
             <p className="text-gray-500 text-sm dark:text-gray-400"> Kanban  </p>
           </div>
         </div>
-      </div>
+      </Link>
 
 
       <div className="mt-5">
@@ -108,10 +91,10 @@ const PerfilUsuario = () => {
             padding: '10px 20px'
           }}
           to="/"
-          onClick={() => { 
+          onClick={() => {
             vaciarProject();
-            logout(); 
-            }}>Cerrar Sesión</Link>
+            logout();
+          }}>Cerrar Sesión</Link>
 
 
       </div>
