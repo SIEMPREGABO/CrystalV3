@@ -482,7 +482,7 @@ export const ProjectProvider = ({ children }) => {
       setTareasKanban(res.data.tasksKanban);
       setProjectInfo(res.data.projectInfo);
       setTareasGantt(res.data.tareasGantt);
-      setNotificaciones(res.data.notificaciones);
+      //setNotificaciones(res.data.notificaciones);
 
       if (res.data.fechasProyecto[0].ID_CATEGORIA_CRYSTAL === 2) {
         res.data.participants.map((participant) => {

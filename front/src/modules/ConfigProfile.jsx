@@ -31,15 +31,6 @@ export const ConfigProfile = () => {
             <Header />
             <div className="relative d-flex flex-col justify-center align-items-center min-h-screen overflow-hidden">
 
-
-                {message && <div class=" items-center bg-green-100 border-l-4 border-green-500 text-green-700  rounded-lg m-2 shadow-md" style={{ maxWidth: '600px' }}>
-                    <p class="text-lg font-semibold m-2">{message}</p>
-                </div>
-                }
-                {autherrors && <div class=" items-center bg-red-100 border-l-4 border-red-500 text-red-700  rounded-lg m-2 shadow-md" style={{ maxWidth: '600px' }}>
-                    <p class="text-lg font-semibold m-2">{autherrors}</p>
-                </div>
-                }
                 <div className="6 card p-5" style={{width: 50+"%"}}>
                     <h1 className="text-3xl font-semibold text-center text-indigo-700 underline uppercase ">
                         Configuración
