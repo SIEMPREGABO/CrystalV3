@@ -3,8 +3,9 @@ import { createAccessToken, createPasswordToken } from '../libs/jwt.js';
 import jwt from 'jsonwebtoken';
 import { SECRET_TOKEN, SECRETPASS_TOKEN } from '../config.js';
 import { sendemailRegister, sendemailReset } from '../middlewares/send.mail.js';
-import { actualizarPass, correoUsuario, agregarUsuario, autenticarUsuario, extraerUsuario, verificarNombre, verificarUsuario, cambiarContrasenia, actualizarUsuario, actualizarUsuarioNombre, verificarBoleta } from '../querys/authquerys.js';
+import { actualizarPass, correoUsuario, agregarUsuario, autenticarUsuario, extraerUsuario, verificarNombre, verificarUsuario, cambiarContrasenia, actualizarUsuario, actualizarUsuarioNombre, verificarBoleta, actualizarEstadoNotificacion } from '../querys/authquerys.js';
 import moment from 'moment-timezone';
+import { getAlerta, getNotificacion, getNotificaciones } from '../querys/projectquerys.js';
 
 
 
@@ -54,6 +55,23 @@ export const login = async (req, res) => {
         //Crea el token de acceso
         const token = await createAccessToken({ id: verificar.userData[0].ID });
         if (!token) return res.status(500).json({ message: "Error inesperado, intente nuevamente" });
+        const notificaciones = await getNotificaciones(verificar.userData[0].ID); /////////////////
+        let allNotificaciones = [];
+
+        if (notificaciones.length > 0) {
+            allNotificaciones = await Promise.all(
+                notificaciones.map(async (Notificacion) => {
+                    const notificacionData = await getNotificacion(Notificacion.ID_NOTIFICACION);
+                    const alerta = await getAlerta(notificacionData[0].ID_TIPO_NOTIFICACION);
+                    const combinedData = {
+                        ...notificacionData[0], // Copia todas las propiedades de notificacionData
+                        ESTADO_VISUALIZACION: Notificacion.ESTADO_VISUALIZACION, // Añade ESTADO_VISUALIZACION
+                        PRIORIDAD: alerta[0].PRIORIDAD
+                    };
+                    return combinedData;
+                })
+            )
+        }
         //Responde con el token y la info del usuario
         res.cookie("token", token);
         res.json({
@@ -66,13 +84,28 @@ export const login = async (req, res) => {
             APELLIDO_MATERNO: verificar.userData[0].APELLIDO_MATERNO,
             TELEFONO: verificar.userData[0].TELEFONO,
             NUMERO_BOLETA: verificar.userData[0].NUMERO_BOLETA,
-            FECHA_CREACION: verificar.userData[0].FECHA_CREACION
+            FECHA_CREACION: verificar.userData[0].FECHA_CREACION,
+            notificaciones: allNotificaciones
         });
     } catch (error) {
         res.status(500).json({ message: error.message })
     }
 
 }
+
+export const cambiarEstado = async (req, res) => {
+    const notificaciones = req.body;
+    try {
+        await Promise.all(notificaciones.map(async (notificacion)=>{
+            //console.log(notificacion.ID);
+            await actualizarEstadoNotificacion(notificacion.ID);
+        }));
+        res.status(200).json({message : "Notificaciones cambiada"});
+    } catch (error) {
+        res.status(500).json({ message: "Error inesperado, intentalo nuevamente" });
+    }
+}
+
 
 export const reset = async (req, res) => {
     try {

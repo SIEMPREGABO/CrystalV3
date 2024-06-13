@@ -6,10 +6,11 @@ import { chatData } from '../data/dummy';
 import { useStateContext } from '../context/Provider';
 import { useProject } from '../context/projectContext';
 import moment from "moment";
+import { useAuth } from '../context/authContext';
 
 const Notification = () => {
   const { currentColor } = useStateContext();
-  const { notificaciones, setNotificaciones, changeState } = useProject();
+  const { notificaciones, setNotificaciones, changeState } = useAuth();
 
   const formatFechaEnvio = (fechaEnvio) => {
     //const date = new Date(fechaEnvio);
@@ -25,7 +26,6 @@ const Notification = () => {
     setNotificaciones(notificaciones);
     changeState(notificaciones);
   },[notificaciones])
-  
 
   return (
     <div className="nav-item absolute right-5 md:right-40 top-16 bg-white dark:bg-[#42464D] p-8 rounded-lg w-96">

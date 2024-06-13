@@ -85,7 +85,7 @@ export function verificarCodigo(CODIGO) {
                 if (results.length > 0) {
                     resolve({ success: true, project: results });
                 } else {
-                    resolve({success: false});
+                    resolve({ success: false });
                 }
             }
         });
@@ -224,7 +224,7 @@ export function eliminarProyecto(ID_PROYECTO) {
             conn.query(selectTareasDependientesQuery, [ID_PROYECTO], (err, results) => {
                 if (err) {
                     //conn.rollback(() => {
-                        reject({ success: false });
+                    reject({ success: false });
                     //});
                 } else {
                     console.log(results);
@@ -232,7 +232,7 @@ export function eliminarProyecto(ID_PROYECTO) {
                         conn.query(deleteTareasDependenciasQuery, [ID_PROYECTO], (err, results) => {
                             if (err) {
                                 //conn.rollback(() => {
-                                    reject({ success: false });
+                                reject({ success: false });
                                 //});
                             }
                             else {
@@ -268,7 +268,7 @@ export function eliminarProyecto(ID_PROYECTO) {
             conn.query(selectColaboracionesQuery, [ID_PROYECTO], (err, results) => {
                 if (err) {
                     //conn.rollback(() => {
-                        reject({ success: false });
+                    reject({ success: false });
                     //});
                 } else {
                     console.log(results);
@@ -277,7 +277,7 @@ export function eliminarProyecto(ID_PROYECTO) {
                             if (err) {
                                 console.log(err)
                                 //conn.rollback(() => {
-                                    reject({ success: false });
+                                reject({ success: false });
                                 //});
                             }
                             else {
@@ -313,7 +313,7 @@ export function eliminarProyecto(ID_PROYECTO) {
             conn.query(selectChatsQuery, [ID_PROYECTO], (err, results) => {
                 if (err) {
                     //conn.rollback(() => {
-                        reject({ success: false });
+                    reject({ success: false });
                     //});
                 } else {
                     console.log(results);
@@ -321,7 +321,7 @@ export function eliminarProyecto(ID_PROYECTO) {
                         conn.query(deleteChatsQuery, [ID_PROYECTO], (err, results) => {
                             if (err) {
                                 //conn.rollback(() => {
-                                    reject({ success: false });
+                                reject({ success: false });
                                 //});
                             } else {
                                 //console.log("xd");
@@ -355,7 +355,7 @@ export function eliminarProyecto(ID_PROYECTO) {
                 if (err) {
                     console.log(err)
                     //conn.rollback(() => {
-                        reject({ success: false });
+                    reject({ success: false });
                     //});
                 } else {
                     console.log(results);
@@ -363,7 +363,7 @@ export function eliminarProyecto(ID_PROYECTO) {
                         conn.query(deleteTareasQuery, [ID_PROYECTO], (err, results) => {
                             if (err) {
                                 //conn.rollback(() => {
-                                    reject({ success: false });
+                                reject({ success: false });
                                 //});
                             }
                             else {
@@ -397,7 +397,7 @@ export function eliminarProyecto(ID_PROYECTO) {
                 if (err) {
 
                     //conn.rollback(() => {
-                        reject({ success: false });
+                    reject({ success: false });
                     //});
                 } else {
                     console.log(results);
@@ -405,7 +405,7 @@ export function eliminarProyecto(ID_PROYECTO) {
                         conn.query(deleteRequerimientosQuery, [ID_PROYECTO], (err, results) => {
                             if (err) {
                                 //conn.rollback(() => {
-                                    reject({ success: false });
+                                reject({ success: false });
                                 //});
                             }
                             else {
@@ -427,10 +427,10 @@ export function eliminarProyecto(ID_PROYECTO) {
                 )
             `;
 
-            conn.query(deleteIteracionesQuery, [ID_PROYECTO],  (err, results) => {
+            conn.query(deleteIteracionesQuery, [ID_PROYECTO], (err, results) => {
                 if (err) {
                     //conn.rollback(() => {
-                        reject({ success: false });
+                    reject({ success: false });
                     //});
                 } else {
                     console.log("xd");
@@ -440,10 +440,10 @@ export function eliminarProyecto(ID_PROYECTO) {
             //console.log("6")
 
             const deleteEntregasQuery = 'DELETE FROM ENTREGAS WHERE ID_PROYECTO = ?';
-            conn.query(deleteEntregasQuery, [ID_PROYECTO],  (err, results) => {
+            conn.query(deleteEntregasQuery, [ID_PROYECTO], (err, results) => {
                 if (err) {
                     //conn.rollback(() => {
-                        reject({ success: false });
+                    reject({ success: false });
                     //});
                 }
                 else {
@@ -455,10 +455,10 @@ export function eliminarProyecto(ID_PROYECTO) {
             //console.log("7")
 
             const deleteUsuariosQuery = 'DELETE FROM U_SeUne_P WHERE ID_PROYECTO = ?';
-            conn.query(deleteUsuariosQuery, [ID_PROYECTO],  (err, results) => {
+            conn.query(deleteUsuariosQuery, [ID_PROYECTO], (err, results) => {
                 if (err) {
                     //conn.rollback(() => {
-                        reject({ success: false });
+                    reject({ success: false });
                     //});
                 }
                 else {
@@ -470,12 +470,12 @@ export function eliminarProyecto(ID_PROYECTO) {
 
             const deleteProyectoQuery = 'DELETE FROM PROYECTOS WHERE ID = ?';
 
-            conn.query(deleteProyectoQuery, [ID_PROYECTO],  (err, results) => {
+            conn.query(deleteProyectoQuery, [ID_PROYECTO], (err, results) => {
                 if (err) {
                     //conn.rollback(() => {
-                        reject({ success: false });
+                    reject({ success: false });
                     //});
-                }else {
+                } else {
                     //console.log("xd");
                     console.log("borrados proyecto: ", results.affectedRows);
                 }
@@ -489,10 +489,10 @@ export function eliminarProyecto(ID_PROYECTO) {
             //conn.rollback();
             reject({ success: false })
         } //finally {
-            // Cerrar la conexión
-            //console.log("si pude")
-            //conn.rollback();
-            //conn.end();
+        // Cerrar la conexión
+        //console.log("si pude")
+        //conn.rollback();
+        //conn.end();
         //}
 
     })
@@ -1200,7 +1200,7 @@ export function getProjectInfo(ID_PROYECTO) {
             (SELECT COUNT(t.ID) FROM ENTREGAS e JOIN ITERACIONES i ON e.ID=i.ID_ENTREGA JOIN TAREAS t ON i.ID=t.ID_ITERACION WHERE e.ID_PROYECTO = ? AND t.ESTADO_DESARROLLO = "En desarrollo") AS NUMTAREASDES,
             (SELECT COUNT(t.ID) FROM ENTREGAS e JOIN ITERACIONES i ON e.ID=i.ID_ENTREGA JOIN TAREAS t ON i.ID=t.ID_ITERACION WHERE e.ID_PROYECTO = ? AND t.ESTADO_DESARROLLO = "Por Revisar") AS NUMTAREASREV;`;
 
-            connection.query(query, [ID_PROYECTO, ID_PROYECTO, ID_PROYECTO, ID_PROYECTO,ID_PROYECTO, ID_PROYECTO, ID_PROYECTO, ID_PROYECTO, ID_PROYECTO, ID_PROYECTO], async (err, results) => {
+            connection.query(query, [ID_PROYECTO, ID_PROYECTO, ID_PROYECTO, ID_PROYECTO, ID_PROYECTO, ID_PROYECTO, ID_PROYECTO, ID_PROYECTO, ID_PROYECTO, ID_PROYECTO], async (err, results) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -1560,23 +1560,81 @@ export function getProjectWithEntrega(ID) {
     });
 }
 
-export function getTareasGantt(ID_PROYECTO){
-    return new Promise (async (resolve, reject) => {
-        try{
+export function getTareasGantt(ID_PROYECTO) {
+    return new Promise(async (resolve, reject) => {
+        try {
             const connection = await getConnection();
-        const query = "SELECT T1.NOMBRE,T1.ID,T1.FECHA_INICIO,T1.FECHA_MAX_TERMINO,ITERACIONES.ID_ENTREGA AS ENTREGA,T1.ESTADO_DESARROLLO,GROUP_CONCAT(T2.NOMBRE) AS DEPENDENCIAS FROM TAREAS T1 JOIN ITERACIONES ON T1.ID_ITERACION = ITERACIONES.ID JOIN ENTREGAS ON ENTREGAS.ID = ITERACIONES.ID_ENTREGA  LEFT JOIN T_DEPENDE_T ON T1.ID = T_DEPENDE_T.ID_TAREA_DEPENDIENTE LEFT JOIN TAREAS T2 ON T_DEPENDE_T.ID_SUBTAREA = T2.ID WHERE ENTREGAS.ID_PROYECTO = ? GROUP BY T1.ID ORDER BY ENTREGA;";
-        connection.query(query, [ID_PROYECTO], async (err, results) => {
-            if(err){
-                reject(err);
-            }else {
-                if(results.length > 0){
-                    resolve(results);
-                }else{
-                    resolve([]);
+            const query = "SELECT T1.NOMBRE,T1.ID,T1.FECHA_INICIO,T1.FECHA_MAX_TERMINO,ITERACIONES.ID_ENTREGA AS ENTREGA,T1.ESTADO_DESARROLLO,GROUP_CONCAT(T2.NOMBRE) AS DEPENDENCIAS FROM TAREAS T1 JOIN ITERACIONES ON T1.ID_ITERACION = ITERACIONES.ID JOIN ENTREGAS ON ENTREGAS.ID = ITERACIONES.ID_ENTREGA  LEFT JOIN T_DEPENDE_T ON T1.ID = T_DEPENDE_T.ID_TAREA_DEPENDIENTE LEFT JOIN TAREAS T2 ON T_DEPENDE_T.ID_SUBTAREA = T2.ID WHERE ENTREGAS.ID_PROYECTO = ? GROUP BY T1.ID ORDER BY ENTREGA;";
+            connection.query(query, [ID_PROYECTO], async (err, results) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    if (results.length > 0) {
+                        resolve(results);
+                    } else {
+                        resolve([]);
+                    }
                 }
-            }
-        });
-        }catch(error){
+            });
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
+export function getNotificaciones(id_usuario) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const connection = await getConnection();
+            const query = 'SELECT * FROM U_RECIBE_N WHERE ID_USUARIO = ? '
+            connection.query(query, [id_usuario], async (err, results) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    if (results.length > 0) {
+                        resolve(results);
+                    } else {
+                        resolve([]);
+                    }
+                }
+            });
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
+export function getNotificacion(ID_NOTIFICACION) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const connection = await getConnection();
+            const query = 'SELECT * FROM NOTIFICACIONES WHERE ID = ? '
+            connection.query(query, [ID_NOTIFICACION], async (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result);
+                }
+            });
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
+export function getAlerta(Id_alerta) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const connection = await getConnection();
+            const query = 'SELECT PRIORIDAD FROM TIPOS_NOTIFICACION WHERE ID = ? '
+            connection.query(query, [Id_alerta], async (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result);
+                }
+            });
+        } catch (error) {
             reject(error);
         }
     })

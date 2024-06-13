@@ -9,7 +9,8 @@ import {
   requestDelegar,
   requestDeleteProject,
   requestDegradar,
-  requestAscender
+  requestAscender,
+  requestCambiarEstado
 } from "../requests/projectReq.js";
 import Cookies from "js-cookie";
 import { useAuth } from "./authContext.js";
@@ -482,7 +483,7 @@ export const ProjectProvider = ({ children }) => {
       setTareasKanban(res.data.tasksKanban);
       setProjectInfo(res.data.projectInfo);
       setTareasGantt(res.data.tareasGantt);
-      //setNotificaciones(res.data.notificaciones);
+      setNotificaciones(res.data.notificaciones);
 
       if (res.data.fechasProyecto[0].ID_CATEGORIA_CRYSTAL === 2) {
         res.data.participants.map((participant) => {
@@ -747,6 +748,28 @@ export const ProjectProvider = ({ children }) => {
     }
   }
 
+  const changeState = async (notificaciones) =>{
+    try {
+      const res = await requestCambiarEstado(notificaciones);
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.message) {
+        swal({
+          title: 'Cambio de estado notificacion',
+          text: error.response.data.message,
+          icon: 'error',
+          button: 'Aceptar',
+        });
+      } else {
+        swal({
+          title: 'Cambio de estado notificacion',
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
+      }
+    }
+  }
+
   useEffect(() => {
     const checkLogin = async () => {
       const cookies = Cookies.get();
@@ -795,10 +818,10 @@ export const ProjectProvider = ({ children }) => {
 
         requerimientos, tareas, tareasGantt,
 
-        messagesChat,notificaciones,
+        messagesChat,notificaciones,setNotificaciones,
 
         setProjecterrors,
-        setMessage, setIsParticipant, setScheduleData,
+        setMessage, setIsParticipant, setScheduleData,changeState,
 
         actualizarParticipantes, actualizarTareas, actualizarRequerimientos,
 

@@ -8,9 +8,9 @@ export function verificarUsuario(CORREO) {
         connection.query(query, [CORREO], (err, results) => {
             if (err) {
                 reject(err);
-            } else {  
+            } else {
                 if (results.length > 0) {
-                    resolve({success:true, userData:results});
+                    resolve({ success: true, userData: results });
                 } else {
                     resolve(false);
                 }
@@ -19,11 +19,11 @@ export function verificarUsuario(CORREO) {
     });
 };
 
-export function actualizarUsuarioNombre(NOMBRE_USUARIO,NUMERO_BOLETA,NOMBRE_PILA,APELLIDO_PATERNO,APELLIDO_MATERNO,TELEFONO, CORREO) {
+export function actualizarUsuarioNombre(NOMBRE_USUARIO, NUMERO_BOLETA, NOMBRE_PILA, APELLIDO_PATERNO, APELLIDO_MATERNO, TELEFONO, CORREO) {
     return new Promise(async (resolve, reject) => {
         const connection = await getConnection();
         const query = 'UPDATE USUARIO SET NOMBRE_USUARIO = ?, NOMBRE_PILA = ?, APELLIDO_PATERNO = ?, APELLIDO_MATERNO = ?, TELEFONO = ?, NUMERO_BOLETA = ? WHERE CORREO = ?';
-        connection.query(query, [NOMBRE_USUARIO,NOMBRE_PILA,APELLIDO_PATERNO,APELLIDO_MATERNO,TELEFONO,NUMERO_BOLETA,CORREO], (err, results) => {
+        connection.query(query, [NOMBRE_USUARIO, NOMBRE_PILA, APELLIDO_PATERNO, APELLIDO_MATERNO, TELEFONO, NUMERO_BOLETA, CORREO], (err, results) => {
             if (err) {
                 reject(err);
             } else {
@@ -37,14 +37,30 @@ export function actualizarUsuarioNombre(NOMBRE_USUARIO,NUMERO_BOLETA,NOMBRE_PILA
     });
 };
 
-export function actualizarUsuario(NUMERO_BOLETA,NOMBRE_PILA,APELLIDO_PATERNO,APELLIDO_MATERNO,TELEFONO, CORREO) {
+export function actualizarEstadoNotificacion(id) {
+    return new Promise(async (resolve, reject) => {
+        const connection = await getConnection();
+        const query = 'UPDATE U_RECIBE_N SET ESTADO_VISUALIZACION = 1 WHERE ID_NOTIFICACION = ?';
+        connection.query(query, [id], (err, results) => {
+            if (err) {
+                console.log(err)
+                reject(err);
+            } else {
+                resolve( true );
+
+            }
+        });
+    })
+}
+
+export function actualizarUsuario(NUMERO_BOLETA, NOMBRE_PILA, APELLIDO_PATERNO, APELLIDO_MATERNO, TELEFONO, CORREO) {
     return new Promise(async (resolve, reject) => {
         const connection = await getConnection();
         const query = 'UPDATE USUARIO SET NOMBRE_PILA = ?, APELLIDO_PATERNO = ?, APELLIDO_MATERNO = ?, TELEFONO = ?, NUMERO_BOLETA = ? WHERE CORREO = ?';
-        connection.query(query, [NOMBRE_PILA,APELLIDO_PATERNO,APELLIDO_MATERNO,TELEFONO,NUMERO_BOLETA,CORREO], (err, results) => {
+        connection.query(query, [NOMBRE_PILA, APELLIDO_PATERNO, APELLIDO_MATERNO, TELEFONO, NUMERO_BOLETA, CORREO], (err, results) => {
             if (err) {
                 reject(err);
-            }  else {
+            } else {
                 if (results.affectedRows > 0) {
                     resolve({ success: true });
                 } else {
@@ -63,9 +79,9 @@ export function correoUsuario(CORREO) {
         connection.query(query, [CORREO], (err, results) => {
             if (err) {
                 reject(err);
-            } else {  
+            } else {
                 if (results.length > 0) {
-                    resolve({success:true, userData:results});
+                    resolve({ success: true, userData: results });
                 } else {
                     resolve(false);
                 }
@@ -79,13 +95,13 @@ export function verificarNombre(Nombre) {
         const connection = await getConnection();
 
         const query = 'SELECT ID, CORREO, NOMBRE_USUARIO,CONTRASENIA, FECHA_CREACION FROM USUARIO WHERE NOMBRE_USUARIO = ? ';
-        
+
         connection.query(query, [Nombre], (err, results) => {
             if (err) {
                 reject(err);
-            } else {  
+            } else {
                 if (results.length > 0) {
-                    resolve({success:true, userData:results});
+                    resolve({ success: true, userData: results });
                 } else {
                     resolve(false);
                 }
@@ -99,13 +115,13 @@ export function verificarBoleta(BOLETA) {
         const connection = await getConnection();
 
         const query = 'SELECT ID FROM USUARIO WHERE NUMERO_BOLETA = ? ';
-        
+
         connection.query(query, [BOLETA], (err, results) => {
             if (err) {
                 reject(err);
-            } else {  
+            } else {
                 if (results.length > 0) {
-                    resolve({success:true, userData:results});
+                    resolve({ success: true, userData: results });
                 } else {
                     resolve(false);
                 }
@@ -114,7 +130,7 @@ export function verificarBoleta(BOLETA) {
     });
 };
 
-export function cambiarContrasenia(ID,CONTRASENIA){
+export function cambiarContrasenia(ID, CONTRASENIA) {
     return new Promise(async (resolve, reject) => {
         const connection = await getConnection();
 
@@ -124,7 +140,7 @@ export function cambiarContrasenia(ID,CONTRASENIA){
             if (err) {
                 //console.log("faie");
                 reject(err);
-            } else {  
+            } else {
                 //console.log("no faie")
                 if (results.affectedRows > 0) {
                     resolve({ success: true, message: 'Contraseña actualizada correctamente' });
@@ -144,7 +160,7 @@ export function agregarUsuario(CORREO, NOMBRE_USUARIO, CONTRASENIA, NOMBRE_PILA,
         const insertarQuery = `INSERT INTO USUARIO (CORREO, NOMBRE_USUARIO, CONTRASENIA, NOMBRE_PILA, APELLIDO_PATERNO, APELLIDO_MATERNO, TELEFONO, NUMERO_BOLETA,FECHA_CREACION) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, CONVERT_TZ(NOW(), '+00:00', '-06:00'))`;
 
-        connection.query(insertarQuery,[CORREO, NOMBRE_USUARIO, CONTRASENIA, NOMBRE_PILA, APELLIDO_PATERNO, APELLIDO_MATERNO, TELEFONO, NUMERO_BOLETA],
+        connection.query(insertarQuery, [CORREO, NOMBRE_USUARIO, CONTRASENIA, NOMBRE_PILA, APELLIDO_PATERNO, APELLIDO_MATERNO, TELEFONO, NUMERO_BOLETA],
             (insertarErr, insertarResults) => {
                 if (insertarErr) {
                     reject(insertarErr);
@@ -179,7 +195,7 @@ export function autenticarUsuario(ID) {
                 reject(err);
             } else {
                 if (results.length > 0) {
-                    resolve({success:true, userData:results});
+                    resolve({ success: true, userData: results });
                 } else {
                     resolve(false);
                 }
@@ -188,34 +204,34 @@ export function autenticarUsuario(ID) {
     });
 };
 
-export function actualizarPass(CORREO,CONTRASENIA){
-    return new Promise(async (resolve, reject)=>{
+export function actualizarPass(CORREO, CONTRASENIA) {
+    return new Promise(async (resolve, reject) => {
         const connection = await getConnection();
         const query = 'UPDATE USUARIO SET CONTRASENIA = ? WHERE CORREO = ?';
-        connection.query(query, [CONTRASENIA, CORREO], (err, results) =>{
+        connection.query(query, [CONTRASENIA, CORREO], (err, results) => {
             if (err) {
-                reject({success:false, error:err});
+                reject({ success: false, error: err });
             } else {
-                resolve({success:true, userData:results});
+                resolve({ success: true, userData: results });
             }
         })
     });
 }
 
-export function getMensajes(){
-    return new promise(async (resolve, reject) =>{
+export function getMensajes() {
+    return new promise(async (resolve, reject) => {
         const connection = await getConnection();
         const query = 'SELECT * FROM MENSAJES';
-        connection.query(query, (err,results) => {
-            if(err){
-                err({success:false, error: err});
-            }else{
-                if(results.length == 0){
+        connection.query(query, (err, results) => {
+            if (err) {
+                err({ success: false, error: err });
+            } else {
+                if (results.length == 0) {
                     results({
                         success: true,
                         vacio: true
                     })
-                }else{
+                } else {
                     results({
                         success: true,
                         vacio: false,
@@ -228,20 +244,20 @@ export function getMensajes(){
 }
 
 
-export function getTasks(){
-    return new promise(async (resolve, reject) =>{
+export function getTasks() {
+    return new promise(async (resolve, reject) => {
         const connection = await getConnection();
         const query = 'SELECT * FROM TASKS';
-        connection.query(query, (err,results) => {
-            if(err){
-                err({success:false, error: err});
-            }else{
-                if(results.length == 0){
+        connection.query(query, (err, results) => {
+            if (err) {
+                err({ success: false, error: err });
+            } else {
+                if (results.length == 0) {
                     results({
                         success: true,
                         vacio: true
                     })
-                }else{
+                } else {
                     results({
                         success: true,
                         vacio: false,
@@ -253,29 +269,29 @@ export function getTasks(){
     })
 }
 
-export function getTask(ID){
-    return new promise(async (resolve,reject) =>{
+export function getTask(ID) {
+    return new promise(async (resolve, reject) => {
         const connection = await getConnection();
         const query = 'SELECT * FROM TASK WHERE ID = ?';
-        connection.query(query, [ID], (err,results)=> {
-            if(reject){
-                reject({success: false, error: err});
-            }else{
-                results({success:true, tasks:results});
+        connection.query(query, [ID], (err, results) => {
+            if (reject) {
+                reject({ success: false, error: err });
+            } else {
+                results({ success: true, tasks: results });
             }
         })
     })
 }
 
-export function projectsUsuario(ID){
-    return new promise(async (resolve,reject) =>{
+export function projectsUsuario(ID) {
+    return new promise(async (resolve, reject) => {
         const connection = await getConnection();
         const query = 'SELECT * FROM PROYECTOS WHERE ID = ?';
-        connection.query(query, [ID], (err,results)=> {
-            if(reject){
-                reject({success: false, error: err});
-            }else{
-                results({success:true, projects:results});
+        connection.query(query, [ID], (err, results) => {
+            if (reject) {
+                reject({ success: false, error: err });
+            } else {
+                results({ success: true, projects: results });
             }
         })
     })

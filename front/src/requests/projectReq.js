@@ -19,4 +19,5 @@ export const requestConfig = async fechas => axios.post(`/configProject`,fechas)
 export const requestDeleteTask = async task => axios.post('/deleteTask', task);
 export const requestUpdateTask = async task => axios.post('/updateTask', task);
 export const requestUpdateTState = async task => axios.post('/updateState', task);
-export const requestDeleteProject = async id => axios.post('/deleteProject',id)
+export const requestDeleteProject = async id => axios.post('/deleteProject',id);
+export const requestCambiarEstado = async notificaciones => axios.post("/changeState",notificaciones);

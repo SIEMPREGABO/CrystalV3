@@ -7,7 +7,8 @@ import {
     configurarProyecto, deleteTask, updateTask, updateTaskState, delegarParticipant, 
     deleteProject,
     degradarParticipant,
-    ascenderParticipant
+    ascenderParticipant,
+    cambiarEstado
 } from "../controllers/project.controller.js";
 import { createSchema, joinSchema, taskSchema, addSchema, requerimientoSchema } from "../schemas/project.schema.js";
 import { validateSchema } from "../middlewares/validator.middleware.js";
@@ -35,6 +36,7 @@ router.post('/updateState', updateTaskState);
 router.post('/deleteTask', deleteTask);
 router.post('/addMessage', agregarMensaje);
 router.post('/getMessages', getMessages);
+router.post('/changeState', cambiarEstado);
 
 
 

@@ -34,7 +34,7 @@ const PerfilUsuario = () => {
       <div className="flex gap-5 items-center mt-2 border-color border-b-1 pb-6">
 
         <div>
-          <p className="font-semibold text-xl dark:text-gray-200"> {user.NOMBRE_PILA} {user.APELLIDO_PATERNO} </p>
+          <p className="font-semibold text-xl dark:text-gray-200"> {user.NOMBRE_PILA} {user.APELLIDO_PATERNO} -- {user.NOMBRE_USUARIO} </p>
           <p className="text-gray-500 text-sm dark:text-gray-400">  {userRole && <div>Administrador</div>}{!userRole && <div>Participante</div>}  </p>
           <p className="text-gray-500 text-sm font-semibold dark:text-gray-400"> {user.CORREO} </p>
         </div>
