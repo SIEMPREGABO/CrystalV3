@@ -56,6 +56,7 @@ export const ProjectProvider = ({ children }) => {
   const [iterationParticipants, setIterationParticipants] = useState([]);
   const [entregas, setEntregas] = useState([]);
   const [iteraciones, setIteraciones] = useState([]);
+  const [notificaciones, setNotificaciones] = useState([]);
 
   useEffect(() => {
     if (message.length > 0) {
@@ -564,6 +565,7 @@ export const ProjectProvider = ({ children }) => {
       setRequirements(res.data.requirements);
       setIterationParticipants(res.data.iterationParticipants);
       setIteraciones(res.data.iteraciones);
+      setNotificaciones(res.data.notificaciones);
       setEntregas(res.data.entregas);
       if(res.data.fechasProyecto[0].ID_CATEGORIA_CRYSTAL === 2 ){
         res.data.participants.map((participant)=>{
@@ -811,6 +813,7 @@ export const ProjectProvider = ({ children }) => {
       setMessagesChat([]);
       setEntregasProject([]);
       setProjectInfo([]);
+      setNotificaciones([]);
     } catch (error) {
       swal({
         title: 'Vaciar el proyecto',
@@ -867,7 +870,7 @@ export const ProjectProvider = ({ children }) => {
 
         requerimientos, tareas,tareasGantt,
 
-        messagesChat,
+        messagesChat, notificaciones,
         requirements,
         iterationParticipants,
         entregas, 

@@ -34,7 +34,12 @@ function AsignarTarea() {
       iteracionactual: iteracionactual,
       CORREO: user.CORREO
     }
+    const idnt = {
+      ID: id,
+      USER : user.ID
+    }
     createTask(data);
+    await getProject(idnt);
   });
 
   useEffect(() => {

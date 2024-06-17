@@ -4,6 +4,7 @@ import { ScheduleComponent, Inject, Day, Week, WorkWeek, Month, Agenda, Resize, 
 import { useProject } from '../context/projectContext';
 import { Header } from '../components';
 import swal from 'sweetalert';
+import { useAuth } from "../context/authContext";
 
 export const Config = () => {
   const { id } = useParams();
@@ -15,12 +16,14 @@ export const Config = () => {
     deleteProjectFunction,
     getProject
   } = useProject();
+  const { user } = useAuth();
   const [scheduleData, setScheduleData] = useState([]);
 
 
   const handleSaveChanges = async () => {
     const idnt = {
-      ID: id
+      ID: id,
+      USER : user.ID
     }
     await configProyect(scheduleData);
     await getProject(idnt);

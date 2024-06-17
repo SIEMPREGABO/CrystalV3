@@ -181,7 +181,7 @@ export const getPermissions = async (req, res) => {
 }
 
 export const getProject = async (req, res) => {
-    const { ID } = req.body;
+    const { ID, USER } = req.body;
     const ID_PROYECTO = ID;
 
     try {
@@ -214,6 +214,7 @@ export const getProject = async (req, res) => {
         const tasks = await getTareas(ITERACION_ACTUAL.ID);
         const tasksKanban = await GetTareasKanban(ITERACION_ACTUAL.ID);
         const projectInfo = await getProjectInfo(ID_PROYECTO);
+        const notificaciones = await getNotificaciones(USER);
         const projectreqs = await getProjectRequirements(ID_PROYECTO, ENTREGA_ACTUAL.ID);
         const iterationParticipants = await getIterationParticipants(ITERACION_ACTUAL.ID);
         const iteraciones = await GetIteraciones(ENTREGA_ACTUAL.ID);
@@ -234,6 +235,7 @@ export const getProject = async (req, res) => {
             iterationParticipants: iterationParticipants, 
             entregas: entregas,
             iteraciones: iteraciones,
+            notificaciones: notificaciones
         };
         return res.json(data);
     } catch (error) {

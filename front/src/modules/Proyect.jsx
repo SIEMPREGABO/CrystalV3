@@ -17,12 +17,14 @@ import { Sidebar, ThemeSettings, Navbar } from "../components/index.jsx";
 import { useProject } from "../context/projectContext.js";
 import { useStateContext } from '../context/Provider.js';
 import ProtectProject from './ProtectProject.jsx';
+import { useAuth } from "../context/authContext.js";
 
 export const Proyecto = () => {
     const { id } = useParams();
     const idint = parseInt(id, 10).toString();
     const { activeMenu, themeSettings, setthemeSettings, currentColor, currentMode } = useStateContext();
 
+    const {user} = useAuth();
     const { getPermissions, userRole } = useProject();
 
     const navigate = useNavigate();
@@ -30,7 +32,8 @@ export const Proyecto = () => {
     useEffect(() => {
 
         const data = {
-            ID: idint
+            ID: idint,
+            USER : user.ID
         }
         getPermissions(data);
         console.log(userRole);
