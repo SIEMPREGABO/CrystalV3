@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import styles from "../css/register.module.css"
 import Header from './Header.jsx';
+import Footer from "./Footer.jsx"
 
 export const Register = () => {
     const {
@@ -200,6 +201,7 @@ export const Register = () => {
                     </div>
                 </div>
             </div>
+            <Footer />
         </div>
     )
 }

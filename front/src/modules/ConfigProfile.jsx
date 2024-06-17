@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { updateSchema } from "../schemas/auth";
 import { useForm } from 'react-hook-form';
 import Header from "./Header";
+import Footer from "./Footer.jsx";
 
 export const ConfigProfile = () => {
     const { user, updateUser, message, autherrors, setAutherrors, setMessage } = useAuth();
@@ -184,6 +185,7 @@ export const ConfigProfile = () => {
                     </form>
                 </div>
             </div>
+            <Footer />
         </div>
     );
 }

@@ -18,6 +18,7 @@ import { useProject } from "../context/projectContext.js";
 import { useStateContext } from '../context/Provider.js';
 import ProtectProject from './ProtectProject.jsx';
 import { useAuth } from "../context/authContext.js";
+import Footer from "./Footer.jsx"
 
 export const Proyecto = () => {
     const { id } = useParams();
@@ -107,6 +108,7 @@ export const Proyecto = () => {
                     </div>
                 </div>
             </div>
+            <Footer />
         </div>
     );
 }

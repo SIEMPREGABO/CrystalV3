@@ -57,7 +57,7 @@ const Inicio = () => {
         },
         {
           icon: <BsBoxSeam />,
-          amount: projectInfo[0].NUMENTREGAS,
+          amount: `${projectInfo[0].NUMENTREGASCMP}/${projectInfo[0].NUMENTREGAS}`,
           percentage: `${Math.floor((projectInfo[0].NUMENTREGASCMP * 100) / projectInfo[0].NUMENTREGAS)} % completado`,
           title: 'Entregas',
           iconColor: 'rgb(255, 244, 229)',
@@ -66,7 +66,7 @@ const Inicio = () => {
         },
         {
           icon: <HiOutlineRefresh />,
-          amount: projectInfo[0].NUMITERACIONES,
+          amount: `${projectInfo[0].NUMITERACIONESCMP} / ${projectInfo[0].NUMITERACIONES}`,
           percentage: `${Math.floor((projectInfo[0].NUMITERACIONESCMP * 100) / projectInfo[0].NUMITERACIONES)} % completado`,
           title: 'Iteraciones',
           iconColor: 'rgb(0, 194, 146)',
@@ -224,9 +224,10 @@ const Inicio = () => {
         <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg h-44 rounded-xl w-full h-auto lg:w-80 p-8 pt-9 m-3 bg-gradient-to-r from-cyan-500 to-blue-500 bg-no-repeat bg-cover bg-center">
           <div className="flex justify-between items-center">
             <div>
-              <p className='font-bold text-gray-700'>{fechasproject && fechasproject.length > 0 ? `Proyecto: ${fechasproject[0].NOMBRE}` : 'Cargando...'}</p>
-              <p className='text-2xl'>{fechasproject && fechasproject.length > 0 ? `Objetivo:  ${fechasproject[0].OBJETIVO}` : 'Cargando...'}</p>
-              <p className='text-xl'>Color Crystal: {fechasproject && fechasproject.length > 0 ? (fechasproject[0].ID_CATEGORIA_CRYSTAL == 1 ? 'Clear' : 'Yellow') : 'Cargando...'}</p>
+            <p className=' text-2xl font-bold text-white'>{fechasproject && fechasproject.length > 0 ? `Proyecto ${fechasproject[0].NOMBRE}` : 'Cargando...'}</p>
+              <p className='text-xl text-white'>Crystal {fechasproject && fechasproject.length > 0 ? (fechasproject[0].ID_CATEGORIA_CRYSTAL == 1 ? 'Clear' : 'Yellow') : 'Cargando...'}</p>
+              <p className='text-xl text-white'>Código {fechasproject && fechasproject.length > 0 ? fechasproject[0].CODIGO_UNIRSE : 'Cargando...'}</p>
+              <p className=' text-white'>{fechasproject && fechasproject.length > 0 ? `Objetivo:  ${fechasproject[0].OBJETIVO}` : 'Cargando...'}</p>
             </div>
           </div>
           <div className='mt-6'>
@@ -245,7 +246,7 @@ const Inicio = () => {
         <div className='flex m-3 flex-wrap justify-center gap-1 items-center'>
           {earningData.map((item) => (
             <div key={item.title} className='bg-white dark:text-gray-200 dark:bg-secondary-dark-bg md=:w-56 p-4 pt-9 rounded-2xl justify-center'>
-              <button type='button' style={{ color: item.iconColor, backgroundColor: item.iconBg }} className='text -2xl opacity-0.9 rounded-full p-4 hover:drop-shadow-xl'>
+              <button type='button' style={{ color: item.iconColor, backgroundColor: item.iconBg }} className='text -2xl opacity-0.9 rounded-full p-4 hover:drop-shadow-xl flex justify-center'>
                 {item.icon}
               </button>
               <p className='mt-3 text-center'>

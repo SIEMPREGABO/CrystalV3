@@ -5,6 +5,7 @@ import { useAuth } from '../context/authContext.js';
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react';
 import Header from './Header.jsx';
+import Footer from "./Footer.jsx"
 
 export const ResetPass = () => {
     const {
@@ -96,7 +97,7 @@ export const ResetPass = () => {
                     </div>
                 </div>
             </section>
-
+            <Footer />
         </div>
     );
 };

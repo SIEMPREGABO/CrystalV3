@@ -12,6 +12,7 @@ import {
     Filter, Page, ExcelExport, PdfExport, Edit, Inject
 } from '@syncfusion/ej2-react-grids';
 import { Header } from './Header';
+import Footer from "./Footer.jsx"
 
 export const Panel = () => {
     const { user ,getProjects,projects} = useAuth();
@@ -128,6 +129,7 @@ export const Panel = () => {
                     </div>
                 </div>
             </div>
+            <Footer />
         </div>
     )
 }
