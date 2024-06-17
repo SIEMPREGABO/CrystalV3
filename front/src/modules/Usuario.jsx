@@ -1,9 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from "react-router-dom";
 import {
   GridComponent, ColumnsDirective, ColumnDirective, Resize, Sort, ContextMenu,
   Filter, Page, Inject, Search, Toolbar
 } from '@syncfusion/ej2-react-grids';
+import { AiOutlineConsoleSql } from 'react-icons/ai';
+import swal from 'sweetalert';
 //import {, employeesData } from '../data/dummy';
 import { Header } from '../components';
 import { useProject } from '../context/projectContext';
@@ -77,183 +79,259 @@ const Usuario = () => {
     resolver: zodResolver(addSchema)
   });
 
-  const { projecterrors, message, fechasproject, addParticipant, participants, deleteParticipant, delegarParticipant,
-    ascenderParticipant, degradarParticipant, twoAdmins, getProject, getPermissions } = useProject();
+  const { fechasproject, addParticipant, participants, deleteParticipant, delegarParticipant,
+    ascenderParticipant, degradarParticipant, twoAdmins, getProject, vaciarProject, actualizarParticipantes } = useProject();
+  const [gridParticipants, setGridParticipants] = useState([]);
+
+  useEffect(() => {
+    setGridParticipants(participants);
+  }, [participants]);
 
   const onSubmit = handleSubmit(async (values) => {
     const data = {
       CORREO: values.CORREO,
       ID_PROYECTO: fechasproject[0].ID
     }
-    addParticipant(data);
-
-    const timer = setTimeout(() => {
-      window.location.reload();
-      window.location.href = `/Proyecto/${id}/Home`;
-    }, 5000);
-    return () => clearTimeout(timer);
-
-  })
-
-  const handleDeleteClick = async (args) => {
-    const data = {
-      ID: args.ID_USUARIO,
-      ID_PROYECTO: id
+    const idnt = {
+      ID: id
     }
-    deleteParticipant(data);
-
-    const timer = setTimeout(() => {
-      window.location.reload();
-      window.location.href = `/Proyecto/${id}/Home`;
-    }, 5000);
-    return () => clearTimeout(timer);
-
-  };
+    await addParticipant(data);
+    await getProject(idnt);
+    const participantes = await actualizarParticipantes();
+    setGridParticipants(participantes);
+  })
+  
+  const handleDeleteClick = (async (args) => {
+    swal({
+      title: "Eliminar un participante",
+      text: "¿Quieres eliminar al participante?",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    })
+      .then(async (willDelete) => {
+        if (willDelete) {
+          const data = { ID: args.ID_USUARIO, ID_PROYECTO: id }
+          const idnt = { ID: id }
+          await deleteParticipant(data);
+          await getProject(idnt);
+          const participantes = await actualizarParticipantes();
+          setGridParticipants(participantes);
+        }
+      });
+  });
 
   const handleDelegarClick = async (args) => {
-    const data = {
-      ID: args.ID_USUARIO,
-      ID_PROYECTO: id,
-    }
-    delegarParticipant(data);
-
-    const timer = setTimeout(() => {
-      window.location.href = `/Proyecto/${id}/Home`;
-    }, 5000);
-    return () => clearTimeout(timer);
-
+    swal({
+      title: "Delegar a un participante",
+      text: "¿Quieres delegar al participante?",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    })
+      .then(async (willDelete) => {
+        if (willDelete) {
+          const data = {
+            ID: args.ID_USUARIO,
+            ID_PROYECTO: id,
+          }
+          const idnt = {
+            ID: id
+          }
+          await delegarParticipant(data);
+          await getProject(idnt);
+          const participantes = await actualizarParticipantes();
+          setGridParticipants(participantes);
+        }
+      });
   };
 
   const handleDegradarClick = async (args) => {
-    const data = {
-      ID: args.ID_USUARIO,
-      ID_PROYECTO: id,
-      ID_admin: user.ID
-    }
-    degradarParticipant(data);
-
-    //const timer = setTimeout(() => {
-    //  window.location.href = '/';
-    //}, 5000);
-    //return () => clearTimeout(timer);
-    if(data.ID === user.ID){
-      const timer = setTimeout(() => {
-        window.location.href = `/panel`;
-      }, 5000);
-      return () => clearTimeout(timer);
-    }else{
-      const timer = setTimeout(() => {
-        window.location.href = `/Proyecto/${id}/Home`;
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
+    swal({
+      title: "Degradar a un administrador",
+      text: "¿Quieres degradar al administrador?",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    })
+      .then(async (willDelete) => {
+        if (willDelete) {
+          const data = {
+            ID: args.ID_USUARIO,
+            ID_PROYECTO: id,
+          }
+          const idnt = {
+            ID: id
+          }
+          await degradarParticipant(data);
+          if (data.ID === user.ID) {
+            const timer = setTimeout(() => {
+              vaciarProject();
+              window.location.href = `/panel`;
+            }, 5000);
+            return () => clearTimeout(timer);
+          } else {
+            await getProject(idnt);
+            const participantes = await actualizarParticipantes();
+            setGridParticipants(participantes);
+          }
+        }
+      });
   };
 
   const handleAscenderClick = async (args) => {
-    const data = {
-      ID: args.ID_USUARIO,
-      ID_PROYECTO: id,
-      ID_admin: user.ID
-    }
-    ascenderParticipant(data);
-
-    //const timer = setTimeout(() => {
-    //  window.location.href = '/';
-    //}, 5000);
-    //return () => clearTimeout(timer);
-    const timer = setTimeout(() => {
-      window.location.href = `/Proyecto/${id}/Home`;
-    }, 5000);
-    return () => clearTimeout(timer);
+    swal({
+      title: "Ascender a un administrador",
+      text: "¿Quieres ascender al administrador?",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    })
+      .then(async (willDelete) => {
+        if (willDelete) {
+          const data = {
+            ID: args.ID_USUARIO,
+            ID_PROYECTO: id,
+            ID_admin: user.ID
+          }
+          const idnt = {
+            ID: id
+          }
+          await ascenderParticipant(data);
+          await getProject(idnt);
+          const participantes = await actualizarParticipantes();
+          setGridParticipants(participantes);
+        }
+      })
   };
 
+ /*
   useEffect(() => {
     const data = {
       ID: idint
+    if (!hasLoaded && participants.length > 0 && fechasproject.length > 0) {
+      setHasLoaded(true);
     }
     getPermissions(data);
     console.log(fechasproject);
   }, [])
 
+  }, [hasLoaded, participants,fechasproject]);
+  useEffect(() => {
+    if (hasLoaded) {
+      console.log("Lista de participantes actualizada:", participants, fechasproject);
+      console.log("Proyecto: ", participants, fechasproject);
+    }
+  }, [hasLoaded, participants,fechasproject]);
+  */
+
 
   const employeesGrid = [
-  { field: 'NOMBRE_USUARIO', headerText: 'Nombre de Usuario', width: '150', textAlign: 'Center' },
-  { field: 'ID_USUARIO', headerText: 'ID Usuario', width: '120', textAlign: 'Center' },
-  { field: 'FECHA_UNION', headerText: 'Fecha de Unión', width: '130', textAlign: 'Center', format: 'yMd' },
-  { field: 'NUMERO_BOLETA', headerText: 'Número Boleta', width: '130', textAlign: 'Center' },
-  { 
-    field: 'Eliminar',
-    headerText: 'Eliminar',
-    width: '120',
-    textAlign: 'Center',
-    template: (props) => (
-      props.ROLE === 0 && (
-        <span data-toggle="tooltip" title="Eliminar"><FontAwesomeIcon icon={faTrash} className="fa-icon" style={{ cursor: 'pointer', color: '#f70808', fontSize: '1.25rem' }} onClick={() => handleDeleteClick(props)} /></span>
-      )
-    )
-  },
-  ...(fechasproject[0].ID_CATEGORIA_CRYSTAL === 1 ? 
-    [
+    ...(participants && fechasproject ? [
       {
-        field: 'Delegar',
-        headerText: 'Delegar',
+        field: 'NOMBRE_USUARIO',
+        headerText: 'Nombre de Usuario',
+        width: '150',
+        textAlign: 'Center',
+        template: (props) => {
+          return props.NOMBRE_USUARIO;
+        }
+      },
+      {
+        field: 'ID_USUARIO',
+        headerText: 'ID Usuario',
+        width: '120',
+        textAlign: 'Center',
+        template: (props) => {
+          return props.ID_USUARIO;
+        }
+      },
+      {
+        field: 'FECHA_UNION',
+        headerText: 'Fecha de Unión',
+        width: '130',
+        textAlign: 'Center',
+        format: 'yMd',
+        template: (props) => {
+          return props.FECHA_UNION;
+        }
+      },
+      {
+        field: 'NUMERO_BOLETA',
+        headerText: 'Número Boleta',
+        width: '130',
+        textAlign: 'Center',
+        template: (props) => {
+          return props.NUMERO_BOLETA;
+        }
+      },
+
+      {
+        field: 'Eliminar',
+        headerText: 'Eliminar',
         width: '120',
         textAlign: 'Center',
         template: (props) => (
           props.ROLE === 0 && (
-            <span data-toggle="tooltip" title="Delegar"><FontAwesomeIcon icon={faPeopleArrows} className="fa-icon" style={{ cursor: 'pointer', color: '#1fe02c', fontSize: '1.25rem' }} onClick={() => handleDelegarClick(props)} /></span>
+            <span data-toggle="tooltip" title="Eliminar"><FontAwesomeIcon icon={faTrash} className="fa-icon" style={{ cursor: 'pointer', color: '#f70808', fontSize: '1.25rem' }} onClick={() => handleDeleteClick(props)} /></span>
           )
         )
-      }
-    ] : []),
-  ...(fechasproject[0].ID_CATEGORIA_CRYSTAL === 2 && twoAdmins ? 
-    [
-      {
-        field: 'Degradar',
-        headerText: 'Degradar',
-        width: '120',
-        textAlign: 'Center',
-        template: (props) => (
-          props.ROLE === 1 && (
-            <span data-toggle="tooltip" title="Degradar"><FontAwesomeIcon icon={faPersonArrowDownToLine} className="fa-icon" style={{ cursor: 'pointer', color: '#f29c07', fontSize: '1.25rem' }} onClick={() => handleDegradarClick(props)} /></span>
-          )
-        )
-      }
-    ] : []),
-  ...(fechasproject[0].ID_CATEGORIA_CRYSTAL === 2 && !twoAdmins ? 
-    [
-      {
-        field: 'Ascender',
-        headerText: 'Ascender',
-        width: '120',
-        textAlign: 'Center',
-        template: (props) => (
-          props.ROLE === 0 && (
-            <span data-toggle="tooltip" title="Ascender"><FontAwesomeIcon icon={faPersonArrowUpFromLine} className="fa-icon" style={{ cursor: 'pointer', color: '#02f7ba', fontSize: '1.25rem' }} onClick={() => handleAscenderClick(props)} /></span>
-          )
-        )
-      }
+      },
+      ...(fechasproject && fechasproject[0]?.ID_CATEGORIA_CRYSTAL === 1 ?
+        [
+          {
+            field: 'Delegar',
+            headerText: 'Delegar',
+            width: '120',
+            textAlign: 'Center',
+            template: (props) => (
+              props.ROLE === 0 && (
+                <span data-toggle="tooltip" title="Delegar"><FontAwesomeIcon icon={faPeopleArrows} className="fa-icon" style={{ cursor: 'pointer', color: '#1fe02c', fontSize: '1.25rem' }} onClick={() => handleDelegarClick(props)} /></span>
+              )
+            )
+          }
+        ] : []),
+      ...(fechasproject && fechasproject[0]?.ID_CATEGORIA_CRYSTAL === 2 && twoAdmins ?
+        [
+          {
+            field: 'Degradar',
+            headerText: 'Degradar',
+            width: '120',
+            textAlign: 'Center',
+            template: (props) => (
+              props.ROLE === 1 && (
+                <span data-toggle="tooltip" title="Degradar"><FontAwesomeIcon icon={faPersonArrowDownToLine} className="fa-icon" style={{ cursor: 'pointer', color: '#f29c07', fontSize: '1.25rem' }} onClick={() => handleDegradarClick(props)} /></span>
+              )
+            )
+          }
+        ] : []),
+      ...(fechasproject && fechasproject[0]?.ID_CATEGORIA_CRYSTAL === 2 && !twoAdmins ?
+        [
+          {
+            field: 'Ascender',
+            headerText: 'Ascender',
+            width: '120',
+            textAlign: 'Center',
+            template: (props) => (
+              props.ROLE === 0 && (
+                <span data-toggle="tooltip" title="Ascender"><FontAwesomeIcon icon={faPersonArrowUpFromLine} className="fa-icon" style={{ cursor: 'pointer', color: '#02f7ba', fontSize: '1.25rem' }} onClick={() => handleAscenderClick(props)} /></span>
+              )
+            )
+          }
+        ] : [])
     ] : [])
 ];
 
 
   return (
     <div className='m-2 md:m-10 p-2 md:p-10 bg-white rounded-3xl'>
-      {message && <div class=" items-center bg-green-100 border-l-4 border-green-500 text-green-700  rounded-lg m-2 shadow-md" style={{ maxWidth: '600px' }}>
-        <p class="text-lg font-semibold m-2">{message}</p>
-      </div>
-      }
-      {projecterrors && <div class=" items-center bg-red-100 border-l-4 border-red-500 text-red-700  rounded-lg m-2 shadow-md" style={{ maxWidth: '600px' }}>
-        <p class="text-lg font-semibold m-2">{projecterrors}</p>
-      </div>
-      }
 
       <Header category="Page" title="Usuarios" />
 
       <div className="card rounded-lg shadow-sm bg-white ">
 
         <GridComponent
-          dataSource={participants}
+          dataSource={gridParticipants}
           allowPaging={true}
           allowSorting={true}
           allowDeleting={true}

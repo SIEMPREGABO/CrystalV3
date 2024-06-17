@@ -86,7 +86,7 @@ export const Proyecto = () => {
                                 {userRole && <Route path="Asignar-tarea" element={<AsignarTarea />} />}
                                 {userRole && <Route path="Calendario" element={<Calendario />} />}
                                 {userRole && <Route path="ChatIteracion" element={<ChatIteracion />} />}
-                                {userRole && <Route path="Entregas" element={<Entregas />} />}
+                                {userRole && <Route path="Informes" element={<Entregas />} />}
                                 {userRole && <Route path="Configuracion" element={<Configuracion />} />}
                                 {userRole && <Route path="Kanban" element={<Kanban />} />}
                                 {userRole && <Route path="VideoChat" element={<VideoChat />} />}
@@ -96,7 +96,8 @@ export const Proyecto = () => {
 
                                 {!userRole && <Route path="Home" element={<Dashboard />} />}
                                 {!userRole && <Route path="Calendario" element={<Calendario />} />}
-                                {!userRole && <Route path="ChatIteracion" element={<ChatIteracion />} />}                                {!userRole && <Route path="Kanban" element={<Kanban />} />}
+                                {!userRole && <Route path="ChatIteracion" element={<ChatIteracion />} />} 
+                                {!userRole && <Route path="Kanban" element={<Kanban />} />}
                                 {!userRole && <Route path="VideoChat" element={<VideoChat />} />}
                             </Route>
                         </Routes>

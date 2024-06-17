@@ -487,14 +487,8 @@ export const links = [
         isAdmin: false,
       },
       {
-        name: 'Asignar tarea',
-        url:'Asignar-tarea',
-        icon: <IoMdContacts />,
-        isAdmin: true,
-      },
-      {
-        name: 'Entregas',
-        url: 'Entregas',
+        name: 'Informes',
+        url: 'Informes',
         icon: <GoFileSubmodule />,
         isAdmin: true,
       },

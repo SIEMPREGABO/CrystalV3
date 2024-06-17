@@ -703,8 +703,15 @@ export const addParticipant = async (req, res) => {
 export const deleteParticipant = async (req, res) => {
     const { ID, ID_PROYECTO } = req.body;
     try {
+        const numeroParticipantes = await verificarNumeroParticipantes(ID_PROYECTO);
+        if (!numeroParticipantes.success) return res.status(400).json({ message: "Numero maximo de participantes alcanzado" });
+
         const eliminado = await eliminarParticipante(ID_PROYECTO, ID);
         if (!eliminado.success) return res.status(500).json({ message: "Error al eliminar al participante" });
+        if (numeroParticipantes.participantes.length === 9) {
+            const actualizarCrystalVar = await actualizarCrystal(1, ID_PROYECTO);
+            if (!actualizarCrystalVar.success) return res.status(500).json({ message: "Error al actualizar el crystal" });
+        }
         return res.status(200).json({ message: "Usuario eliminado con exito" });
     } catch (error) {
         res.status(500).json({ mensaje: "Error inesperado, intentalo nuevamente" });
