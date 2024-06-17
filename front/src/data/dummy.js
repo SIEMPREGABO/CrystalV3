@@ -481,7 +481,7 @@ export const links = [
     title: 'Páginas',
     links: [
       {
-        name: 'Dashboard',
+        name: 'Home',
         url: 'Home',
         icon: <IoHome />,
         isAdmin: false,
@@ -552,7 +552,7 @@ export const links = [
 
 export const links2 = [
   {
-    title: 'Dashboard',
+    title: 'Home',
     links: [
       {
         name: 'Inicio',

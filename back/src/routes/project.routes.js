@@ -7,9 +7,11 @@ import {
     configurarProyecto, deleteTask, updateTask, updateTaskState, delegarParticipant, 
     deleteProject,
     degradarParticipant,
-    ascenderParticipant
+    ascenderParticipant,
+    agregarColaboradorTarea,
+    eliminarColaboradorTarea
 } from "../controllers/project.controller.js";
-import { createSchema, joinSchema, taskSchema, addSchema, requerimientoSchema } from "../schemas/project.schema.js";
+import { createSchema, joinSchema, taskSchema, addSchema, requerimientoSchema, collabSchema } from "../schemas/project.schema.js";
 import { validateSchema } from "../middlewares/validator.middleware.js";
 
 const router  = Router();
@@ -30,11 +32,13 @@ router.post('/getProjectTasks', getTareasxIteracion);
 router.post('/addRequirement', validateSchema(requerimientoSchema), agregarRequerimiento); 
 router.get('/tasks', validarToken ,getTasks);
 router.post('/createTask',validateSchema(taskSchema),createTask);
-router.post('/updateTask',validateSchema(taskSchema), updateTask); 
+router.post('/updateTask',updateTask); 
 router.post('/updateState', updateTaskState);
 router.post('/deleteTask', deleteTask);
 router.post('/addMessage', agregarMensaje);
 router.post('/getMessages', getMessages);
+router.post('/addCollab', validateSchema(collabSchema),agregarColaboradorTarea);
+router.post('/deleteCollab', eliminarColaboradorTarea);
 
 
 

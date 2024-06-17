@@ -3,7 +3,7 @@ import { createAccessToken, createPasswordToken } from '../libs/jwt.js';
 import jwt from 'jsonwebtoken';
 import { SECRET_TOKEN, SECRETPASS_TOKEN } from '../config.js';
 import { sendemailRegister, sendemailReset } from '../middlewares/send.mail.js';
-import { actualizarPass, correoUsuario, agregarUsuario, autenticarUsuario, extraerUsuario, verificarNombre, verificarUsuario, cambiarContrasenia, actualizarUsuario, actualizarUsuarioNombre } from '../querys/authquerys.js';
+import { actualizarPass, correoUsuario, agregarUsuario, autenticarUsuario, extraerUsuario, verificarNombre, verificarUsuario, cambiarContrasenia, actualizarUsuario, actualizarUsuarioNombre, verificarBoleta } from '../querys/authquerys.js';
 import moment from 'moment-timezone';
 
 
@@ -15,25 +15,28 @@ export const register = async (req, res) => {
 
         //Verifica si existen el usuario
         const verificar = await verificarUsuario(CORREO);
-        if (verificar.success) return res.status(400).json({ message: ["Usuario registrado"] });
+        if (verificar.success) return res.status(400).json({ message: "Usuario registrado" });
 
         const verificarUser = await verificarNombre(NOMBRE_USUARIO);
-        if (verificarUser.success) return res.status(400).json({ message: ["Nombre de usuario registrado"] });
+        if (verificarUser.success) return res.status(400).json({ message: "Nombre de usuario registrado" });
+        
+        const verificarBol = await verificarBoleta(NUMERO_BOLETA);
+        if(verificarBol.success) return res.status(400).json({ message: "Boleta registrada" });
         //Encripta la contraseña
         const passwordHash = await bcrypt.hash(CONTRASENIA, 10);
 
         //Agrega el usuario a la base
         const agregar = await agregarUsuario(CORREO, NOMBRE_USUARIO, passwordHash, NOMBRE_PILA, APELLIDO_PATERNO, APELLIDO_MATERNO, TELEFONO, NUMERO_BOLETA)
-        if (!agregar) res.status(500).json({ message: ["Error del servidor, intentelo nuevamente"] });
+        if (!agregar) res.status(500).json({ message: "Error del servidor, intentelo nuevamente" });
 
         const emailsendend = await sendemailRegister(CORREO,NOMBRE_USUARIO);
 
 
         res.json({
-            message: ["Usuario registrado"]
+            message: "Usuario registrado"
         });
     } catch (error) {
-        res.status(500).json({ message: [error.message] })
+        res.status(500).json({ message: error.message })
     }
 }
 
@@ -44,13 +47,13 @@ export const login = async (req, res) => {
 
         //Verifica la existencia del usuario
         const verificar = await verificarUsuario(CORREO);
-        if (!verificar.success) return res.status(400).json({ message: ["Usuario no registrado"] });
+        if (!verificar.success) return res.status(400).json({ message: "Usuario no registrado" });
         //Compara las contraseñas        
         const isMatch = await bcrypt.compare(CONTRASENIA, verificar.userData[0].CONTRASENIA);
-        if (!isMatch) return res.status(400).json({ message: ["Contraseña incorrecta"] });
+        if (!isMatch) return res.status(400).json({ message: "Contraseña incorrecta" });
         //Crea el token de acceso
         const token = await createAccessToken({ id: verificar.userData[0].ID });
-        if (!token) return res.status(500).json({ message: ["Error inesperado, intente nuevamente"] });
+        if (!token) return res.status(500).json({ message: "Error inesperado, intente nuevamente" });
         //Responde con el token y la info del usuario
         res.cookie("token", token);
         res.json({

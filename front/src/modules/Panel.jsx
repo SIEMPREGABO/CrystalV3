@@ -31,23 +31,16 @@ export const Panel = () => {
             CODIGO_UNIRSE: values.CODIGO_UNIRSE
         }
         joinProject(data);
+        const timer = setTimeout(() => {
+            window.location.reload();
+        }, 5000);
+        return () => clearTimeout(timer);
     })
 
     useEffect(() => {
         getProjects();
 
     }, []);
-
-    useEffect(() => {
-        if (message.length > 0) {
-            const timer = setTimeout(() => {
-                window.location.reload();
-            }, 5000);
-            return () => clearTimeout(timer);
-        }
-    }, [message]);
-
-
 
     return (
         <div>

@@ -94,6 +94,26 @@ export function verificarNombre(Nombre) {
     });
 };
 
+export function verificarBoleta(BOLETA) {
+    return new Promise(async (resolve, reject) => {
+        const connection = await getConnection();
+
+        const query = 'SELECT ID FROM USUARIO WHERE NUMERO_BOLETA = ? ';
+
+        connection.query(query, [BOLETA], (err, results) => {
+            if (err) {
+                reject(err);
+            } else {  
+                if (results.length > 0) {
+                    resolve({success:true, userData:results});
+                } else {
+                    resolve(false);
+                }
+            }
+        });
+    });
+};
+
 export function cambiarContrasenia(ID,CONTRASENIA){
     return new Promise(async (resolve, reject) => {
         const connection = await getConnection();

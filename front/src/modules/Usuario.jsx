@@ -11,10 +11,14 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { addSchema } from '../schemas/project';
 import { useAuth } from '../context/authContext';
+import { L10n } from '@syncfusion/ej2-base';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faTrash, faPeopleArrows, faPersonArrowUpFromLine, faPersonArrowDownToLine} from '@fortawesome/free-solid-svg-icons';
 
 const employeesGrid = [
   { field: 'NOMBRE_USUARIO', headerText: 'Nombre de Usuario', width: '150', textAlign: 'Center' },
-  { field: 'ID_USUARIO', headerText: 'ID Usuario', width: '120', textAlign: 'Center' },
+  { field: 'NOMBRE_CMP', headerText: 'Nombre', width: '150', textAlign: 'Center' },
+  { field: 'ID_USUARIO', headerText: 'ID Usuario', width: '100', textAlign: 'Center' },
   { field: 'FECHA_UNION', headerText: 'Fecha de Unión', width: '130', textAlign: 'Center', format: 'yMd' },
   { field: 'NUMERO_BOLETA', headerText: 'Número Boleta', width: '130', textAlign: 'Center' },
   /*{
@@ -28,11 +32,42 @@ const employeesGrid = [
     }
   }*/
 ];
+L10n.load({
+  'esp': {
+      grid: {
+          EmptyRecord: "Sin usuarios para mostrar",
+          GroupDropArea: 'Arrastra un encabezado de columna aqui para agrupar',
+          UnGroup: 'Haz click aqui para desagrupar'
+      },
+      pager: {
+          currentPageInfo: '{0} de {1} páginas',
+          totalItemsInfo: '({0} elementos)',
+          firstPageTooltip: 'Ir a la primera página',
+          lastPageTooltip: 'Ir a la última página',
+          nextPageTooltip: 'Ir a la página siguiente',
+          previousPageTooltip: 'Ir a la página anterior',
+          nextPagerTooltip: 'Ir al siguiente paginador',
+          previousPagerTooltip: 'Ir al paginador anterior',
+      },
+      toolbar: {
+          Add: 'Añadir',
+          Edit: 'Editar',
+          Delete: 'Eliminar',
+          Update: 'Actualizar',
+          Cancel: 'Cancelar',
+          Search: 'Buscar',
+      },
+      searchbar: {
+          Search: 'Buscar'
+      }
+  }
+});
 
 const Usuario = () => {
 
   const { id } = useParams();
   const { user } = useAuth();
+  const idint = parseInt(id, 10).toString();
 
   const {
     register,
@@ -43,7 +78,7 @@ const Usuario = () => {
   });
 
   const { projecterrors, message, fechasproject, addParticipant, participants, deleteParticipant, delegarParticipant,
-    ascenderParticipant, degradarParticipant, twoAdmins } = useProject();
+    ascenderParticipant, degradarParticipant, twoAdmins, getProject, getPermissions } = useProject();
 
   const onSubmit = handleSubmit(async (values) => {
     const data = {
@@ -54,6 +89,7 @@ const Usuario = () => {
 
     const timer = setTimeout(() => {
       window.location.reload();
+      window.location.href = `/Proyecto/${id}/Home`;
     }, 5000);
     return () => clearTimeout(timer);
 
@@ -68,6 +104,7 @@ const Usuario = () => {
 
     const timer = setTimeout(() => {
       window.location.reload();
+      window.location.href = `/Proyecto/${id}/Home`;
     }, 5000);
     return () => clearTimeout(timer);
 
@@ -77,12 +114,11 @@ const Usuario = () => {
     const data = {
       ID: args.ID_USUARIO,
       ID_PROYECTO: id,
-      ID_admin: user.ID
     }
     delegarParticipant(data);
 
     const timer = setTimeout(() => {
-      window.location.href = '/';
+      window.location.href = `/Proyecto/${id}/Home`;
     }, 5000);
     return () => clearTimeout(timer);
 
@@ -100,7 +136,17 @@ const Usuario = () => {
     //  window.location.href = '/';
     //}, 5000);
     //return () => clearTimeout(timer);
-
+    if(data.ID === user.ID){
+      const timer = setTimeout(() => {
+        window.location.href = `/panel`;
+      }, 5000);
+      return () => clearTimeout(timer);
+    }else{
+      const timer = setTimeout(() => {
+        window.location.href = `/Proyecto/${id}/Home`;
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
   };
 
   const handleAscenderClick = async (args) => {
@@ -115,8 +161,80 @@ const Usuario = () => {
     //  window.location.href = '/';
     //}, 5000);
     //return () => clearTimeout(timer);
-
+    const timer = setTimeout(() => {
+      window.location.href = `/Proyecto/${id}/Home`;
+    }, 5000);
+    return () => clearTimeout(timer);
   };
+
+  useEffect(() => {
+    const data = {
+      ID: idint
+    }
+    getPermissions(data);
+    console.log(fechasproject);
+  }, [])
+
+
+  const employeesGrid = [
+  { field: 'NOMBRE_USUARIO', headerText: 'Nombre de Usuario', width: '150', textAlign: 'Center' },
+  { field: 'ID_USUARIO', headerText: 'ID Usuario', width: '120', textAlign: 'Center' },
+  { field: 'FECHA_UNION', headerText: 'Fecha de Unión', width: '130', textAlign: 'Center', format: 'yMd' },
+  { field: 'NUMERO_BOLETA', headerText: 'Número Boleta', width: '130', textAlign: 'Center' },
+  { 
+    field: 'Eliminar',
+    headerText: 'Eliminar',
+    width: '120',
+    textAlign: 'Center',
+    template: (props) => (
+      props.ROLE === 0 && (
+        <span data-toggle="tooltip" title="Eliminar"><FontAwesomeIcon icon={faTrash} className="fa-icon" style={{ cursor: 'pointer', color: '#f70808', fontSize: '1.25rem' }} onClick={() => handleDeleteClick(props)} /></span>
+      )
+    )
+  },
+  ...(fechasproject[0].ID_CATEGORIA_CRYSTAL === 1 ? 
+    [
+      {
+        field: 'Delegar',
+        headerText: 'Delegar',
+        width: '120',
+        textAlign: 'Center',
+        template: (props) => (
+          props.ROLE === 0 && (
+            <span data-toggle="tooltip" title="Delegar"><FontAwesomeIcon icon={faPeopleArrows} className="fa-icon" style={{ cursor: 'pointer', color: '#1fe02c', fontSize: '1.25rem' }} onClick={() => handleDelegarClick(props)} /></span>
+          )
+        )
+      }
+    ] : []),
+  ...(fechasproject[0].ID_CATEGORIA_CRYSTAL === 2 && twoAdmins ? 
+    [
+      {
+        field: 'Degradar',
+        headerText: 'Degradar',
+        width: '120',
+        textAlign: 'Center',
+        template: (props) => (
+          props.ROLE === 1 && (
+            <span data-toggle="tooltip" title="Degradar"><FontAwesomeIcon icon={faPersonArrowDownToLine} className="fa-icon" style={{ cursor: 'pointer', color: '#f29c07', fontSize: '1.25rem' }} onClick={() => handleDegradarClick(props)} /></span>
+          )
+        )
+      }
+    ] : []),
+  ...(fechasproject[0].ID_CATEGORIA_CRYSTAL === 2 && !twoAdmins ? 
+    [
+      {
+        field: 'Ascender',
+        headerText: 'Ascender',
+        width: '120',
+        textAlign: 'Center',
+        template: (props) => (
+          props.ROLE === 0 && (
+            <span data-toggle="tooltip" title="Ascender"><FontAwesomeIcon icon={faPersonArrowUpFromLine} className="fa-icon" style={{ cursor: 'pointer', color: '#02f7ba', fontSize: '1.25rem' }} onClick={() => handleAscenderClick(props)} /></span>
+          )
+        )
+      }
+    ] : [])
+];
 
 
   return (
@@ -141,84 +259,17 @@ const Usuario = () => {
           allowDeleting={true}
           toolbar={['Search']}
           width="auto"
+          locale='esp'
+          allowTextWrap={true}
         >
           <ColumnsDirective>
             {employeesGrid.map((item, index) => (
               <ColumnDirective key={index}{...item} />
             ))}
-            <ColumnDirective
-              headerText='Eliminar'
-              field='Eliminar'
-              width='120'
-              textAlign='Center'
-              template={(props) => (
-                props.ROLE === 0 && (
-                  <button
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded-full"
-                    onClick={() => handleDeleteClick(props)}>Eliminar
-                  </button>
-                )
-              )}
-            />
-            {fechasproject[0].ID_CATEGORIA_CRYSTAL === 1 &&
-              <ColumnDirective
-                headerText='Delegar'
-                field='Delegar'
-                width='120'
-                textAlign='Center'
-                template={(props) => (
-                  props.ROLE === 0 && (
-                    <button
-                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded-full"
-                      onClick={() => handleDelegarClick(props)}>Delegar
-                    </button>
-                  )
-                )}
-              />}
-            {fechasproject[0].ID_CATEGORIA_CRYSTAL === 2 &&
-              <div>
-                {twoAdmins &&
-                  <div>
-                    <ColumnDirective
-                      headerText='Degradar'
-                      field='Degradar'
-                      width='120'
-                      textAlign='Center'
-                      template={(props) => (
-                        props.ROLE === 1 && (
-                          <button
-                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded-full"
-                            onClick={() => handleDegradarClick(props)}>Degradar
-                          </button>
-                        )
-                      )}
-                    />
-                  </div>}
-                {!twoAdmins &&
-                  <div>
-                    <ColumnDirective
-                      headerText='Ascender'
-                      field='Ascender'
-                      width='120'
-                      textAlign='Center'
-                      template={(props) => (
-                        props.ROLE === 0 && (
-                          <button
-                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded-full"
-                            onClick={() => handleAscenderClick(props)}>Ascender
-                          </button>
-                        )
-                      )}
-                    />
-                  </div>
-                }
-              </div>
-            }
-
+            
           </ColumnsDirective>
           <Inject services={[Page, Search, Toolbar]} />
         </GridComponent>
-
         <div className="card-body row justify-content-evenly">
           <div className="col">
             <form className="" onSubmit={handleSubmit(onSubmit)}>

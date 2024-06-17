@@ -98,7 +98,7 @@ export const Config = () => {
 
         <Header title="Calendario" />
 
-        <ScheduleComponent height="850px" width="600px" eventSettings={{ dataSource: scheduleData }}>
+        <ScheduleComponent height="850px" width="550px" eventSettings={{ dataSource: scheduleData }}>
           <Inject services={[Day, Month, Agenda, Resize, DragAndDrop]} />
         </ScheduleComponent>
 

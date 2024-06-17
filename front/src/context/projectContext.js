@@ -9,7 +9,9 @@ import {
   requestDelegar,
   requestDeleteProject,
   requestDegradar,
-  requestAscender
+  requestAscender,
+  requestAddCollab,
+  requestDeleteCollab
 } from "../requests/projectReq.js";
 import Cookies from "js-cookie";
 import { useAuth } from "./authContext.js";
@@ -50,6 +52,10 @@ export const ProjectProvider = ({ children }) => {
   const [entregasproject, setEntregasProject] = useState([]);
   const [projectInfo, setProjectInfo] = useState([]);
   const [tareasGantt, setTareasGantt] = useState([]);
+  const [requirements, setRequirements] = useState([]);
+  const [iterationParticipants, setIterationParticipants] = useState([]);
+  const [entregas, setEntregas] = useState([]);
+  const [iteraciones, setIteraciones] = useState([]);
 
   useEffect(() => {
     if (message.length > 0) {
@@ -205,24 +211,28 @@ export const ProjectProvider = ({ children }) => {
   }
 
   const updateTask = async (Task) => {
+    let valor = null;
     try {
       const res = await requestUpdateTask(Task);
-      //console.log(res.data.message);
+      console.log(res.data.message);
       swal({
         title: 'Actualizar tarea',
         text: res.data.message,
         icon: 'success',
         button: 'Aceptar',
       });
+      valor = true;
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
         //setProjecterrors(error.response.data.message);
+        console.log(error.response);
         swal({
           title: 'Actualizar tarea',
           text: error.response.data.message,
           icon: 'warning',
           button: 'Aceptar',
         });
+        valor = false;
       } else {
         //setProjecterrors("Error del servidor");
         swal({
@@ -231,8 +241,11 @@ export const ProjectProvider = ({ children }) => {
           icon: 'error',
           button: 'Aceptar',
         });
+        valor = false;
       }
+      valor = false;
     }
+    return valor;
   }
 
   const configProyect = async (fechas) => {
@@ -412,6 +425,76 @@ export const ProjectProvider = ({ children }) => {
     }
   }
 
+  const addCollab = async (collab) => {
+    try {
+      const res = await requestAddCollab(collab);
+      if(res.data.estado === true){
+        swal({
+          title: 'Colaborador Agregado',
+          text: 'El usuario ha sido agregado como colaborador a la tarea seleccionada',
+          icon: 'success',
+          button: 'Aceptar'
+        });
+      } else{
+        swal({
+          title: 'Error',
+          text: 'Ha ocurrido un error al intentar agregar un colaborador, intentalo de nuevo más tarde',
+          icon: 'error',
+          button: 'Aceptar'
+        });
+      }  
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.message) {
+        swal({
+          title: 'Agregar colaborador',
+          text: error.response.data.message,
+          icon: 'error',
+          button: 'Aceptar',
+        });
+        //setProjecterrors(error.response.data.message);
+      } else {
+        swal({
+          title: 'Agregar colaborador',
+          text: 'Error en el servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
+        //setProjecterrors("Error del servidor");
+      }
+    }
+  }
+
+  const deleteCollab = async (collab) => {
+    try {
+      const res = await requestDeleteCollab(collab);
+
+      swal({
+        title: 'Eliminar Colaborador',
+        text: res.data.message,
+        icon: 'success',
+        button: 'Aceptar'
+      });
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.message) {
+        swal({
+          title: 'Eliminar Colaborador',
+          text: error.response.data.message,
+          icon: 'error',
+          button: 'Aceptar',
+        });
+        //setProjecterrors(error.response.data.message);
+      } else {
+        swal({
+          title: 'Eliminar Colaborador',
+          text: 'Error en el servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
+        //setProjecterrors("Error del servidor");
+      }
+    }
+  }
+
   const addParticipant = async (participant) => {
     try {
       const res = await requestAdd(participant);
@@ -489,7 +572,10 @@ export const ProjectProvider = ({ children }) => {
       setTareasKanban(res.data.tasksKanban);
       setProjectInfo(res.data.projectInfo);
       setTareasGantt(res.data.tareasGantt);
-      
+      setRequirements(res.data.requirements);
+      setIterationParticipants(res.data.iterationParticipants);
+      setIteraciones(res.data.iteraciones);
+      setEntregas(res.data.entregas);
       if(res.data.fechasProyecto[0].ID_CATEGORIA_CRYSTAL === 2 ){
         res.data.participants.map((participant)=>{
           if(participant.ROLE === 1){
@@ -639,6 +725,7 @@ export const ProjectProvider = ({ children }) => {
               icon: 'success',
               button: 'Aceptar',
             });
+            setTwoAdmins(false);
           }
         });
     } catch (error) {
@@ -704,7 +791,6 @@ export const ProjectProvider = ({ children }) => {
       }
     }
   }
-
 
   const getPermissions = async (id) => {
     try {
@@ -826,7 +912,10 @@ export const ProjectProvider = ({ children }) => {
         requerimientos, tareas,tareasGantt,
 
         messagesChat,
-
+        requirements,
+        iterationParticipants,
+        entregas, 
+        iteraciones,
         setProjecterrors,
         setMessage, setIsParticipant, setScheduleData,
 
@@ -848,7 +937,9 @@ export const ProjectProvider = ({ children }) => {
         updateTask,
         updateTaskState,
         deleteProjectFunction,
-        vaciarProject
+        vaciarProject,
+        addCollab,
+        deleteCollab
       }}
     >
       {children}

@@ -1,0 +1,6 @@
+.background-image-chat {
+    background-image: url('../images/fondoChat.jpg');
+    background-size: cover; /* Asegura que la imagen cubra todo el div */
+    background-position: center; /* Centra la imagen en el div */
+    z-index: 1000;
+  }

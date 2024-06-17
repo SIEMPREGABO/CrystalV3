@@ -5,6 +5,13 @@ import { DatePickerComponent } from '@syncfusion/ej2-react-calendars';
 import { Header } from '../components';
 import { useProject } from '../context/projectContext';
 import { useParams } from 'react-router-dom';
+import { L10n } from '@syncfusion/ej2-base';
+
+L10n.load({
+  'esp': {
+    
+  }
+});
 
 const Calendario = () => {
   const {

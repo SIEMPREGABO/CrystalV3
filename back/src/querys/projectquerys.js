@@ -3,6 +3,7 @@ import moment from "moment-timezone";
 import { getConnection } from "../database.js";
 import { generarIteraciones } from '../libs/makerProject.js';
 import { zonaHoraria } from '../config.js';
+import { query } from "express";
 
 export function crearProyecto(NOMBRE_PROYECTO, OBJETIVO, DESCRIPCION, FECHA_CREACION, FECHA_INICIO, FECHA_TERMINO, ENTREGAS, CODIGO_UNICO, ID) {
     return new Promise(async (resolve, reject) => {
@@ -85,7 +86,7 @@ export function verificarCodigo(CODIGO) {
                 if (results.length > 0) {
                     resolve({ success: true, project: results });
                 } else {
-                    resolve(false);
+                    resolve({success: false});
                 }
             }
         });
@@ -201,7 +202,7 @@ export function eliminarProyecto(ID_PROYECTO) {
         const conn = await getConnection();
         try {
             //conn.beginTransaction();
-            console.log("primer")
+            //console.log("primer")
             const selectTareasDependientesQuery = `
                 SELECT * FROM T_DEPENDE_T WHERE ID_TAREA_DEPENDIENTE IN(
                     SELECT ID FROM TAREAS WHERE ID_ITERACION IN(
@@ -224,7 +225,7 @@ export function eliminarProyecto(ID_PROYECTO) {
             conn.query(selectTareasDependientesQuery, [ID_PROYECTO], (err, results) => {
                 if (err) {
                     //conn.rollback(() => {
-                        reject({ success: false });
+                    reject({ success: false });
                     //});
                 } else {
                     console.log(results);
@@ -232,7 +233,7 @@ export function eliminarProyecto(ID_PROYECTO) {
                         conn.query(deleteTareasDependenciasQuery, [ID_PROYECTO], (err, results) => {
                             if (err) {
                                 //conn.rollback(() => {
-                                    reject({ success: false });
+                                reject({ success: false });
                                 //});
                             }
                             else {
@@ -268,7 +269,7 @@ export function eliminarProyecto(ID_PROYECTO) {
             conn.query(selectColaboracionesQuery, [ID_PROYECTO], (err, results) => {
                 if (err) {
                     //conn.rollback(() => {
-                        reject({ success: false });
+                    reject({ success: false });
                     //});
                 } else {
                     console.log(results);
@@ -277,7 +278,7 @@ export function eliminarProyecto(ID_PROYECTO) {
                             if (err) {
                                 console.log(err)
                                 //conn.rollback(() => {
-                                    reject({ success: false });
+                                reject({ success: false });
                                 //});
                             }
                             else {
@@ -313,7 +314,7 @@ export function eliminarProyecto(ID_PROYECTO) {
             conn.query(selectChatsQuery, [ID_PROYECTO], (err, results) => {
                 if (err) {
                     //conn.rollback(() => {
-                        reject({ success: false });
+                    reject({ success: false });
                     //});
                 } else {
                     console.log(results);
@@ -321,7 +322,7 @@ export function eliminarProyecto(ID_PROYECTO) {
                         conn.query(deleteChatsQuery, [ID_PROYECTO], (err, results) => {
                             if (err) {
                                 //conn.rollback(() => {
-                                    reject({ success: false });
+                                reject({ success: false });
                                 //});
                             } else {
                                 console.log("xd");
@@ -333,7 +334,7 @@ export function eliminarProyecto(ID_PROYECTO) {
                     }
                 }
             });
-            console.log("3")
+            //console.log("3")
 
             const selectTareasQuery = `
                 SELECT ID FROM TAREAS WHERE ID_ITERACION IN (
@@ -355,7 +356,7 @@ export function eliminarProyecto(ID_PROYECTO) {
                 if (err) {
                     console.log(err)
                     //conn.rollback(() => {
-                        reject({ success: false });
+                    reject({ success: false });
                     //});
                 } else {
                     console.log(results);
@@ -363,7 +364,7 @@ export function eliminarProyecto(ID_PROYECTO) {
                         conn.query(deleteTareasQuery, [ID_PROYECTO], (err, results) => {
                             if (err) {
                                 //conn.rollback(() => {
-                                    reject({ success: false });
+                                reject({ success: false });
                                 //});
                             }
                             else {
@@ -397,7 +398,7 @@ export function eliminarProyecto(ID_PROYECTO) {
                 if (err) {
 
                     //conn.rollback(() => {
-                        reject({ success: false });
+                    reject({ success: false });
                     //});
                 } else {
                     console.log(results);
@@ -405,7 +406,7 @@ export function eliminarProyecto(ID_PROYECTO) {
                         conn.query(deleteRequerimientosQuery, [ID_PROYECTO], (err, results) => {
                             if (err) {
                                 //conn.rollback(() => {
-                                    reject({ success: false });
+                                reject({ success: false });
                                 //});
                             }
                             else {
@@ -427,10 +428,10 @@ export function eliminarProyecto(ID_PROYECTO) {
                 )
             `;
 
-            conn.query(deleteIteracionesQuery, [ID_PROYECTO],  (err, results) => {
+            conn.query(deleteIteracionesQuery, [ID_PROYECTO], (err, results) => {
                 if (err) {
                     //conn.rollback(() => {
-                        reject({ success: false });
+                    reject({ success: false });
                     //});
                 } else {
                     console.log("xd");
@@ -440,10 +441,10 @@ export function eliminarProyecto(ID_PROYECTO) {
             console.log("6")
 
             const deleteEntregasQuery = 'DELETE FROM ENTREGAS WHERE ID_PROYECTO = ?';
-            conn.query(deleteEntregasQuery, [ID_PROYECTO],  (err, results) => {
+            conn.query(deleteEntregasQuery, [ID_PROYECTO], (err, results) => {
                 if (err) {
                     //conn.rollback(() => {
-                        reject({ success: false });
+                    reject({ success: false });
                     //});
                 }
                 else {
@@ -455,10 +456,10 @@ export function eliminarProyecto(ID_PROYECTO) {
             console.log("7")
 
             const deleteUsuariosQuery = 'DELETE FROM U_SeUne_P WHERE ID_PROYECTO = ?';
-            conn.query(deleteUsuariosQuery, [ID_PROYECTO],  (err, results) => {
+            conn.query(deleteUsuariosQuery, [ID_PROYECTO], (err, results) => {
                 if (err) {
                     //conn.rollback(() => {
-                        reject({ success: false });
+                    reject({ success: false });
                     //});
                 }
                 else {
@@ -470,12 +471,12 @@ export function eliminarProyecto(ID_PROYECTO) {
 
             const deleteProyectoQuery = 'DELETE FROM PROYECTOS WHERE ID = ?';
 
-            conn.query(deleteProyectoQuery, [ID_PROYECTO],  (err, results) => {
+            conn.query(deleteProyectoQuery, [ID_PROYECTO], (err, results) => {
                 if (err) {
                     //conn.rollback(() => {
-                        reject({ success: false });
+                    reject({ success: false });
                     //});
-                }else {
+                } else {
                     console.log("xd");
                     console.log("borrados proyecto: ", results.affectedRows);
                 }
@@ -552,7 +553,7 @@ export function verificarUnionCorreo(ID_PROYECTO, CORREO) {
     });
 }
 
-export function registarNotificacion(id_usuario, contenido, tipo, fecha) {
+export function registrarNotificacion(id_usuario, contenido, tipo, fecha) {
     return new Promise(async (resolve, reject) => {
         try {
             const connection = await getConnection();
@@ -737,7 +738,7 @@ export function getAdmins(ID) {
     return new Promise(async (resolve, reject) => {
         const connection = await getConnection();
         const query = ' SELECT ID_USUARIO FROM U_SEUNE_P WHERE ID_PROYECTO = ? AND ES_CREADOR = 1';
-        connection.query(query, [CRYSTAL, ID], (err, results) => {
+        connection.query(query, [ID], (err, results) => {
             if (err) {
                 reject(err);
             } else {
@@ -983,27 +984,57 @@ export function GetTareasxIteracion(ID_PROYECTO) {
             const entregasquery = `
 SELECT 
     e.ID,
+    e.FECHA_INICIO,
+    e.FECHA_TERMINO,
     (
         SELECT JSON_ARRAYAGG(
             JSON_OBJECT(
                 "id", i.ID,
+                "fechai", i.FECHA_INICIO,
+                "fechaf", i.FECHA_TERMINO,
                 "tareas", (
                     SELECT JSON_ARRAYAGG(
                         JSON_OBJECT(
-                            "nombre", nombre,
-                            "est_desarr", estado_desarrollo
+                            "nombre", t.nombre,
+                            "est_desarr", t.estado_desarrollo,
+                            "fechatermino", t.FECHA_TERMINO,
+                            "devs", (
+                                SELECT JSON_ARRAYAGG(
+                                    JSON_OBJECT(
+                                        "nombredev", u.NOMBRE_USUARIO,
+                                        "fnamedev", CONCAT(u.NOMBRE_PILA, ' ', u.APELLIDO_PATERNO, ' ', u.APELLIDO_MATERNO),
+                                        "rol", tr.NOMBRE
+                                    )
+                                )
+                                FROM COLABORACIONES c 
+                                JOIN USUARIO u ON c.ID_USUARIO = u.ID
+                                JOIN TIPOS_ROLES tr ON c.ROL_REALIZADO = tr.ID
+                                WHERE c.ID_TAREA_REALIZADA = t.ID
+                            )
                         )
-                    ) 
-                    FROM TAREAS 
-                    WHERE ID_ITERACION = i.ID
+                    )
+                    FROM TAREAS t
+                    WHERE t.ID_ITERACION = i.ID
                 )
             )
+        ) AS ITERACIONES
+        FROM ITERACIONES i
+        WHERE i.ID_ENTREGA = e.ID
+    ) AS ITERACIONES,
+    (
+        SELECT JSON_ARRAYAGG (
+            JSON_OBJECT(
+                "objetivo", r.OBJETIVO, 
+                "descripcion", r.DESCRIPCION,
+                "treq", tr.NOMBRE 
+            )
         ) 
-        FROM iteraciones i 
-        WHERE ID_ENTREGA = e.ID
-    ) AS ITERACIONES 
-FROM entregas e 
-WHERE ID_PROYECTO = ?;
+        FROM REQUERIMIENTOS r
+        JOIN TIPOS_REQUERIMIENTOS tr ON r.ID_TIPO_REQUERIMIENTO = tr.ID
+        WHERE r.ID_ENTREGA = e.ID
+    ) AS REQUERIMIENTOS
+FROM ENTREGAS e 
+WHERE e.ID_PROYECTO = ?;
 `;
 
             //const entregasquery = "SELECT e.ID, (SELECT JSON_ARRAYAGG(JSON_OBJECT('id', i.ID, 'tareas', (SELECT JSON_ARRAYAGG(JSON_OBJECT('nombre', nombre, 'est_desarr', estado_desarrollo)) FROM TAREAS WHERE ID_ITERACION = i.ID))) FROM iteraciones i WHERE ID_ENTREGA = e.ID) AS ITERACIONES FROM entregas e WHERE ID_PROYECTO = ?;";
@@ -1099,7 +1130,7 @@ export function DeleteTask(ID_TAREA) {
                                             reject(errt);
                                         } else {
                                             console.log("eliminando tarea");
-                                            resolve("Tarea Eliminada Correctamente");
+                                            resolve({success: true});
                                         }
                                     });
                                 } else {
@@ -1121,7 +1152,7 @@ export function getTask(ID_TAREA) {
         try {
             const connection = await getConnection();
 
-            const query = "SELECT * FROM TAREAS WHERE ID_TAREA = ?"
+            const query = "SELECT * FROM TAREAS WHERE ID = ?"
             connection.query(query, [ID_TAREA], async (err, results) => {
                 if (err) {
                     reject(err);
@@ -1139,20 +1170,30 @@ export function getTask(ID_TAREA) {
     })
 }
 
-export function UpdateTask(ID, NOMBRE, DESCRIPCION, ESTADO_DESARROLLO, FECHA_INICIO, FECHA_MAX_TERMINO) {
+export function UpdateTask(ID, NOMBRE, DESCRIPCION, ESTADO_DESARROLLO, FECHA_INICIO, FECHA_MAX_TERMINO, ROLPARTICIPANTE, IDDESARROLLADOR) {
     return new Promise(async (resolve, reject) => {
         try {
             const connection = await getConnection();
             const updatequery = "UPDATE TAREAS SET NOMBRE=?, DESCRIPCION=?, ESTADO_DESARROLLO=?, FECHA_INICIO=?, FECHA_MAX_TERMINO=? WHERE ID = ?";
-
+            const updatecollabquery = "UPDATE COLABORACIONES SET ROL_REALIZADO=? WHERE ID_TAREA_REALIZADA = ? AND ID_USUARIO = ?";
             connection.query(updatequery, [NOMBRE, DESCRIPCION, ESTADO_DESARROLLO, FECHA_INICIO, FECHA_MAX_TERMINO, ID], async (err, results) => {
                 if (err) {
                     reject(err);
                 } else {
                     if (results.affectedRows > 0) {
-                        resolve(true);
+                        connection.query(updatecollabquery, [ROLPARTICIPANTE, ID, IDDESARROLLADOR], async (errc, resultsc) => {
+                            if(errc){
+                                reject(errc);
+                            }else{
+                                if(resultsc.affectedRows > 0){
+                                    resolve({success: true});
+                                }else{
+                                    resolve({success: false});
+                                }
+                            }
+                        });
                     } else {
-                        reject("Ha habido un problema al actualizar la tarea");
+                        resolve({success: false});
                     }
                 }
             });
@@ -1168,7 +1209,7 @@ export function GetTareasKanban(ID_ITERACION) {
             const connection = await getConnection();
 
             //const kanbanquery = 'select c.ID_TAREA_REALIZADA, u.NOMBRE_USUARIO as Desarrollador, t.*, r.OBJETIVO FROM COLABORACIONES c JOIN USUARIO u ON c.ID_USUARIO=U.ID JOIN TAREAS t ON c.ID_TAREA_REALIZADA = t.ID JOIN REQUERIMIENTOS r  ON t.ID_REQUERIMIENTO = r.ID WHERE t.ID_ITERACION = ? ;'
-            const kanbanquery = 'select c.ID_TAREA_REALIZADA, u.NOMBRE_USUARIO as Desarrollador, u.ID as IDDESARROLLADOR, t.*, r.OBJETIVO FROM COLABORACIONES c JOIN USUARIO u ON c.ID_USUARIO=U.ID JOIN TAREAS t ON c.ID_TAREA_REALIZADA = t.ID JOIN REQUERIMIENTOS r  ON t.ID_REQUERIMIENTO = r.ID WHERE t.ID_ITERACION = ? ;'
+            const kanbanquery = "SELECT CONCAT(c.ID_TAREA_REALIZADA,'-', u.ID) AS IDK, c.ID_TAREA_REALIZADA, c.ROL_REALIZADO, tr.NOMBRE as ROL,  u.NOMBRE_USUARIO as Desarrollador, u.ID as IDDESARROLLADOR, t.*, r.OBJETIVO, tp.ID as ID_TAREA_PADRE, tp.ESTADO_DESARROLLO as ESTADO_PADRE, tp.NOMBRE as NOMBRE_TAREA_PADRE, CASE WHEN tp.ESTADO_DESARROLLO = 'Bloqueada' THEN FALSE WHEN tp.ESTADO_DESARROLLO = 'En espera' THEN FALSE WHEN tp.ESTADO_DESARROLLO = 'En desarrollo' THEN FALSE WHEN tp.ESTADO_DESARROLLO = 'Atrasada' THEN FALSE ELSE TRUE END as ESTADO_PERMITIDO_PADRE FROM COLABORACIONES c JOIN USUARIO u ON c.ID_USUARIO = u.ID JOIN TAREAS t ON c.ID_TAREA_REALIZADA = t.ID JOIN REQUERIMIENTOS r ON t.ID_REQUERIMIENTO = r.ID LEFT JOIN T_DEPENDE_T d ON t.ID = d.ID_SUBTAREA LEFT JOIN TAREAS tp ON d.ID_TAREA_DEPENDIENTE = tp.ID  LEFT JOIN TIPOS_ROLES tr ON c.ROL_REALIZADO = tr.ID WHERE t.ID_ITERACION = ? ORDER BY 1;";
             connection.query(kanbanquery, [ID_ITERACION], async (err, results) => {
                 if (err) {
                     reject(err);
@@ -1191,18 +1232,18 @@ export function getProjectInfo(ID_PROYECTO) {
         try {
             const connection = await getConnection();
             const query = `SELECT
-            (SELECT count(ID_USUARIO) AS NUMPARTICIPANTES FROM U_SEUNE_P WHERE ID_PROYECTO = 1 GROUP BY ID_PROYECTO) AS NUMPARTICIPANTS,
-            (SELECT COUNT(e.ID) FROM Entregas e WHERE e.ID_PROYECTO = 1) AS NUMENTREGAS,
-            (SELECT COUNT(e.ID) FROM Entregas e WHERE e.ID_PROYECTO = 1 AND e.ESTADO = "Finalizado") AS NUMENTREGASCMP,
-            (SELECT COUNT(i.ID) FROM Iteraciones i JOIN Entregas e ON e.ID = i.ID_ENTREGA WHERE e.ID_PROYECTO = 1) AS NUMITERACIONES,
-            (SELECT COUNT(i.ID) FROM Iteraciones i JOIN Entregas e ON e.ID = i.ID_ENTREGA WHERE e.ID_PROYECTO = 1 AND i.ESTADO = "Finalizado") AS NUMITERACIONESCMP,
-            (SELECT COUNT(t.ID) FROM ENTREGAS e JOIN ITERACIONES i ON e.ID=i.ID_ENTREGA JOIN TAREAS t ON i.ID=t.ID_ITERACION WHERE e.ID_PROYECTO = 1) AS NUMTAREAS,
-            (SELECT COUNT(t.ID) FROM ENTREGAS e JOIN ITERACIONES i ON e.ID=i.ID_ENTREGA JOIN TAREAS t ON i.ID=t.ID_ITERACION WHERE e.ID_PROYECTO = 1 AND t.ESTADO_DESARROLLO = "Cerrada") AS NUMTAREASCMP,
-            (SELECT COUNT(t.ID) FROM ENTREGAS e JOIN ITERACIONES i ON e.ID=i.ID_ENTREGA JOIN TAREAS t ON i.ID=t.ID_ITERACION WHERE e.ID_PROYECTO = 1 AND t.ESTADO_DESARROLLO = "En espera") AS NUMTAREASESP,
-            (SELECT COUNT(t.ID) FROM ENTREGAS e JOIN ITERACIONES i ON e.ID=i.ID_ENTREGA JOIN TAREAS t ON i.ID=t.ID_ITERACION WHERE e.ID_PROYECTO = 1 AND t.ESTADO_DESARROLLO = "En desarrollo") AS NUMTAREASDES,
-            (SELECT COUNT(t.ID) FROM ENTREGAS e JOIN ITERACIONES i ON e.ID=i.ID_ENTREGA JOIN TAREAS t ON i.ID=t.ID_ITERACION WHERE e.ID_PROYECTO = 1 AND t.ESTADO_DESARROLLO = "Por Revisar") AS NUMTAREASREV;`;
+            (SELECT count(ID_USUARIO) AS NUMPARTICIPANTES FROM U_SEUNE_P WHERE ID_PROYECTO = ? GROUP BY ID_PROYECTO) AS NUMPARTICIPANTS,
+            (SELECT COUNT(e.ID) FROM Entregas e WHERE e.ID_PROYECTO = ?) AS NUMENTREGAS,
+            (SELECT COUNT(e.ID) FROM Entregas e WHERE e.ID_PROYECTO = ? AND e.ESTADO = "Finalizado") AS NUMENTREGASCMP,
+            (SELECT COUNT(i.ID) FROM Iteraciones i JOIN Entregas e ON e.ID = i.ID_ENTREGA WHERE e.ID_PROYECTO = ?) AS NUMITERACIONES,
+            (SELECT COUNT(i.ID) FROM Iteraciones i JOIN Entregas e ON e.ID = i.ID_ENTREGA WHERE e.ID_PROYECTO = ? AND i.ESTADO = "Finalizado") AS NUMITERACIONESCMP,
+            (SELECT COUNT(t.ID) FROM ENTREGAS e JOIN ITERACIONES i ON e.ID=i.ID_ENTREGA JOIN TAREAS t ON i.ID=t.ID_ITERACION WHERE e.ID_PROYECTO = ?) AS NUMTAREAS,
+            (SELECT COUNT(t.ID) FROM ENTREGAS e JOIN ITERACIONES i ON e.ID=i.ID_ENTREGA JOIN TAREAS t ON i.ID=t.ID_ITERACION WHERE e.ID_PROYECTO = ? AND t.ESTADO_DESARROLLO = "Cerrada") AS NUMTAREASCMP,
+            (SELECT COUNT(t.ID) FROM ENTREGAS e JOIN ITERACIONES i ON e.ID=i.ID_ENTREGA JOIN TAREAS t ON i.ID=t.ID_ITERACION WHERE e.ID_PROYECTO = ? AND t.ESTADO_DESARROLLO = "En espera") AS NUMTAREASESP,
+            (SELECT COUNT(t.ID) FROM ENTREGAS e JOIN ITERACIONES i ON e.ID=i.ID_ENTREGA JOIN TAREAS t ON i.ID=t.ID_ITERACION WHERE e.ID_PROYECTO = ? AND t.ESTADO_DESARROLLO = "En desarrollo") AS NUMTAREASDES,
+            (SELECT COUNT(t.ID) FROM ENTREGAS e JOIN ITERACIONES i ON e.ID=i.ID_ENTREGA JOIN TAREAS t ON i.ID=t.ID_ITERACION WHERE e.ID_PROYECTO = ? AND t.ESTADO_DESARROLLO = "Por Revisar") AS NUMTAREASREV;`;
 
-            connection.query(query, [ID_PROYECTO, ID_PROYECTO, ID_PROYECTO, ID_PROYECTO], async (err, results) => {
+            connection.query(query, [ID_PROYECTO, ID_PROYECTO, ID_PROYECTO, ID_PROYECTO, ID_PROYECTO, ID_PROYECTO, ID_PROYECTO, ID_PROYECTO, ID_PROYECTO, ID_PROYECTO], async (err, results) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -1224,7 +1265,7 @@ export function getParticipantsQuery(ID_PROYECTO) {
         try {
             const connection = await getConnection();
             const query = 'SELECT ID_USUARIO, FECHA_UNION, ES_CREADOR FROM U_SEUNE_P WHERE ID_PROYECTO = ?';
-            const queryusers = "SELECT NOMBRE_USUARIO, NUMERO_BOLETA  FROM USUARIO WHERE ID = ?"
+            const queryusers = "SELECT NOMBRE_USUARIO, NUMERO_BOLETA, CONCAT(NOMBRE_PILA, ' ', APELLIDO_PATERNO, ' ', APELLIDO_MATERNO) AS NOMBRE_CMP  FROM USUARIO WHERE ID = ?"
             connection.query(query, [ID_PROYECTO], async (err, results) => {
                 if (err) {
                     reject(err);
@@ -1246,7 +1287,8 @@ export function getParticipantsQuery(ID_PROYECTO) {
                             ROLE: role,
                             ID_USUARIO: result.ID_USUARIO,
                             FECHA_UNION: moment(result.FECHA_UNION).tz(zonaHoraria).format("YYYY-MM-DD"),
-                            NUMERO_BOLETA: Userdata.NUMERO_BOLETA
+                            NUMERO_BOLETA: Userdata.NUMERO_BOLETA,
+                            NOMBRE_CMP: Userdata.NOMBRE_CMP
                         };
                     })
                     const users = await Promise.all(promises);
@@ -1260,6 +1302,52 @@ export function getParticipantsQuery(ID_PROYECTO) {
             reject(error);
         }
     })
+}
+
+export function getIterationParticipants(ID_ITERACION) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const connection = await getConnection();
+            const query = "select c.ID_USUARIO, concat(u.NOMBRE_PILA, ' ', u.APELLIDO_PATERNO, ' ', u.APELLIDO_MATERNO) as NOMBRE, u.NOMBRE_USUARIO, group_concat(c.ID_TAREA_REALIZADA ORDER BY c.ID_TAREA_REALIZADA) as TAREAS_REAL from colaboraciones c JOIN USUARIO U ON c.ID_USUARIO = u.ID where ID_ITERACION = ? group by ID_USUARIO;";
+
+            connection.query(query, [ID_ITERACION], async (err, results) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    if (results.length > 0) {
+                        resolve(results);
+                    } else {
+                        resolve([]);
+                    }
+                }
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+export function getProjectRequirements(ID_PROYECTO, ENTREGA) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const queryreq = "select r.OBJETIVO, r.DESCRIPCION, tr.NOMBRE, r.ID_ENTREGA as ENTREGA, r.ID from REQUERIMIENTOS r  LEFT JOIN ENTREGAS e ON r.ID_ENTREGA = e.ID JOIN TIPOS_REQUERIMIENTOS tr ON r.ID_TIPO_REQUERIMIENTO = tr.ID WHERE e.ID_PROYECTO = ? AND r.ID_ENTREGA = ? order by r.ID_ENTREGA;";
+            const connection = await getConnection();
+
+            connection.query(queryreq, [ID_PROYECTO, ENTREGA], async (err, results) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    if (results.length > 0) {
+                        resolve(results);
+                    } else {
+                        resolve([]);
+                    }
+                }
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
 }
 
 export function ActualizarEstado(ESTADO, TABLA, ID) {
@@ -1562,23 +1650,114 @@ export function getProjectWithEntrega(ID) {
     });
 }
 
-export function getTareasGantt(ID_PROYECTO){
-    return new Promise (async (resolve, reject) => {
-        try{
+export function getTareasGantt(ID_PROYECTO) {
+    return new Promise(async (resolve, reject) => {
+        try {
             const connection = await getConnection();
-        const query = "SELECT T1.NOMBRE,T1.ID,T1.FECHA_INICIO,T1.FECHA_MAX_TERMINO,ITERACIONES.ID_ENTREGA AS ENTREGA,T1.ESTADO_DESARROLLO,GROUP_CONCAT(T2.NOMBRE) AS DEPENDENCIAS FROM TAREAS T1 JOIN ITERACIONES ON T1.ID_ITERACION = ITERACIONES.ID JOIN ENTREGAS ON ENTREGAS.ID = ITERACIONES.ID_ENTREGA  LEFT JOIN T_DEPENDE_T ON T1.ID = T_DEPENDE_T.ID_TAREA_DEPENDIENTE LEFT JOIN TAREAS T2 ON T_DEPENDE_T.ID_SUBTAREA = T2.ID WHERE ENTREGAS.ID_PROYECTO = 1 GROUP BY T1.ID ORDER BY ENTREGA;";
-        connection.query(query, [ID_PROYECTO], async (err, results) => {
-            if(err){
-                reject(err);
-            }else {
-                if(results.length > 0){
-                    resolve(results);
-                }else{
-                    resolve([]);
+            const query = "SELECT T1.ID_ITERACION, T1.NOMBRE,T1.ID,T1.FECHA_INICIO,T1.FECHA_MAX_TERMINO,ITERACIONES.ID_ENTREGA AS ENTREGA,T1.ESTADO_DESARROLLO,GROUP_CONCAT(T2.NOMBRE) AS DEPENDENCIAS FROM TAREAS T1 JOIN ITERACIONES ON T1.ID_ITERACION = ITERACIONES.ID JOIN ENTREGAS ON ENTREGAS.ID = ITERACIONES.ID_ENTREGA  LEFT JOIN T_DEPENDE_T ON T1.ID = T_DEPENDE_T.ID_SUBTAREA LEFT JOIN TAREAS T2 ON T_DEPENDE_T.ID_TAREA_DEPENDIENTE = T2.ID WHERE ENTREGAS.ID_PROYECTO = ? GROUP BY T1.ID ORDER BY ENTREGA;";
+            connection.query(query, [ID_PROYECTO], async (err, results) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    if (results.length > 0) {
+                        resolve(results);
+                    } else {
+                        resolve([]);
+                    }
                 }
-            }
-        });
-        }catch(error){
+            });
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
+export function AgregarColaboradorTarea(ID_USUARIO, ID_ITERACION, ID_TAREA_REALIZADA, ROL_REALIZADO){
+    return new Promise(async (resolve, reject) => {
+        try {
+            const connection = await getConnection();
+            const query = "INSERT INTO COLABORACIONES (ID_USUARIO, ID_ITERACION, ID_TAREA_REALIZADA, ROL_REALIZADO) VALUES (?,?,?,?)";
+            connection.query(query, [ID_USUARIO, ID_ITERACION, ID_TAREA_REALIZADA, ROL_REALIZADO], async (err, results) => {
+                if(err){
+                    reject(err);
+                }else {
+                    if(results.affectedRows > 0 ){
+                        resolve({success: true});
+                    }else{
+                        resolve({success: false});
+                    }
+                }
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+export function EliminarColaborador(ID_USUARIO, ID_TAREA){
+    return new Promise (async (resolve , reject ) => {
+        try {
+            const connection = await getConnection();
+            const query = "DELETE FROM COLABORACIONES WHERE ID_TAREA_REALIZADA = ? AND ID_USUARIO = ?";
+
+            connection.query(query, [ID_TAREA, ID_USUARIO], async (err, results) => {
+                if(err){
+                    reject(err);
+                }else{
+                    if(results.affectedRows > 0){
+                        resolve({success: true});
+                    }else{
+                        resolve({success: false});
+                    }
+                }
+            });
+        } catch (error) {
+            
+        }
+    });
+}
+
+export function GetEntregas(ID_PROYECTO){
+    return new Promise (async (resolve, reject) => {
+        try {
+            const connection = await getConnection();
+            const query = "select  concat('Entrega', ' ', (@row_number:=@row_number + 1)) AS Nombre_Entrega, entregas.ID from entregas, (SELECT @row_number:=0) r  WHERE entregas.ID_PROYECTO = ?";
+
+            connection.query(query, [ID_PROYECTO], async (err, results) => {
+                if(err){
+                    reject(err);
+                }else{
+                    if(results.length > 0){
+                        resolve(results);
+                    }else{
+                        resolve([]);
+                    }
+                }
+            });
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
+export function GetIteraciones(ID_ENTREGA){
+    return new Promise (async (resolve, reject) => {
+        try {
+            const connection = await getConnection();
+            const query = "select  concat('Iteración', ' ', (@row_number:=@row_number + 1)) AS Nombre_Iteracion, iteraciones.ID from iteraciones, (SELECT @row_number:=0) r  WHERE iteraciones.ID_ENTREGA = ?";
+
+            connection.query(query, [ID_ENTREGA], async (err, results) => {
+                if(err){
+                    reject(err);
+                }else{
+                    if(results.length > 0){
+                        resolve(results);
+                    }else{
+                        resolve([]);
+                    }
+                }
+            });
+        } catch (error) {
             reject(error);
         }
     })

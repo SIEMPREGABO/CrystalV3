@@ -77,9 +77,9 @@ export const Proyecto = () => {
                     
 
                     <div>
+                    {themeSettings && <ThemeSettings />}
                         <Routes>
                             <Route element={<ProtectProject />}>
-                                {themeSettings && <ThemeSettings />}
                                 {/* Proteger las rutas autorizadas */}
                                 {userRole && <Route path="Home" element={<Dashboard />} />}
                                 {userRole && <Route path="Participantes" element={<Participantes />} />}

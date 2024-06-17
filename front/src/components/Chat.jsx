@@ -1,15 +1,20 @@
 import React from 'react';
 import { MdOutlineCancel } from 'react-icons/md';
 
-import { Button} from '.';
+import { Button } from '.';
 import { chatData } from '../data/dummy';
 import { useStateContext } from '../context/Provider';
 import { Link } from 'react-router-dom';
+import { useProject } from '../context/projectContext';
 
 const Chat = () => {
   const { currentColor, handleClick } = useStateContext();
+  const { createMessages, iteracionactual, messagesChat, getMessages } = useProject();
 
   return (
+    <div className='m-2 md:m-10 p-2 md:p-10 bg-white rounded-3xl'>
+
+      {/*
     <div className="nav-item absolute right-5 md:right-52 top-16 bg-white dark:bg-[#42464D] p-8 rounded-lg w-96">
       <div className="flex justify-between items-center">
         <div className="flex gap-3">
@@ -62,7 +67,9 @@ const Chat = () => {
 
         </div>
       </div>
+    </div>*/}
     </div>
+
   );
 };
 
