@@ -5,7 +5,8 @@ import { registrarIteracion, registrarEntrega } from "../querys/projectquerys.js
 
 
 
-export function generarEntregas(ENTREGAS, FECHA_INICIAL, FECHA_FINAL,ID_PROYECTO){
+export function generarEntregas(ENTREGAS, FECHA_ACTUAL, FECHA_FINAL,ID_PROYECTO){
+        const FECHA_INICIAL = moment(FECHA_ACTUAL);
         const DIAS_PROYECTO = FECHA_FINAL.diff(FECHA_INICIAL, 'days') + 1;
         const NUMEROENTREGAS = parseInt(ENTREGAS, 10);
         const PARTES = Math.floor(DIAS_PROYECTO / NUMEROENTREGAS);

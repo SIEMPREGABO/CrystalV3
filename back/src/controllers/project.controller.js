@@ -51,21 +51,25 @@ export const createProject = async (req, res) => {
         if (DIAS_PROYECTO < 90) return res.status(400).json({ message: "El proyecto debe durar minimo 3 meses" });
         if (DIAS_PROYECTO > 365) return res.status(400).json({ message: "El proyecto debe durar maximo 1 año" });
 
-        let REGISTRO_ACTUAL = moment(FECHA_ACTUAL).format('YYYY-MM-DD HH:mm:ss');
+        let REGISTRO_ACTUAL = moment(FECHA_ACTUAL).format('YYYY-MM-DD 00:00:00');
         let REGISTRO_INICIAL = moment(FECHA_INICIAL).format('YYYY-MM-DD HH:mm:ss');
         let REGISTRO_FINAL = moment(FECHA_FINAL).format('YYYY-MM-DD HH:mm:ss');
 
         const CODIGO_UNICO = await generarCodigo();
 
-        const generarProyecto = await crearProyecto(NOMBRE_PROYECTO, OBJETIVO, DESCRIPCION_GNRL, REGISTRO_ACTUAL, REGISTRO_INICIAL, REGISTRO_FINAL, ENTREGAS, CODIGO_UNICO, ID);
+        const generarProyecto = await crearProyecto(NOMBRE_PROYECTO, OBJETIVO, DESCRIPCION_GNRL, REGISTRO_ACTUAL, REGISTRO_ACTUAL, REGISTRO_FINAL, ENTREGAS, CODIGO_UNICO, ID);
         if (!generarProyecto.success) return res.status(400).json({ message: "Error al crear el proyecto" });
 
-        const ARREGLOPROYECTO = generarEntregas(ENTREGAS, FECHA_INICIAL, FECHA_FINAL, generarProyecto.ID_P);
+        const ARREGLOPROYECTO = generarEntregas(ENTREGAS, REGISTRO_ACTUAL, FECHA_FINAL, generarProyecto.ID_P);
         if (!ARREGLOPROYECTO) return res.status(400).json({ message: "Error al crear las entregas e iteraciones" });
-
-        const emailsendend = await sendemailProject(CORREO, NOMBRE_PROYECTO, OBJETIVO, REGISTRO_INICIAL, REGISTRO_FINAL, CODIGO_UNICO);
-        if (!emailsendend) return res.status(400).json({ message: "Error inesperado, intente nuevamente" })
-
+        try {
+            const emailsendend = await sendemailProject(CORREO, NOMBRE_PROYECTO, OBJETIVO, REGISTRO_ACTUAL, REGISTRO_FINAL, CODIGO_UNICO);
+            if (!emailsendend) return res.status(400).json({ message: "Error inesperado, intente nuevamente" })
+    
+        } catch (error) {
+            
+        }
+        activarTareasInactivas();
         return res.status(200).json({ message: "Proyecto creado con exito" });
     } catch (error) {
         res.status(500).json({ message: "Error inesperado, intentalo de nuevo" });
@@ -837,7 +841,7 @@ export const activarTareasInactivas = async (req, res) => {
                         const correoParticipante = await getUser(id.ID_USUARIO);
                         try {
                             await sendemailStartProject(projectinfo[0].NOMBRE, correoParticipante[0].CORREO, projectinfo[0].OBJETIVO, projectinfo[0].DESCRIPCION_GNRL);
-                        } finally { }
+                        } catch(err) { }
                     }));
                 }
             }
@@ -862,7 +866,7 @@ export const activarTareasInactivas = async (req, res) => {
                         const correoParticipante = await getUser(id.ID_USUARIO);
                         try {
                             await sendemailEndProject(projectinfo[0].NOMBRE, correoParticipante[0].CORREO, projectinfo[0].OBJETIVO, projectinfo[0].DESCRIPCION_GNRL);
-                        } finally { }
+                        } catch(err) { }
                     }));
                 } if (fechas === FECHAS_ITERACIONES) {
                     const idProyecto = await getProjectWithIter(fecha.ID);
@@ -884,7 +888,7 @@ export const activarTareasInactivas = async (req, res) => {
                         const correoParticipante = await getUser(id.ID_USUARIO);
                         try {
                             await sendemailFaseProject(projectinfo[0].NOMBRE, correoParticipante[0].CORREO, projectinfo[0].OBJETIVO, projectinfo[0].DESCRIPCION_GNRL);
-                        } finally { }
+                        } catch(err) { }
                     }));
                 }
                 if (fechas === FECHAS_ENTREGAS) {
@@ -907,7 +911,7 @@ export const activarTareasInactivas = async (req, res) => {
                         const correoParticipante = await getUser(id.ID_USUARIO);
                         try {
                             await sendemailFaseProject(projectinfo[0].NOMBRE, correoParticipante[0].CORREO, projectinfo[0].OBJETIVO, projectinfo[0].DESCRIPCION_GNRL);
-                        } finally { }
+                        } catch(err) { }
 
                     }));
                 }
@@ -958,7 +962,7 @@ export const activarTareasInactivas = async (req, res) => {
     }))
 
     console.log("Im alive");
-    setTimeout(activarTareasInactivas, 10 * 60 * 1000);
+    setTimeout(activarTareasInactivas, 60 * 1000);
 }
 
 export const agregarRequerimiento = async (req, res) => {
