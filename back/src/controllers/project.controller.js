@@ -33,7 +33,8 @@ import {
     AgregarColaboradorTarea,
     EliminarColaborador,
     GetEntregas,
-    GetIteraciones
+    GetIteraciones,
+    
 } from '../querys/projectquerys.js';
 import jwt from 'jsonwebtoken'
 import { zonaHoraria } from '../config.js';
@@ -214,7 +215,7 @@ export const getProject = async (req, res) => {
         const tasks = await getTareas(ITERACION_ACTUAL.ID);
         const tasksKanban = await GetTareasKanban(ITERACION_ACTUAL.ID);
         const projectInfo = await getProjectInfo(ID_PROYECTO);
-        const notificaciones = await getNotificaciones(USER);
+        //const notificaciones = await getNotificaciones(USER);
         const projectreqs = await getProjectRequirements(ID_PROYECTO, ENTREGA_ACTUAL.ID);
         const iterationParticipants = await getIterationParticipants(ITERACION_ACTUAL.ID);
         const iteraciones = await GetIteraciones(ENTREGA_ACTUAL.ID);
@@ -235,7 +236,7 @@ export const getProject = async (req, res) => {
             iterationParticipants: iterationParticipants, 
             entregas: entregas,
             iteraciones: iteraciones,
-            notificaciones: notificaciones
+            //notificaciones: notificaciones
         };
         return res.json(data);
     } catch (error) {
@@ -648,6 +649,7 @@ export const createTask = async (req, res) => {
         //console.log("Controller function createTask");
         const tareacreada = await CrearTarea(NOMBRE, DESCRIPCION, REGISTRO_INICIO, REGISTRO_MAX, iteracionactual.ID, ID_USUARIO, ID_REQUERIMIENTO, ROLPARTICIPANTE, ID_TAREA_DEPENDIENTE);
         if (!tareacreada.success) return res.status(400).json({ message: "Error al crear la tarea" });
+        console.log("Tarea creada");
         const usuario = await getUser(ID_USUARIO);
         const registro = moment(FECHA_ACTUAL).format('YYYY-MM-DD HH:mm:ss');
         const meterNotificacion = registrarNotificacion(
@@ -657,8 +659,10 @@ export const createTask = async (req, res) => {
             registro
         )
         if (!meterNotificacion) return res.status(500).json({ message: 'Error al registrar la notificación' });
+        console.log("Noti enviado");
         const emailsendend = await sendemailTask(usuario[0].CORREO, NOMBRE, DESCRIPCION, REGISTRO_INICIO, REGISTRO_MAX, ROLPARTICIPANTE);
         if (!emailsendend) return res.status(400).json({ message: "Error inesperado, intente nuevamente"})
+            console.log("Email enviado");
 
         return res.status(200).json({ message: "Tarea creada con exito" });
 
