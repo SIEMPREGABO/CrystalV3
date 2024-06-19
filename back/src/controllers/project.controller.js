@@ -36,11 +36,12 @@ import { sendemailAdd, sendemailAdmin, sendemailConfig, sendemailDeleteProject, 
 import { actualizarEstadoNotificacion } from '../querys/authquerys.js';
 
 export const createProject = async (req, res) => {
-    const FECHA_ACTUAL = moment().tz(zonaHoraria);
+    const FECHA_ACTUAL = moment().tz(zonaHoraria).startOf('day');
     const { NOMBRE_PROYECTO, OBJETIVO, DESCRIPCION_GNRL, FECHA_INICIO, FECHA_TERMINO, ENTREGAS, ID, CORREO } = req.body;
     console.log(req.body);
     try {
-        const FECHA_INICIAL = moment(FECHA_INICIO).tz(zonaHoraria).add(1, 'days');
+        let dias = 7;
+        const FECHA_INICIAL = moment(FECHA_INICIO).tz(zonaHoraria).startOf('day');
         const FECHA_FINAL = moment(FECHA_TERMINO).tz(zonaHoraria).endOf('day');
 
         if (FECHA_INICIAL.isBefore(FECHA_ACTUAL)) return res.status(400).json({ message: "Fecha inicial incorrecta" });
@@ -49,23 +50,25 @@ export const createProject = async (req, res) => {
         const DIAS_PROYECTO = FECHA_FINAL.diff(FECHA_INICIAL, 'days') + 1;
 
         if (DIAS_PROYECTO < 90) return res.status(400).json({ message: "El proyecto debe durar minimo 3 meses" });
+        if (DIAS_PROYECTO > 179) dias = 14;
         if (DIAS_PROYECTO > 365) return res.status(400).json({ message: "El proyecto debe durar maximo 1 año" });
 
-        let REGISTRO_ACTUAL = moment(FECHA_ACTUAL).format('YYYY-MM-DD 00:00:00');
+
+        let REGISTRO_ACTUAL = moment(FECHA_ACTUAL).format('YYYY-MM-DD HH:mm:ss');
         let REGISTRO_INICIAL = moment(FECHA_INICIAL).format('YYYY-MM-DD HH:mm:ss');
         let REGISTRO_FINAL = moment(FECHA_FINAL).format('YYYY-MM-DD HH:mm:ss');
 
         const CODIGO_UNICO = await generarCodigo();
 
-        const generarProyecto = await crearProyecto(NOMBRE_PROYECTO, OBJETIVO, DESCRIPCION_GNRL, REGISTRO_ACTUAL, REGISTRO_ACTUAL, REGISTRO_FINAL, ENTREGAS, CODIGO_UNICO, ID);
+        const generarProyecto = await crearProyecto(NOMBRE_PROYECTO, OBJETIVO, DESCRIPCION_GNRL, REGISTRO_ACTUAL, REGISTRO_INICIAL, REGISTRO_FINAL, ENTREGAS, CODIGO_UNICO, ID);
         if (!generarProyecto.success) return res.status(400).json({ message: "Error al crear el proyecto" });
 
-        const ARREGLOPROYECTO = generarEntregas(ENTREGAS, REGISTRO_ACTUAL, FECHA_FINAL, generarProyecto.ID_P);
+        const ARREGLOPROYECTO = generarEntregas(ENTREGAS, REGISTRO_INICIAL, FECHA_FINAL, generarProyecto.ID_P, dias);
         if (!ARREGLOPROYECTO) return res.status(400).json({ message: "Error al crear las entregas e iteraciones" });
         try {
-            const emailsendend = await sendemailProject(CORREO, NOMBRE_PROYECTO, OBJETIVO, REGISTRO_ACTUAL, REGISTRO_FINAL, CODIGO_UNICO);
+            const emailsendend = await sendemailProject(CORREO, NOMBRE_PROYECTO, OBJETIVO, REGISTRO_INICIAL, REGISTRO_FINAL, CODIGO_UNICO);
             if (!emailsendend) return res.status(400).json({ message: "Error inesperado, intente nuevamente" })
-    
+        
         } catch (error) {
             
         }

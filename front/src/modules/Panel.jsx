@@ -71,7 +71,7 @@ export const Panel = () => {
                                     <ColumnsDirective>
                                         <ColumnDirective field='ID' headerText='ID del proyecto' width='120' textAlign='Center' />
                                         <ColumnDirective field='NOMBRE' headerText='Nombre del proyecto' width='150' textAlign='Center' />
-                                        <ColumnDirective field='FECHA_INI' headerText='Fecha de Termino' width='150' textAlign='Center' template={(props) => {
+                                        <ColumnDirective field='FECHA_INI' headerText='Fecha de Inicio' width='150' textAlign='Center' template={(props) => {
                                             const fechaConsulta = props.FECHA_INICIO; // Fecha recibida desde la consulta
                                             const fecha = new Date(fechaConsulta); // Crear un objeto Date con la fecha de la consulta\
                                             const año = fecha.getFullYear();

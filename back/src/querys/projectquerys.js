@@ -751,7 +751,7 @@ export function projectsUsuario(ID) {
     return new Promise(async (resolve, reject) => {
         const connection = await getConnection();
         const usuarioQuery = 'SELECT ID_PROYECTO, ES_CREADOR FROM U_SEUNE_P WHERE ID_USUARIO = ?';
-        const projectQuery = `SELECT NOMBRE, ID, ESTADO, CONVERT_TZ(FECHA_INICIO, '+00:00', '-06:00') AS FECHA_INICIO, CONVERT_TZ(FECHA_TERMINO, '+00:00', '-06:00') AS FECHA_TERMINO FROM PROYECTOS WHERE ID = ?`;
+        const projectQuery = `SELECT NOMBRE, ID, ESTADO,  FECHA_INICIO,  FECHA_TERMINO FROM PROYECTOS WHERE ID = ?`;
         connection.query(usuarioQuery, [ID], (err, results) => {
             if (err) {
                 reject(err);
@@ -786,7 +786,7 @@ export function projectsUsuario(ID) {
     });
 }
 
-export function registrarEntrega(RETROALIMENTACION, ESTADO, FECHA_INICIO, FECHA_TERMINO, ID_PROYECTO) {
+export function registrarEntrega(RETROALIMENTACION, ESTADO, FECHA_INICIO, FECHA_TERMINO, ID_PROYECTO, DIAS) {
     return new Promise(async (resolve, reject) => {
         const FIN = moment(FECHA_TERMINO).endOf('day').format('YYYY-MM-DD HH:mm:ss');
         const connection = await getConnection();
@@ -797,7 +797,7 @@ export function registrarEntrega(RETROALIMENTACION, ESTADO, FECHA_INICIO, FECHA_
             } else {
                 if (results.affectedRows > 0) {
                     resolve(true);
-                    generarIteraciones(moment(FECHA_INICIO), moment(FECHA_TERMINO), results.insertId);
+                    generarIteraciones(moment(FECHA_INICIO), moment(FECHA_TERMINO), results.insertId, DIAS);
                 } else {
                     resolve(false);
                 }
