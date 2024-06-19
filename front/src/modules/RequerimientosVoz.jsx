@@ -21,7 +21,8 @@ import { useProject } from "../context/projectContext.js";
 import { zodResolver } from '@hookform/resolvers/zod';
 import styles from '../css/voicereq.module.css';
 import { requerimientoxVozSchema } from '../schemas/project.js';
-
+import { useStateContext } from '../context/Provider.js';
+import { Header } from '../components';
 
 
 function createRequirement(tipo, requerimiento) {
@@ -29,7 +30,7 @@ function createRequirement(tipo, requerimiento) {
 }
 
 export const RequerimientoVoz = () => {
-
+    const { activeMenu, themeSettings, setthemeSettings, currentColor, currentMode } = useStateContext();
     const {
         register,
         handleSubmit,
@@ -39,6 +40,7 @@ export const RequerimientoVoz = () => {
     });
 
     const { createRequirements, projecterrors, entregaactual, message } = useProject();
+
 
     const onSubmit = handleSubmit(async (values) => {
         const data = {
@@ -111,7 +113,7 @@ export const RequerimientoVoz = () => {
         <div className={styles.App}>
             <header className={styles['App-header']}>
                 <div className={styles.container}>
-                    <h1 className={styles.titulo}>Requerimientos X Voz</h1>
+                <Header category="App" title="Requerimientos X Voz" />
                     <p className={styles.parrafo}>Para levantar requerimientos con respecto a una entrega, solo pulsa el
                         botón en forma de micrófono que se encuentra justo debajo y comienza a hablar!</p>
                     <p className={styles.parrafo}><em>Nota: Para solicitar un nuevo requerimiento di "levantar requerimiento (tu requerimiento)", en caso de que desees solictar un cambio dí lo siguiente "cambio de (tu cambio)"</em></p>
@@ -147,11 +149,11 @@ export const RequerimientoVoz = () => {
                     <p>{type}</p>
                     <TableContainer component={Paper} >
                         <Table sx={{ minWidth: 400 }} aria-label="simple table">
-                            <TableHead sx={{ bgcolor: "blue" }}>
+                            <TableHead sx={{ bgcolor: currentColor }}>
                                 <TableRow>
-                                    <TableCell>N°</TableCell>
-                                    <TableCell>Tipo Requerimiento</TableCell>
-                                    <TableCell>Requerimiento</TableCell>
+                                    <TableCell className='text-white font-semibold'>N°</TableCell>
+                                    <TableCell className='text-white font-semibold'>Tipo Requerimiento</TableCell>
+                                    <TableCell className='text-white font-semibold'>Requerimiento</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>

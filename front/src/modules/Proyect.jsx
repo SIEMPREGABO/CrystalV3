@@ -41,8 +41,8 @@ export const Proyecto = () => {
     }, [userRole]);
 
     return (
-        <div className={currentMode === 'Dark' ? 'dark' : ''}>
-            <div className="flex relative dark:bg-main-dark-bg">
+        <div className='bg-light-gray'>
+            <div className="flex relative bg-light-gray ">
                 <div className="fixed right-4 bottom-4" style={{ zIndex: '1000' }}>
                     <TooltipComponent content="Settings" position="Top">
                         <button
@@ -108,7 +108,9 @@ export const Proyecto = () => {
                     </div>
                 </div>
             </div>
-            <Footer />
+            <div className='bg-light-gray'>
+                <Footer />
+            </div>
         </div>
     );
 }

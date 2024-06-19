@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { createContext, useContext, useState } from "react";
-import { requestLogin, requestRegister, requestLogout, requestVerify, requestReset, requestPass, requestUpdate } from "../requests/auth.js";
+import { requestLogin, requestRegister, requestLogout, requestVerify, requestReset, requestPass, requestUpdate, requestCambiarEstado  } from "../requests/auth.js";
 import Cookies from "js-cookie";
 import {requestProjects} from "../requests/projectReq.js";
 import swal from 'sweetalert';
@@ -27,6 +27,7 @@ export const AuthProvider = ({ children }) => {
   const [message, setMessage] = useState([]);
 
   const [isLoading, setLoading] = useState(true);
+  const [notificaciones, setNotificaciones] = useState([]);
 
   useEffect(() => {
     if (autherrors.length > 0) {
@@ -60,6 +61,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await requestLogin(user);
       setUser(res.data);
+      setNotificaciones(res.data.notificaciones);
       setIsAuthenticated(true);
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
@@ -81,6 +83,27 @@ export const AuthProvider = ({ children }) => {
       }
     }
   };
+  const changeState = async (notificaciones) =>{
+    try {
+      const res = await requestCambiarEstado(notificaciones);
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.message) {
+        swal({
+          title: 'Cambio de estado notificacion',
+          text: error.response.data.message,
+          icon: 'error',
+          button: 'Aceptar',
+        });
+      } else {
+        swal({
+          title: 'Cambio de estado notificacion',
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
+      }
+    }
+  }
 
   const signup = async (user) => {
     try {
@@ -266,11 +289,11 @@ export const AuthProvider = ({ children }) => {
 
         autherrors, message,
 
-        IsAuthenticated, isLoading,
+        IsAuthenticated, isLoading,notificaciones,setNotificaciones,
 
         setAutherrors, setMessage, setUser, setIsAuthenticated, setLoading,setProjects,
 
-        signin,
+        signin,changeState,
         signup,
         resetToken,
         resetPass,

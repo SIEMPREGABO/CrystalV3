@@ -17,7 +17,7 @@ function AsignarTarea() {
   const { user } = useAuth();
   // la funcion creatTask
   //Agregar a la tarea la tarea dependiente y el requerimiento que cumple y rol, a quien se asigna
-  const { fechasproject, message, setProjecterrors, setMessage, iteracionactual, createTask, participants, requerimientos, projecterrors, tareas } = useProject();
+  const { fechasproject, message, setProjecterrors, setMessage, iteracionactual, createTask, participants, requerimientos, projecterrors, tareas, getProject } = useProject();
   const onSubmit = handleSubmit(async (values) => {
     console.log("submit iniciado");
     const data = {
@@ -35,7 +35,7 @@ function AsignarTarea() {
       CORREO: user.CORREO
     }
     const idnt = {
-      ID: id,
+      ID: fechasproject[0].ID,
       USER : user.ID
     }
     createTask(data);

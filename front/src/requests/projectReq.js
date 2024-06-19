@@ -22,3 +22,6 @@ export const requestUpdateTState = async task => axios.post('/updateState', task
 export const requestDeleteProject = async id => axios.post('/deleteProject',id);
 export const requestAddCollab = async collab => axios.post('/addCollab', collab);
 export const requestDeleteCollab = async collab => axios.post('/deleteCollab', collab);
+export const requestCambiarEstado = async notificaciones => axios.post("/changeState",notificaciones);
+export const requestSetObjetivo = async objetivo => axios.post("/setObjetivo", objetivo);
+export const requestSetRetroalimentacion = async retro => axios.post("/setRetroalimentacion", retro);

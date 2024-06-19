@@ -8,8 +8,11 @@ import {
     deleteProject,
     degradarParticipant,
     ascenderParticipant,
+    cambiarEstado,
     agregarColaboradorTarea,
-    eliminarColaboradorTarea
+    eliminarColaboradorTarea,
+    setObjetivo,
+    setRetroalimentacion
 } from "../controllers/project.controller.js";
 import { createSchema, joinSchema, taskSchema, addSchema, requerimientoSchema, collabSchema } from "../schemas/project.schema.js";
 import { validateSchema } from "../middlewares/validator.middleware.js";
@@ -39,6 +42,9 @@ router.post('/addMessage', agregarMensaje);
 router.post('/getMessages', getMessages);
 router.post('/addCollab', validateSchema(collabSchema),agregarColaboradorTarea);
 router.post('/deleteCollab', eliminarColaboradorTarea);
+router.post('/changeState', cambiarEstado);
+router.post('/setObjetivo', setObjetivo);
+router.post('/setRetroalimentacion', setRetroalimentacion);
 
 
 

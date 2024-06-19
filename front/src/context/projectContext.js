@@ -11,7 +11,10 @@ import {
   requestDegradar,
   requestAscender,
   requestAddCollab,
-  requestDeleteCollab
+  requestDeleteCollab,
+  requestCambiarEstado,
+  requestSetObjetivo,
+  requestSetRetroalimentacion
 } from "../requests/projectReq.js";
 import Cookies from "js-cookie";
 import { useAuth } from "./authContext.js";
@@ -57,6 +60,7 @@ export const ProjectProvider = ({ children }) => {
   const [entregas, setEntregas] = useState([]);
   const [iteraciones, setIteraciones] = useState([]);
   const [notificaciones, setNotificaciones] = useState([]);
+  const [objetivoItAct, setObjItAct] = useState([]);
 
   useEffect(() => {
     if (message.length > 0) {
@@ -454,6 +458,66 @@ export const ProjectProvider = ({ children }) => {
     }
   }
 
+  const setObjetivo = async (data) => {
+    try{
+      const res = await requestSetObjetivo(data);
+      swal({
+        title: 'Establecer Objetivo',
+        text: res.data.message,
+        icon: 'success',
+        button: 'Aceptar',
+      });
+    }catch(error){
+      if (error.response && error.response.data && error.response.data.message) {
+        swal({
+          title: 'Eliminar Colaborador',
+          text: error.response.data.message,
+          icon: 'error',
+          button: 'Aceptar',
+        });
+        //setProjecterrors(error.response.data.message);
+      } else {
+        swal({
+          title: 'Eliminar Colaborador',
+          text: 'Error en el servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
+        //setProjecterrors("Error del servidor");
+      }
+    }
+  }
+
+  const setRetroalimentacion = async (data) => {
+    try{
+      const res = await requestSetRetroalimentacion(data);
+      swal({
+        title: 'Establecer Retroalimentación',
+        text: res.data.message,
+        icon: 'success',
+        button: 'Aceptar',
+      });
+    }catch(error){
+      if (error.response && error.response.data && error.response.data.message) {
+        swal({
+          title: 'Establecer Retroalimentación',
+          text: error.response.data.message,
+          icon: 'error',
+          button: 'Aceptar',
+        });
+        //setProjecterrors(error.response.data.message);
+      } else {
+        swal({
+          title: 'Establecer Retroalimentacion',
+          text: 'Error en el servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
+        //setProjecterrors("Error del servidor");
+      }
+    }
+  }
+
   const deleteCollab = async (collab) => {
     try {
       const res = await requestDeleteCollab(collab);
@@ -551,6 +615,7 @@ export const ProjectProvider = ({ children }) => {
     let counter = 0;
     try {
       const res = await requestgetProject(project);
+      console.log(res);
       setParticipants(res.data.participants);
       setFechasproject(res.data.fechasProyecto);
       setFechasentregas(res.data.fechasEntregas);
@@ -565,8 +630,9 @@ export const ProjectProvider = ({ children }) => {
       setRequirements(res.data.requirements);
       setIterationParticipants(res.data.iterationParticipants);
       setIteraciones(res.data.iteraciones);
-      //setNotificaciones(res.data.notificaciones);
+      setNotificaciones(res.data.notificaciones);
       setEntregas(res.data.entregas);
+      setObjItAct(iteracionactual.OBJETIVO);
       if(res.data.fechasProyecto[0].ID_CATEGORIA_CRYSTAL === 2 ){
         res.data.participants.map((participant)=>{
           if(participant.ROLE === 1){
@@ -824,6 +890,28 @@ export const ProjectProvider = ({ children }) => {
     }
   }
 
+  const changeState = async (notificaciones) =>{
+    try {
+      const res = await requestCambiarEstado(notificaciones);
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.message) {
+        swal({
+          title: 'Cambio de estado notificacion',
+          text: error.response.data.message,
+          icon: 'error',
+          button: 'Aceptar',
+        });
+      } else {
+        swal({
+          title: 'Cambio de estado notificacion',
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
+      }
+    }
+  }
+
   useEffect(() => {
     const checkLogin = async () => {
       const cookies = Cookies.get();
@@ -870,13 +958,14 @@ export const ProjectProvider = ({ children }) => {
 
         requerimientos, tareas,tareasGantt,
 
-        messagesChat, notificaciones,
+        messagesChat, notificaciones,setNotificaciones,
         requirements,
         iterationParticipants,
         entregas, 
         iteraciones,
+        objetivoItAct,
         setProjecterrors,
-        setMessage, setIsParticipant, setScheduleData,
+        setMessage, setIsParticipant, setScheduleData,changeState,
         actualizarParticipantes, actualizarTareas, actualizarRequerimientos,
         create,
         configProyect,
@@ -898,7 +987,10 @@ export const ProjectProvider = ({ children }) => {
         deleteProjectFunction,
         vaciarProject,
         addCollab,
-        deleteCollab
+        deleteCollab,
+        setObjetivo,
+        setObjItAct,
+        setRetroalimentacion
       }}
     >
       {children}

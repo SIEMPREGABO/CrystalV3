@@ -559,14 +559,12 @@ export function registrarNotificacion(id_usuario, contenido, tipo, fecha) {
             const connection = await getConnection();
             const query = 'INSERT INTO NOTIFICACIONES (CONTENIDO, FECHA_ENVIO ,ID_TIPO_NOTIFICACION ) VALUES (?,?,?)';
             const queryRecibe = 'INSERT INTO U_RECIBE_N (ID_USUARIO, ID_NOTIFICACION , ESTADO_VISUALIZACION) VALUES (?,?,?)';
-            console.log("xxxx")
             connection.query(query, [contenido, fecha, tipo], (err, results) => {
                 if (err) {
                     //console.log(err);
                     reject(err)
                 } else {
                     if (results.affectedRows > 0) {
-                        console.log("pasa")
                         const idNotificacion = results.insertId;
                         connection.query(queryRecibe, [id_usuario, idNotificacion, false], (err, results) => {
                             if (err) {
@@ -932,9 +930,9 @@ export function obtenerFechasID(tabla, ID) {
             if (tabla === "PROYECTOS") {
                 query = `SELECT ID, FECHA_INICIO,  FECHA_TERMINO, ESTADO, NOMBRE,OBJETIVO,DESCRIPCION_GNRL,CODIGO_UNIRSE, FECHA_CREACION,ID_CATEGORIA_CRYSTAL  FROM ${tabla} WHERE ID = ?`
             } else if (tabla === "ENTREGAS") {
-                query = `SELECT ID,  FECHA_INICIO,  FECHA_TERMINO, ESTADO, ID_PROYECTO FROM ${tabla} WHERE ID_PROYECTO = ?`
+                query = `SELECT ID,  FECHA_INICIO,  FECHA_TERMINO, ESTADO, ID_PROYECTO, RETROALIMENTACION  FROM ${tabla} WHERE ID_PROYECTO = ?`
             } else if (tabla === "ITERACIONES") {
-                query = `SELECT ID,   FECHA_INICIO,  FECHA_TERMINO, ESTADO, ID_ENTREGA FROM ${tabla} WHERE ID_ENTREGA = ?`
+                query = `SELECT ID,   FECHA_INICIO,  FECHA_TERMINO, ESTADO, ID_ENTREGA, OBJETIVO FROM ${tabla} WHERE ID_ENTREGA = ?`
             }
             //const query = `SELECT ID, FECHA_INICIO, FECHA_TERMINO, ESTADO FROM ${tabla} WHERE ID = ?`;
             connection.query(query, [ID], (err, results) => {
@@ -1672,6 +1670,64 @@ export function getTareasGantt(ID_PROYECTO) {
     })
 }
 
+export function getNotificaciones(id_usuario) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const connection = await getConnection();
+            const query = 'SELECT * FROM U_RECIBE_N WHERE ID_USUARIO = ? '
+            connection.query(query, [id_usuario], async (err, results) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    if (results.length > 0) {
+                        resolve(results);
+                    } else {
+                        resolve([]);
+                    }
+                }
+            });
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
+export function getNotificacion(ID_NOTIFICACION) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const connection = await getConnection();
+            const query = 'SELECT * FROM NOTIFICACIONES WHERE ID = ? '
+            connection.query(query, [ID_NOTIFICACION], async (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result);
+                }
+            });
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
+export function getAlerta(Id_alerta) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const connection = await getConnection();
+            const query = 'SELECT PRIORIDAD FROM TIPOS_NOTIFICACION WHERE ID = ? '
+            connection.query(query, [Id_alerta], async (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result);
+                }
+            });
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
 export function AgregarColaboradorTarea(ID_USUARIO, ID_ITERACION, ID_TAREA_REALIZADA, ROL_REALIZADO){
     return new Promise(async (resolve, reject) => {
         try {
@@ -1754,6 +1810,56 @@ export function GetIteraciones(ID_ENTREGA){
                         resolve(results);
                     }else{
                         resolve([]);
+                    }
+                }
+            });
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
+export function SetObjetivo(ID, OBJETIVO){
+    return new Promise (async (resolve, reject) => {
+        try {
+            console.log("datos");
+            console.log(ID + " " + OBJETIVO);
+            const connection = await getConnection();
+            const query = "Update ITERACIONES SET OBJETIVO = ? WHERE ID = ?";
+
+            connection.query(query, [OBJETIVO, ID], async (err, results) => {
+                if(err){
+                    reject(err);
+                }else{
+                    if(results.affectedRows > 0){
+                        resolve({success: true});
+                    }else{
+                        resolve({success: false});
+                    }
+                }
+            });
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
+export function SetRetroalimentacion(ID, RETRO){
+    return new Promise (async (resolve, reject) => {
+        try {
+            console.log("datos");
+            console.log(ID + " " + RETRO);
+            const connection = await getConnection();
+            const query = "Update ENTREGAS SET RETROALIMENTACION = ? WHERE ID = ?";
+
+            connection.query(query, [RETRO, ID], async (err, results) => {
+                if(err){
+                    reject(err);
+                }else{
+                    if(results.affectedRows > 0){
+                        resolve({success: true});
+                    }else{
+                        resolve({success: false});
                     }
                 }
             });

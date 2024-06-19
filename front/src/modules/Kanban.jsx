@@ -44,7 +44,7 @@ const Kanban = () => {
   const { activeMenu, themeSettings, setthemeSettings, currentColor, currentMode } = useStateContext();
   const { tareasKanban, setTareasKanban, deleteTask, updateTask, updateTaskState, iteracionactual, entregaactual,
     fechasproject, setProjecterrors, setMessage, createTask, participants, requerimientos, tareas, getPermissions, userRole,
-    addCollab, deleteCollab, iteraciones, entregas
+    addCollab, deleteCollab, iteraciones, entregas, setObjetivo, objetivoItAct, setObjItAct, setRetroalimentacion
   } = useProject();
   const [dialogVisible, setDialogVisible] = useState(false);
   const [selectedTarea, setSelectedTarea] = useState(null);
@@ -64,6 +64,7 @@ const Kanban = () => {
   const [search, setSearch] = useState("");
   const [entregaActiva, setEntregaActiva] = useState("");
   const [iteracionActiva, setIteracionActiva] = useState("");
+  //const [objetivoIteracion, setObjetivoIteracion] = useState("");
   //const [idUsuario, setIdUsuario] = useState(0);
   const {
     register,
@@ -228,11 +229,96 @@ const Kanban = () => {
     console.log(iteracionactual);
     console.log(entregaactual);
     console.log(user);
+    const date1 = new Date();
+    const date2 = new Date(entregaactual.FECHA_TERMINO);
+    const date3 = new Date(iteracionactual.FECHA_TERMINO);
     setDialogVisible(false);
     setSelectedTarea(null);
     setProjecterrors([]);
     setMessage([]);
     setData(tareasKanban);
+    //setObjetivoIteracion(iteracionactual.OBJETIVO);
+    if(objetivoItAct == "" && userRole){
+      swal({
+        title: "Agregar Objetivo de Iteración",
+        text: "Aún no se ha registrado un objetivo para esta iteración, por favor agrégalo ahora.",
+        content: {
+          element: 'input',
+          attributes: {
+            placeholder: 'Inserta un objetivo',
+            type: 'text'
+          },
+        },
+        icon: 'info',
+      }).then((objetivo) => {
+        if(!objetivo) return;
+          setObjItAct(objetivo);
+
+          const data = {
+            ID: iteracionactual.ID,
+            OBJETIVO: objetivo
+          }
+
+          setObjetivo(data);
+      });
+    }
+
+    const day1 = date1.getDate();
+    const month1 = date1.getMonth(); // Los meses en JavaScript son 0-indexados (0 = Enero, 1 = Febrero, etc.)
+    const year1 = date1.getFullYear();
+
+    // Extraer día, mes y año de la segunda fecha
+    const day2 = date2.getDate();
+    const month2 = date2.getMonth();
+    const year2 = date2.getFullYear();
+
+    // Extraer día, mes y año de la segunda fecha
+    const day3 = date3.getDate();
+    const month3 = date3.getMonth();
+    const year3 = date3.getFullYear();
+
+    const filtrado = tareasKanban.filter(card => card.ESTADO_DESARROLLO !== "Cerrada");
+    
+    if(year1 == year3 && month1 == month3 && day1 == day3 && userRole){
+      swal({
+        title: "Iteración por Terminar",
+        text: "La iteración actual está en su último día de desarrollo, y existen tareas que aun no son terminadas, por favor dirijase a la configuracion del proyecto y actualice la fecha de termino de esta iteracion.",
+        icon:'waring',
+        buttons: {
+          cancel: "Cancelar",
+          confirm: "Confirmar"
+        }
+      }).then((value) =>{
+        if(value === "confirm"){
+
+        }else if(value === "cancel"){
+
+        }
+      });
+    }
+
+    if(year1 == year2 && month1 == month2 && day1 == day2 && userRole){
+      swal({
+        title: "Retroalimentacioón de Entrega",
+        text: "La entrega actual está por terminar, en caso de que ya se cuente con la retroalimentación necesaria por favor ingrésela, de lo contrario de click fuera de esta ventana",
+        content: {
+          element: 'input',
+          attributes: {
+            placeholder: 'Inserta la retroalimentacion',
+            type: 'text'
+          },
+        },
+        icon:'info',
+      }).then((retro) =>{
+        if(!retro) return;
+
+        const data = {
+          ID: entregaactual.ID,
+          RETRO: retro,
+        }
+        setRetroalimentacion(data);
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -546,9 +632,10 @@ const Kanban = () => {
     <div className="m-2 md:m-10 mt-24 p-2 md:p-10 bg-white rounded-3xl e-kanbantooltiptemp">
       <Header category="App" title="Kanban" />
       <div className="w-full ">
-        <p>Periodo Activo</p>
-        <p>{entregaActiva ? entregaActiva : "Cargando entrega activa"}</p>
-        <p>{iteracionActiva ? iteracionActiva : "Cargando iteracion Activa"}</p>
+      <h2 className="text-lg border-b-4 mb-4"><strong className='text-xl mr-2'>Periodo Activo: </strong> {iteracionActiva ? iteracionActiva : "Cargando iteracion Activa"} {" de "} {entregaActiva ? entregaActiva : "Cargando entrega activa"}   : {iteracionactual.FECHA_INICIO ? new Date(iteracionactual.FECHA_INICIO).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' }) : "Cargando"} - {iteracionactual.FECHA_TERMINO ? new Date(iteracionactual.FECHA_TERMINO).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' }) : "Cargando"} </h2>
+      </div>
+      <div className="w-full">
+      <h2 className="text-lg border-b-4 mb-4"><strong className='text-xl mr-2'>Objetivo: </strong> {objetivoItAct != "" ? objetivoItAct : "Cargando Objetivo de Iteracion"} </h2>
       </div>
       <div className='m-3 w-full flex'>
         <div className='w-6/12'>

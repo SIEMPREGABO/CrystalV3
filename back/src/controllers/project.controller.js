@@ -34,11 +34,14 @@ import {
     EliminarColaborador,
     GetEntregas,
     GetIteraciones,
+    getNotificaciones, getNotificacion, getAlerta, SetObjetivo, SetRetroalimentacion
     
 } from '../querys/projectquerys.js';
 import jwt from 'jsonwebtoken'
 import { zonaHoraria } from '../config.js';
 import { createProjectToken } from '../libs/jwt.js';
+
+import { actualizarEstadoNotificacion } from '../querys/authquerys.js';
 import { sendemailAdd, sendemailAdmin, sendemailConfig, sendemailDeleteProject, sendemailDeleteTask, sendemailEndProject, sendemailFaseProject, sendemailJoin, sendemailProject, sendemailStartProject, sendemailTask, sendemailUpdateTask } from '../middlewares/send.mail.js';
 
 export const createProject = async (req, res) => {
@@ -57,21 +60,24 @@ export const createProject = async (req, res) => {
         if (DIAS_PROYECTO < 90) return res.status(400).json({ message: "El proyecto debe durar minimo 3 meses" });
         if (DIAS_PROYECTO > 365) return res.status(400).json({ message: "El proyecto debe durar maximo 1 año" });
 
-        let REGISTRO_ACTUAL = moment(FECHA_ACTUAL).format('YYYY-MM-DD HH:mm:ss');
+        let REGISTRO_ACTUAL = moment(FECHA_ACTUAL).format('YYYY-MM-DD 00:00:00');
         let REGISTRO_INICIAL = moment(FECHA_INICIAL).format('YYYY-MM-DD HH:mm:ss');
         let REGISTRO_FINAL = moment(FECHA_FINAL).format('YYYY-MM-DD HH:mm:ss');
 
         const CODIGO_UNICO = await generarCodigo();
 
-        const generarProyecto = await crearProyecto(NOMBRE_PROYECTO, OBJETIVO, DESCRIPCION_GNRL, REGISTRO_ACTUAL, REGISTRO_INICIAL, REGISTRO_FINAL, ENTREGAS, CODIGO_UNICO, ID);
+        const generarProyecto = await crearProyecto(NOMBRE_PROYECTO, OBJETIVO, DESCRIPCION_GNRL, REGISTRO_ACTUAL, REGISTRO_ACTUAL, REGISTRO_FINAL, ENTREGAS, CODIGO_UNICO, ID);
         if (!generarProyecto.success) return res.status(400).json({ message: "Error al crear el proyecto"});
 
-        const ARREGLOPROYECTO = generarEntregas(ENTREGAS, FECHA_INICIAL, FECHA_FINAL, generarProyecto.ID_P);
+        const ARREGLOPROYECTO = generarEntregas(ENTREGAS, REGISTRO_ACTUAL, FECHA_FINAL, generarProyecto.ID_P);
         if (!ARREGLOPROYECTO) return res.status(400).json({ message: "Error al crear las entregas e iteraciones" });
-
-        const emailsendend = await sendemailProject(CORREO, NOMBRE_PROYECTO, OBJETIVO, REGISTRO_INICIAL, REGISTRO_FINAL, CODIGO_UNICO);
-        if (!emailsendend) return res.status(400).json({ message: "Error inesperado, intente nuevamente" })
-
+        try {
+            const emailsendend = await sendemailProject(CORREO, NOMBRE_PROYECTO, OBJETIVO, REGISTRO_ACTUAL, REGISTRO_FINAL, CODIGO_UNICO);
+            if (!emailsendend) return res.status(400).json({ message: "Error inesperado, intente nuevamente" })    
+        } catch (error) {
+            
+        }
+        activarTareasInactivas();
         return res.status(200).json({ message: "Proyecto creado con exito" });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -146,7 +152,9 @@ export const joinProject = async (req, res) => {
             )
             const correoParticipante = await getUser(adminID.ID_USUARIO);
 
-            await sendemailAdmin(proyecto.project[0],  correoParticipante[0].CORREO);
+            try {
+                await sendemailAdmin(proyecto.project[0], correoParticipante[0].CORREO);
+            } finally { }
         }));
 
         const correoParticipante = await getUser(ID_USUARIO);
@@ -216,6 +224,25 @@ export const getProject = async (req, res) => {
         const tasksKanban = await GetTareasKanban(ITERACION_ACTUAL.ID);
         const projectInfo = await getProjectInfo(ID_PROYECTO);
         //const notificaciones = await getNotificaciones(USER);
+        const notificaciones = await getNotificaciones(USER); /////////////////
+        let allNotificaciones = [];
+        if (notificaciones.length > 0) {
+            allNotificaciones = await Promise.all(
+                notificaciones.map(async (Notificacion) => {
+                    const notificacionData = await getNotificacion(Notificacion.ID_NOTIFICACION);
+                    console.log(notificacionData[0].ID_TIPO_NOTIFICACION)
+                    const alerta = await getAlerta(notificacionData[0].ID_TIPO_NOTIFICACION);
+                    console.log(alerta);
+                    const combinedData = {
+                        ...notificacionData[0], // Copia todas las propiedades de notificacionData
+                        ESTADO_VISUALIZACION: Notificacion.ESTADO_VISUALIZACION, // Añade ESTADO_VISUALIZACION
+                        PRIORIDAD: alerta[0].PRIORIDAD
+                    };
+                    return combinedData;
+                })
+            )
+        }
+        console.log(allNotificaciones);
         const projectreqs = await getProjectRequirements(ID_PROYECTO, ENTREGA_ACTUAL.ID);
         const iterationParticipants = await getIterationParticipants(ITERACION_ACTUAL.ID);
         const iteraciones = await GetIteraciones(ENTREGA_ACTUAL.ID);
@@ -236,11 +263,23 @@ export const getProject = async (req, res) => {
             iterationParticipants: iterationParticipants, 
             entregas: entregas,
             iteraciones: iteraciones,
-            //notificaciones: notificaciones
+            notificaciones: allNotificaciones
         };
         return res.json(data);
     } catch (error) {
         return res.status(500).json({ message: error })
+    }
+}
+
+export const cambiarEstado = async (req, res) => {
+    const notificaciones = req.body;
+    try {
+        await Promise.all(notificaciones.map(async (notificacion)=>{
+            await actualizarEstadoNotificacion(notificacion.ID);
+        }));
+        res.status(200).json({message : "Notificaciones cambiada"});
+    } catch (error) {
+        res.status(500).json({ mensaje: "Error inesperado, intentalo nuevamente" });
     }
 }
 
@@ -249,9 +288,35 @@ export const getTasks = async (req, res) => {
     const { ID_ITERACION } = req.body;
     try {
         const tasks = await getTareas(ID_ITERACION);
-        res.json(tasks);
+        return res.json(tasks);
     } catch (error) {
-        res.status(500).json({ mensaje: "Error inesperado, intentalo nuevamente" });
+        return res.status(500).json({ mensaje: "Error inesperado, intentalo nuevamente" });
+    }
+}
+
+export const setObjetivo = async (req, res) => {
+    const {ID, OBJETIVO} = req.body;
+
+    try {
+        const objective = await SetObjetivo(ID, OBJETIVO);
+        
+        if (!objective.success) return res.status(200).json({message: "Objetivo establecido correctamente"});
+        return res.status(200).json({message: "Objetivo establecido correctamente"});
+    } catch (error) {
+        return res.status(500).json({ mensaje: "Error inesperado, intentalo nuevamente" });
+    }
+}
+
+export const setRetroalimentacion = async (req, res) => {
+    const {ID, RETRO} = req.body;
+
+    try {
+        const objective = await SetRetroalimentacion(ID, RETRO);
+        
+        if (!objective.success) return res.status(200).json({message: "Retroalimentación no establecida, intentalo más tarde"});
+        return res.status(200).json({message: "Retroalimentación establecida correctamente"});
+    } catch (error) {
+        return res.status(500).json({ mensaje: "Error inesperado, intentalo nuevamente" });
     }
 }
 
@@ -261,9 +326,9 @@ export const getTareasxIteracion = async (req, res) => {
 
     try {
         const tareasxiteracion = await GetTareasxIteracion(ID_PROYECTO);
-        res.json(tareasxiteracion);
+        return res.json(tareasxiteracion);
     } catch (error) {
-        res.status(500).json({ message: `Error: ${error}` })
+        return res.status(500).json({ message: `Error: ${error}` })
     }
 };
 
@@ -515,7 +580,9 @@ export const configurarProyecto = async (req, res) => {
             if (!meterNotificacion) return res.status(500).json({ message: 'Error al registrar la notificación' });
 
             const correoParticipante = await getUser(id.ID_USUARIO);
-            await sendemailConfig(proyectos[0].Title,  correoParticipante[0].CORREO);
+            try {
+                await sendemailConfig(proyectos[0].Title, correoParticipante[0].CORREO);
+            } finally { }
 
         }));
         
@@ -589,6 +656,21 @@ export const updateTask = async (req, res) => {
 
         const updTask = await UpdateTask(ID, NOMBRE, DESCRIPCION, ESTADO_DESARROLLO, REGISTRO_INICIO, REGISTRO_MAX, Rol, IDDESARROLLADOR);
         if (!updTask.success) return res.status(400).json({ message: "Error al actualizar la tarea"});
+
+        /*const FECHA_ACTUAL = moment().tz(zonaHoraria);
+    const FECHA_ACTUAL_REGISTRAR = FECHA_ACTUAL.format('YYYY-MM-DD HH:mm:ss');
+    const meterNotificacion = registrarNotificacion(
+        id_usuario,
+        `Se ha actualizado la tarea ${req.body.NOMBRE}`,
+        2,
+        FECHA_ACTUAL_REGISTRAR
+    )
+    if (!meterNotificacion) return res.status(500).json({ message: 'Error al registrar la notificación' });
+
+    const correoParticipante = await getUser(id_usuario);
+    try {
+        await sendemailUpdateTask(req.body.NOMBRE, correoParticipante, req.body.DESCRIPCION, req.body.ESTADO_DESARROLLO, req.body.FECHA_INICIO, req.body.FECHA_MAX_TERMINO);
+    } finally { }*/
     } catch (error) {
         res.status(500).json({ message: "Error al intentar actualizar tarea, intentalo nuevamente" });
     }
@@ -660,10 +742,14 @@ export const createTask = async (req, res) => {
         )
         if (!meterNotificacion) return res.status(500).json({ message: 'Error al registrar la notificación' });
         console.log("Noti enviado");
+        console.log(usuario[0].CORREO);
+        try{
         const emailsendend = await sendemailTask(usuario[0].CORREO, NOMBRE, DESCRIPCION, REGISTRO_INICIO, REGISTRO_MAX, ROLPARTICIPANTE);
         if (!emailsendend) return res.status(400).json({ message: "Error inesperado, intente nuevamente"})
             console.log("Email enviado");
-
+        }catch (error){
+            return res.status(500).json({message: `El error es.  ${error}`});
+        }
         return res.status(200).json({ message: "Tarea creada con exito" });
 
     } catch (error) {
@@ -843,7 +929,9 @@ export const activarTareasInactivas = async (req, res) => {
                         if (!meterNotificacion) return res.status(500).json({ message: 'Error al registrar la notificación' });
 
                         const correoParticipante = await getUser(id.ID_USUARIO);
-                        await sendemailStartProject(projectinfo[0].NOMBRE, correoParticipante[0].CORREO, projectinfo[0].OBJETIVO, projectinfo[0].DESCRIPCION_GNRL);
+                        try {
+                            await sendemailStartProject(projectinfo[0].NOMBRE, correoParticipante[0].CORREO, projectinfo[0].OBJETIVO, projectinfo[0].DESCRIPCION_GNRL);
+                        } finally { }
                     }));
                 } 
             }
@@ -866,7 +954,9 @@ export const activarTareasInactivas = async (req, res) => {
                         if (!meterNotificacion) return res.status(500).json({ message: 'Error al registrar la notificación' });
 
                         const correoParticipante = await getUser(id.ID_USUARIO);
-                        await sendemailEndProject(projectinfo[0].NOMBRE, correoParticipante[0].CORREO, projectinfo[0].OBJETIVO, projectinfo[0].DESCRIPCION_GNRL);
+                        try {
+                            await sendemailEndProject(projectinfo[0].NOMBRE, correoParticipante[0].CORREO, projectinfo[0].OBJETIVO, projectinfo[0].DESCRIPCION_GNRL);
+                        } finally { }
                     }));
                 } if(fechas === FECHAS_ITERACIONES) {
                     const idProyecto = await getProjectWithIter(fecha.ID);
@@ -886,7 +976,9 @@ export const activarTareasInactivas = async (req, res) => {
                         if (!meterNotificacion) return res.status(500).json({ message: 'Error al registrar la notificación' });
                         
                         const correoParticipante = await getUser(id.ID_USUARIO);
-                        await sendemailFaseProject(projectinfo[0].NOMBRE, correoParticipante[0].CORREO, projectinfo[0].OBJETIVO, projectinfo[0].DESCRIPCION_GNRL);
+                        try {
+                            await sendemailFaseProject(projectinfo[0].NOMBRE, correoParticipante[0].CORREO, projectinfo[0].OBJETIVO, projectinfo[0].DESCRIPCION_GNRL);
+                        } finally { }
                         
                     }));
                 }
@@ -908,7 +1000,9 @@ export const activarTareasInactivas = async (req, res) => {
                         if (!meterNotificacion) return res.status(500).json({ message: 'Error al registrar la notificación' });
                         
                         const correoParticipante = await getUser(id.ID_USUARIO);
-                        await sendemailFaseProject(projectinfo[0].NOMBRE, correoParticipante[0].CORREO, projectinfo[0].OBJETIVO, projectinfo[0].DESCRIPCION_GNRL);
+                        try {
+                            await sendemailFaseProject(projectinfo[0].NOMBRE, correoParticipante[0].CORREO, projectinfo[0].OBJETIVO, projectinfo[0].DESCRIPCION_GNRL);
+                        } finally { }
                         
                     }));
                 }
@@ -959,7 +1053,7 @@ export const activarTareasInactivas = async (req, res) => {
     }))
 
     console.log("Im alive");
-    setTimeout(activarTareasInactivas, 10 * 60 * 1000);
+    setTimeout(activarTareasInactivas, 5 * 60 * 1000);
 }
 
 export const agregarRequerimiento = async (req, res) => {

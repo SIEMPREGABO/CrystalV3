@@ -16,7 +16,6 @@ import { L10n } from '@syncfusion/ej2-base';
 
 const requirementsGrid = [
     { field: "ID", headerText: "ID", width: "100", textAlign: "center", headerTextAlign: "center", visible: false },
-    { field: "ENTREGA", headerText: "Entrega", width: "100", textAlign: "center", headerTextAlign: "center" },
     { field: "OBJETIVO", headerText: "Objetivo", width: "200", textAlign: "left", headerTextAlign: "center" },
     { field: "DESCRIPCION", headerText: "Descripcion", width: "200", textAlign: "left", headerTextAlign: "center" },
     { field: "NOMBRE", headerText: "Tipo Requerimiento", width: "100", textAlign: "center", headerTextAlign: "center" },
@@ -72,7 +71,7 @@ const Requerimientos = () => {
         resolver: zodResolver(requerimientoSchema)
     });
 
-    const { createRequirements, entregaactual, fechasproject, projecterrors, message, requirements } = useProject();
+    const { createRequirements, entregaactual, fechasproject, projecterrors, message, requirements, getProject } = useProject();
 
     useEffect(() => {
         console.log(requirements);

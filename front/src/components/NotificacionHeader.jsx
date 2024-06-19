@@ -1,15 +1,16 @@
-import { MdOutlineCancel } from 'react-icons/md';
 import React, { useEffect, useState } from 'react';
+import { MdOutlineCancel } from 'react-icons/md';
+import { FcMediumPriority, FcLowPriority, FcHighPriority } from "react-icons/fc";
 import { Button } from '.';
 import { chatData } from '../data/dummy';
 import { useStateContext } from '../context/Provider';
-import { FcMediumPriority, FcLowPriority, FcHighPriority } from "react-icons/fc";
 import { useProject } from '../context/projectContext';
 import moment from "moment";
+import { useAuth } from '../context/authContext';
 
 const Notification = () => {
   const { currentColor } = useStateContext();
-  const { notificaciones, setNotificaciones, changeState } = useProject();
+  const { notificaciones, setNotificaciones, changeState } = useAuth();
 
   const formatFechaEnvio = (fechaEnvio) => {
     //const date = new Date(fechaEnvio);
@@ -24,7 +25,7 @@ const Notification = () => {
     });
     setNotificaciones(notificaciones);
     changeState(notificaciones);
-  },[notificaciones]);
+  },[notificaciones])
 
   return (
     <div className="nav-item absolute right-5 md:right-40 top-16 bg-white dark:bg-[#42464D] p-8 rounded-lg w-96">
@@ -32,8 +33,8 @@ const Notification = () => {
         <div className="flex gap-3">
           <p className="font-semibold text-lg dark:text-gray-200">Notificaciones</p>
           {/*contadorNotificaciones > 0 ? <div className="text-white text-xs rounded p-1 px-2 bg-orange-500 "> {contadorNotificaciones}</div> : [] */}
+
         </div>
-        <Button icon={<MdOutlineCancel />} color="rgb(153, 171, 180)" bgHoverColor="light-gray" size="2xl" borderRadius="50%" />
       </div>
       <div className="mt-2 ">
         {notificaciones.length === 0 ? (

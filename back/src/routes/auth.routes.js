@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { login,register, logout, verifyToken, reset, resetpass, updateUser } from "../controllers/auth.controller.js";
+import { login,register, logout, verifyToken, reset, resetpass, updateUser, cambiarEstado  } from "../controllers/auth.controller.js";
 //import {validarToken,validarTokenPass} from '../middlewares/validate.token.js';
 import { validateSchema } from "../middlewares/validator.middleware.js";
 import { registerSchema,loginSchema, resetSchema, resetpasswordSchema, updateSchema } from "../schemas/auth.schema.js";
@@ -13,5 +13,6 @@ router.get('/verify', verifyToken);
 router.post('/reset',validateSchema(resetSchema),reset);
 router.post('/resetpass',validateSchema(resetpasswordSchema), resetpass);
 router.post('/updateuser',validateSchema(updateSchema),updateUser);
+router.post('/changeState', cambiarEstado);
 
 export default router;

@@ -4,11 +4,13 @@ import { useProject } from '../context/projectContext';
 import { useAuth } from '../context/authContext';
 import { useForm } from 'react-hook-form';
 import { Header } from '../components';
+import { useStateContext } from '../context/Provider.js';
 
 
 export const ChatIteracion = () => {
   const messageInputRef = useRef(null);
   //const socket = io('http://localhost:4001');
+  const { activeMenu, themeSettings, setthemeSettings, currentColor, currentMode } = useStateContext();
   const { user } = useAuth();
   const { createMessages, iteracionactual, entregaactual,messagesChat, getMessages, iterationParticipants, iteraciones, entregas } = useProject();
 
@@ -19,6 +21,17 @@ export const ChatIteracion = () => {
   const [participantColors, setParticipantColors] = useState({});
   const [entregaActiva, setEntregaActiva] = useState("");
   const [iteracionActiva, setIteracionActiva] = useState("");
+
+
+  const downloadChat = () => {
+    const element = document.createElement("a");
+    const file = new Blob([messages.map(msg => `${msg.from}: ${msg.data}`).join("\n")], { type: 'text/plain' });
+    element.href = URL.createObjectURL(file);
+    element.download = "chat.txt";
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
 
   const {
     register,
@@ -92,6 +105,7 @@ export const ChatIteracion = () => {
   });
 
   useEffect(() => {
+    console.log(iteracionactual);
     const iteracion = {
       ID_ITERACION: iteracionactual.ID
     }
@@ -171,7 +185,7 @@ export const ChatIteracion = () => {
       <div className="w-full flex ">
         <div className="w-4/12 p-2 border-r-4 border-black border-solid border-opacity-25">
         <h2 className="text-xl font-medium border-b-4 mb-4">Iteración Activa </h2>
-        <p>{iteracionActiva}</p>
+        <p className="text-lg text-">{iteracionActiva ? iteracionActiva : "Cargando Iteracion Activa"} {" de "} {entregaActiva ? entregaActiva : "Cargando Entrega Activa"}: {iteracionactual.FECHA_INICIO ? new Date(iteracionactual.FECHA_INICIO).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' }) : "Cargando"} - {iteracionactual.FECHA_TERMINO ? new Date(iteracionactual.FECHA_TERMINO).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' }) : "Cargando"}</p>
           <h2 className="text-xl font-medium border-b-4 mb-4">Participantes de Iteración</h2>
           {iterationParticipants != null ? (
             iterationParticipants.map((participant, index) => {
@@ -198,6 +212,9 @@ export const ChatIteracion = () => {
           )}
         </div>
         <div className="w-8/12  p-2 ">
+        <div className="w-full flex justify-end m-0 p-0.5"><button className="btn text-white" style={{backgroundColor: currentColor}} onClick={downloadChat}>
+        Descargar Chat
+      </button></div>
           <div className="h-screen bg- text-black">
             <div className='w-full h-5/6 border-2 rounded-lg shadow-md'>
               <form onSubmit={handleSubmit(onSubmit)} className="p-10 w-full h-full rounded-lg overflow-y-scroll flex flex-column justify-end bg-gradient-to-br from-green-400 via-yellow-400 to-red-500 bg-opacity-100" action="POST">

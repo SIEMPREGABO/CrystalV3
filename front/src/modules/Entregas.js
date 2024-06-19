@@ -38,7 +38,7 @@ const Entregas = () => {
         if (entregasproject !== undefined && entregasproject.length > 0) {
             setEntregas(entregasproject);
         }
-        console.log(JSON.parse(entregasproject[0].REQUERIMIENTOS));
+        //console.log(JSON.parse(entregasproject[0].REQUERIMIENTOS));
     }, [entregasproject]);
 
     const obtenerClasexEstado = (estado) => {
@@ -57,7 +57,7 @@ const Entregas = () => {
 
             {entregas.map((entrega, index) => (
                 <div key={entrega.ID} className="mb-3">
-                    <div className="dropdown bg-gray-200" style={{ boxShadow: "0 0 5px rgba(0, 0, 0, 0.1)" }}>
+                    <div className="flex flex-column dropdown bg-gray-200" style={{ boxShadow: "0 0 5px rgba(0, 0, 0, 0.1)" }}>
                         <button
                             className="btn btn-link dropdown-toggle text-xl font-semibold"
                             style={{ width: "100%", border: "none", color: "black" }}
@@ -95,13 +95,15 @@ const Entregas = () => {
                                                         {`ITERACIÓN # ${index + 1}`}
                                                         <i className="bi bi-chevron-down"></i>
                                                     </button>
-                                                    {showTareas[iteracion.id] && iteracion.tareas && (
+                                                    {showTareas[iteracion.id] && iteracion.tareas &&  (
                                                         <div className="dropdown-menu show border-gray-600" style={{ width: "100%", boxShadow: "none", position: "relative", backgroundColor: 'transparent' }}>
                                                             <div className="w-full h-fit flex justify-around items-center mb-1">
                                                                 <div><strong className="pr-1">Fecha de inicio:</strong>{iteracion.fechai ? new Date(iteracion.fechai).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' }) : "Cargando"}</div>
                                                                 <div><strong className="pr-1">Fecha de Termino:</strong>{iteracion.fechaf ? new Date(iteracion.fechaf).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' }) : "Cargando"}</div>
                                                             </div>
-                                                            <div className="w-full flex border-b px-2" style={{ backgroundColor: currentColor }}>
+                                                            {iteracion.tareas.length > 0 ? (
+                                                                <div>
+                                                                    <div className="w-full flex border-b px-2" style={{ backgroundColor: currentColor }}>
                                                                 <div className="w-4/12 flex items-center justify-center text-white font-bold"><p>Tarea</p></div>
                                                                 <div className="w-3/12 flex items-center justify-center text-white font-bold"><p>Desarrollador</p></div>
                                                                 <div className="w-3/12 flex items-center justify-center text-white font-bold"><p>Estado de Desarrollo</p></div>
@@ -122,18 +124,23 @@ const Entregas = () => {
                                                                     <div className="w-3/12 flex justify-center items-center">
                                                                         <span>{tarea.est_desarr}</span>
                                                                     </div>
-                                                                    <div className="w-2/12 flex jusify-center items-center">
-                                                                        <span className="flex jusify-center ">{tarea.fechatermino ? new Date(tarea.fechatermino).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' }) : "Aún sin terminar"}</span>
+                                                                    <div className="w-2/12 flex justify-center items-center">
+                                                                        <span className="flex justify-center ">{tarea.fechatermino ? new Date(tarea.fechatermino).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' }) : "Aún sin terminar"}</span>
                                                                     </div>
                                                                 </div>
                                                             ))}
+                                                                </div>
+                                                            ) : (<p className="mt-1 w-full text-lg text-center bg-transparent">No hay Tareas definidas para esta Iteración </p>)}
                                                         </div>
                                                     )}
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
-                                    <div className="tab-pane fade bg-white" id={`requerimientos-${entrega.ID}`} role="tabpanel" aria-labelledby={`requerimientos-tab-${entrega.ID}`}>
+                                    <div className="tab-pane fade bg-transparent" id={`requerimientos-${entrega.ID}`} role="tabpanel" aria-labelledby={`requerimientos-tab-${entrega.ID}`}>
+                                    {entrega.REQUERIMIENTOS &&  JSON.parse(entrega.REQUERIMIENTOS) != null ? (
+                                        <div>
+                                             
                                         {/* Requerimientos */}
                                         <div className="w-full flex border-b px-2" style={{ backgroundColor: currentColor }}>
                                             <div className="w-5/12 flex items-center justify-center text-white font-bold"><p>Objetivo</p></div>
@@ -141,19 +148,21 @@ const Entregas = () => {
                                             <div className="w-2/12 flex items-center justify-center text-white font-bold"><p>Tipo </p></div>
                                         </div>
                                         {JSON.parse(entrega.REQUERIMIENTOS).map((req, index) => (
-                                            <div key={index} className="w-full flex border-b px-2">
+                                            <div key={index} className="w-full flex border-b px-2 bg-white">
                                                 <div className="w-5/12 flex items-center break-words p-1">
                                                     <strong>{req.objetivo}</strong>
                                                 </div>
                                                 <div className="w-5/12 flex items-center break-words p-1">
                                                     <p>{req.descripcion}</p>
                                                 </div>
-                                                <div className="w-2/12 flex items-center break-words p-1">
+                                                <div className="w-2/12 flex justify-center items-center break-words p-1">
                                                     <p className="text-center">{req.treq}</p>
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
+                                    ) : (<p className="mt-1 w-full text-lg text-center bg-transparent">No hay Requerimientos definidos para esta Entrega</p>)}
+                                        </div>
                                 </div>
                                 {/* Fin Bootstrap Tabs */}
                             </div>

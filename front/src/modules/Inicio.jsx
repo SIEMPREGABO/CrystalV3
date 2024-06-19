@@ -224,9 +224,9 @@ const Inicio = () => {
         <div className="bg-white dark:text-gray-200 dark:bg-secondary-dark-bg h-44 rounded-xl w-full h-auto lg:w-80 p-8 pt-9 m-3 bg-gradient-to-r from-cyan-500 to-blue-500 bg-no-repeat bg-cover bg-center">
           <div className="flex justify-between items-center">
             <div>
-            <p className=' text-2xl font-bold text-white'>{fechasproject && fechasproject.length > 0 ? `Proyecto ${fechasproject[0].NOMBRE}` : 'Cargando...'}</p>
+              <p className=' text-2xl font-bold text-white'>{fechasproject && fechasproject.length > 0 ? `Proyecto ${fechasproject[0].NOMBRE}` : 'Cargando...'}</p>
               <p className='text-xl text-white'>Crystal {fechasproject && fechasproject.length > 0 ? (fechasproject[0].ID_CATEGORIA_CRYSTAL == 1 ? 'Clear' : 'Yellow') : 'Cargando...'}</p>
-              <p className='text-xl text-white'>Código {fechasproject && fechasproject.length > 0 ? fechasproject[0].CODIGO_UNIRSE : 'Cargando...'}</p>
+              <p className='text-xl text-white '>Código: {fechasproject && fechasproject.length > 0 ? fechasproject[0].CODIGO_UNIRSE : 'Cargando...'}</p>
               <p className=' text-white'>{fechasproject && fechasproject.length > 0 ? `Objetivo:  ${fechasproject[0].OBJETIVO}` : 'Cargando...'}</p>
             </div>
           </div>
@@ -245,8 +245,8 @@ const Inicio = () => {
         </div>
         <div className='flex m-3 flex-wrap justify-center gap-1 items-center'>
           {earningData.map((item) => (
-            <div key={item.title} className='bg-white dark:text-gray-200 dark:bg-secondary-dark-bg md=:w-56 p-4 pt-9 rounded-2xl justify-center'>
-              <button type='button' style={{ color: item.iconColor, backgroundColor: item.iconBg }} className='text -2xl opacity-0.9 rounded-full p-4 hover:drop-shadow-xl flex justify-center'>
+            <div key={item.title} className='bg-white dark:text-gray-200 dark:bg-secondary-dark-bg md=:w-56 p-4 pt-9 rounded-2xl flex flex-col justify-center items-center'>
+              <button type='button' style={{ color: item.iconColor, backgroundColor: item.iconBg }} className='w-fit text-2xl opacity-0.9 rounded-full p-4 hover:drop-shadow-xl flex justify-center'>
                 {item.icon}
               </button>
               <p className='mt-3 text-center'>
@@ -278,22 +278,26 @@ const Inicio = () => {
               ))}
             </select>
           </div>
-          <div style={{ overflowX: 'scroll', overflowY: 'scroll', height: '600px', width: '100%', scrollbarGutter: 'stable' }}>
-            <Chart
-              chartType="Gantt"
-              data={filteredDataChart}
-              options={options}
-              width={"150%"}
-              height={"150%"}
-              loader={
-                <div className='d-flex justify-content-center text-center m-5'>
-                  <div className="spinner-border text-primary" style={{width: "3rem", height: "3rem", role:"status"}}>
-                    <span className="visually-hidden">Loading...</span>
+          {tareasGantt && tareasGantt.length > 0 ? (
+            <div style={{ overflowX: 'scroll', overflowY: 'scroll', height: '600px', width: '100%', scrollbarGutter: 'stable' }}>
+              {filteredDataChart && filteredDataChart.length > 0 ? (
+                <Chart
+                chartType="Gantt"
+                data={filteredDataChart}
+                options={options}
+                width={"auto"}
+                height={"150%"}
+                loader={
+                  <div className='d-flex justify-content-center text-center m-5'>
+                    <div className="spinner-border text-primary" style={{ width: "3rem", height: "3rem", role: "status" }}>
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
                   </div>
-                </div>
-              }
-            />
-          </div>
+                }
+              />
+              ) : (<div><p className="mt-1 w-full text-lg text-center bg-transparent">No hay tareas registradas</p></div>)}
+            </div>
+          ) : (<div><p className="mt-1 w-full text-lg text-center bg-transparent">No hay tareas registradas en el proyecto</p></div>)}
         </div>
       </div>
     </div>

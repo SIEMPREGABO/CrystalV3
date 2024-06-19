@@ -37,6 +37,22 @@ export function actualizarUsuarioNombre(NOMBRE_USUARIO,NUMERO_BOLETA,NOMBRE_PILA
     });
 };
 
+export function actualizarEstadoNotificacion(id) {
+    return new Promise(async (resolve, reject) => {
+        const connection = await getConnection();
+        const query = 'UPDATE U_RECIBE_N SET ESTADO_VISUALIZACION = 1 WHERE ID_NOTIFICACION = ?';
+        connection.query(query, [id], (err, results) => {
+            if (err) {
+                console.log(err)
+                reject(err);
+            } else {
+                resolve( true );
+
+            }
+        });
+    })
+}
+
 export function actualizarUsuario(NUMERO_BOLETA,NOMBRE_PILA,APELLIDO_PATERNO,APELLIDO_MATERNO,TELEFONO, CORREO) {
     return new Promise(async (resolve, reject) => {
         const connection = await getConnection();
