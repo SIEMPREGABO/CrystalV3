@@ -60,6 +60,7 @@ const Kanban = () => {
   const [tiempoInicio, setTiempoInicio] = useState("");
   const [tiempoFinal, setTiempoFinal] = useState("");
   const [desarrollador, setDesarrollador] = useState("");
+  const [estadoPadre, setEstadoPadre] = useState(false);
   const [data2, setData] = useState([]);
   const [search, setSearch] = useState("");
   const [entregaActiva, setEntregaActiva] = useState("");
@@ -133,7 +134,7 @@ const Kanban = () => {
     const data = {
       ID_USUARIO: values.ID_USUARIOC,
       ROLPARTICIPANTE: values.ROLPARTICIPANTEC,
-      ID_TAREA_REALIZADA: selectedTarea.ID,
+      ID_TAREA_REALIZADA: selectedTarea.ID_TAREA_REALIZADA,
       ITERACION: iteracionactual.ID
     }
     const des = participants.find(part => part.ID_USUARIO == values.ID_USUARIOC);
@@ -148,7 +149,7 @@ const Kanban = () => {
       FECHA_MAX_TERMINO: selectedTarea.FECHA_MAX_TERMINO,
       FECHA_TERMINO: selectedTarea.FECHA_TERMINO,
       ID: selectedTarea.ID,
-      IDK: `${selectedTarea.ID}-${values.ID_USUARIOC}`,
+      IDK: `${selectedTarea.NOMBRE}-${values.ID_USUARIOC}`,
       IDDESARROLLADOR: values.ID_USUARIOC,
       ID_ITERACION: selectedTarea.ID_ITERACION,
       ID_REQUERIMIENTO: selectedTarea.ID_REQUERIMIENTO,
@@ -163,6 +164,12 @@ const Kanban = () => {
     console.log(dataLocal);
     addCollab(data);
     setTareasKanban((prevdata) => [...prevdata, dataLocal]);
+    const data1 = {
+      ID: idint,
+      USER : user.ID
+  }
+  getPermissions(data1);
+  console.log(userRole);
     //setDialogVisible(true);
   });
 
@@ -215,12 +222,21 @@ const Kanban = () => {
       ESTADO_DESARROLLO: "En espera",
       ID_DESARROLLADOR: values.ID_USUARIO,
       Desarrollador: des.NOMBRE_USUARIO,
-      ESTADO_PERMITIDO_PADRE: estadop
+      ESTADO_PERMITIDO_PADRE: estadop,
+      IDK: `${values.NOMBRE}-${values.ID_USUARIO}`
     }
     console.log(estadop);
     setTareasKanban((prevdata) => [...prevdata, dataLocal]);
     setDialogVisible(false);
     createTask(data);
+
+    
+        const data1 = {
+            ID: idint,
+            USER : user.ID
+        }
+        getPermissions(data1);
+        console.log(userRole);
   });
 
 
@@ -279,10 +295,10 @@ const Kanban = () => {
 
     const filtrado = tareasKanban.filter(card => card.ESTADO_DESARROLLO !== "Cerrada");
     
-    if(year1 == year3 && month1 == month3 && day1 == day3 && userRole){
+    if(year1 == year3 && month1 == month3 && day1 == day3 && userRole && filtrado.length > 0){
       swal({
         title: "Iteración por Terminar",
-        text: "La iteración actual está en su último día de desarrollo, y existen tareas que aun no son terminadas, por favor dirijase a la configuracion del proyecto y actualice la fecha de termino de esta iteracion.",
+        text: `La iteración actual está en su último día de desarrollo, y existen ${filtrado.length} tareas que aun no son terminadas, por favor dirijase a la configuracion del proyecto y actualice la fecha de termino de esta iteracion.`,
         icon:'waring',
         buttons: {
           cancel: "Cancelar",
@@ -319,6 +335,8 @@ const Kanban = () => {
         setRetroalimentacion(data);
       });
     }
+
+  
   }, []);
 
   useEffect(() => {
@@ -357,6 +375,9 @@ const Kanban = () => {
       console.log(selectedTarea.Desarrollador);
       setDesarrollador(selectedTarea.Desarrollador);
       setRol(selectedTarea.ROL);
+      console.log("ESTADO PADRE");
+      console.log(selectedTarea.ESTADO_PERMITIDO_PADRE);
+      setEstadoPadre(selectedTarea.ESTADO_PERMITIDO_PADRE);
       const fecha_inicio = new Date(selectedTarea.FECHA_INICIO);
       const fecha_mx = new Date(selectedTarea.FECHA_MAX_TERMINO);
       let di = fecha_inicio.getDate();
@@ -438,21 +459,21 @@ const Kanban = () => {
 
   const handleDoubleClick = (data) => {
     //console.log(data.ESTADO_PERMITIDO_PADRE);
-    if (data.ESTADO_PERMITIDO_PADRE == 1) {
+    //if (data.ESTADO_PERMITIDO_PADRE == 1) {
       setDialogVisible(true);
       setSelectedTarea(data);
-    } else {
-      console.log(data);
-      swal({
+    //} else {
+      //console.log(data);
+      /*swal({
         title: 'Ha habido un error',
         text: 'Esta tarea esta bloqueada debido a que su tarea madre no ha sido terminada y no puede ser editada',
         icon: 'error',
         button: 'Aceptar',
-      });
-      setDialogVisible(false);
-      setSelectedTarea(null);
+      });*/
+      //setDialogVisible(false);
+      //setSelectedTarea(null);
       //alert('Esta tarjeta está bloqueada y no puede ser editada.');
-    }
+    //}
     console.log("Selected Tarea");
     console.log(selectedTarea);
   }
@@ -472,6 +493,8 @@ const Kanban = () => {
         ID: args.data[0].ID,
       };
 
+      
+
       if (args.data[0].ESTADO_DESARROLLO === "Cerrada") {
         const tareashijas = tareasKanban.filter(tarea => tarea.ID_TAREA_PADRE === args.data[0].ID);
         console.log("Tareas Hijas");
@@ -490,6 +513,19 @@ const Kanban = () => {
       }
 
       updateTaskState(dragTask);
+      const updatedEstatetask = tareasKanban.map(card => card.ID_TAREA_REALIZADA == args.data[0].ID_TAREA_REALIZADA ? 
+                                                  {...card, ESTADO_DESARROLLO: args.data[0].ESTADO_DESARROLLO } : 
+                                                  card
+      );
+      console.log(updatedEstatetask);
+      setTareasKanban([...updatedEstatetask]);
+
+      const data1 = {
+        ID: idint,
+        USER : user.ID
+    }
+    getPermissions(data1);
+    console.log(userRole);
     }
   };
 
@@ -708,7 +744,7 @@ const Kanban = () => {
           </div>
           <div className="input-group mb-3 flex items-center ">
             <label htmlFor="estado" className='block text-sm font-semibold text-gray-800'>Estado: </label>
-            <select id="ESTADOU" value={estadoTarea} name='ESTADOU' onChange={(e) => setEstadoTarea(e.target.value)} className="block w-full px-4 py-2 mt-2 text-black bg-white border rounded-md focus:border-indigo-400 focus:ring-indigo-300 focus:outline-none focus:ring focus:ring-opacity-40">
+            <select id="ESTADOU"  disabled={estadoPadre == 0 ? true : false} value={estadoTarea} name='ESTADOU' onChange={(e) => setEstadoTarea(e.target.value)} className="block w-full px-4 py-2 mt-2 text-black bg-white border rounded-md focus:border-indigo-400 focus:ring-indigo-300 focus:outline-none focus:ring focus:ring-opacity-40">
               <option value="0" >Selecciona una opción</option>
               <option value="En espera" >En espera</option>
               <option value="En pausa" >Pausada</option>

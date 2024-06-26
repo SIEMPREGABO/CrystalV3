@@ -11,7 +11,7 @@ import { MdOutlineSupervisorAccount } from 'react-icons/md';
 import { FiBarChart } from 'react-icons/fi';
 import { HiOutlineRefresh } from 'react-icons/hi';
 import '../css/kanban.module.css';
-
+import { useParams } from "react-router-dom";
 const options = {
   gantt: {
     criticalPathEnabled: false,
@@ -36,12 +36,22 @@ const options = {
 const Inicio = () => {
   const { currentColor } = useStateContext();
   const [entregas, setEntregas] = useState([]);
-  const { getProject, project, fechasproject, participants, projectInfo, tareasGantt, entregasproject, getTasksProject } = useProject();
+  const { getProject, getPermissions, userRole, project, fechasproject, participants, projectInfo, tareasGantt, entregasproject, getTasksProject } = useProject();
   const [earningData, setEarningData] = useState([]);
   const [dataChart, setDataChart] = useState([]);
   const [filteredDataChart, setFilteredDataChart] = useState([]);
   const [selectedIteracion, setSelectedIteracion] = useState('');
   const { user } = useAuth();
+  const { id } = useParams();
+  const idint = parseInt(id, 10).toString();
+  useEffect(() => {
+    const data1 = {
+      ID: idint,
+      USER : user.ID
+  }
+  getPermissions(data1);
+  console.log(userRole); 
+  }, []);
 
   useEffect(() => {
     if (projectInfo && projectInfo.length > 0) {
@@ -76,7 +86,7 @@ const Inicio = () => {
         {
           icon: <FiBarChart />,
           amount: projectInfo[0].NUMTAREAS,
-          percentage: `${Math.floor((projectInfo[0].NUMTAREASCMP * 100) / projectInfo[0].NUMTAREAS)} % completado`,
+          percentage: projectInfo[0].NUMTAREAS === 0 ? "0 % completado" : `${Math.floor((projectInfo[0].NUMTAREASCMP * 100) / projectInfo[0].NUMTAREAS)} % completado`,
           title: 'Tareas',
           iconColor: 'rgb(228, 106, 118)',
           iconBg: 'rgb(255, 244, 229)',

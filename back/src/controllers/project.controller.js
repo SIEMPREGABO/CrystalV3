@@ -45,34 +45,38 @@ import { actualizarEstadoNotificacion } from '../querys/authquerys.js';
 import { sendemailAdd, sendemailAdmin, sendemailConfig, sendemailDeleteProject, sendemailDeleteTask, sendemailEndProject, sendemailFaseProject, sendemailJoin, sendemailProject, sendemailStartProject, sendemailTask, sendemailUpdateTask } from '../middlewares/send.mail.js';
 
 export const createProject = async (req, res) => {
-    const FECHA_ACTUAL = moment().tz(zonaHoraria);
-    const { NOMBRE_PROYECTO, OBJETIVO, DESCRIPCION_GNRL, FECHA_INICIO, FECHA_TERMINO, ENTREGAS, ID, CORREO } = req.body;
+    const FECHA_ACTUAL = moment().tz(zonaHoraria).startOf('day');
+    const { NOMBRE_PROYECTO, OBJETIVO, DESCRIPCION_GNRL, FECHA_INICIO, FECHA_TERMINO, ENTREGAS, ID, CORREO, MATERIA } = req.body;
     console.log(req.body);
     try {
-        const FECHA_INICIAL = moment(FECHA_INICIO).tz(zonaHoraria).add(1, 'days');
+        let dias = 7;
+        const FECHA_INICIAL = moment(FECHA_INICIO).tz(zonaHoraria).startOf('day');
         const FECHA_FINAL = moment(FECHA_TERMINO).tz(zonaHoraria).endOf('day');
 
-        if (FECHA_INICIAL.isBefore(FECHA_ACTUAL)) return res.status(400).json({ message: "Fecha inicial incorrecta" });
-        if (FECHA_FINAL.isBefore(FECHA_INICIAL)) return res.status(400).json({ message: "Fecha final incorrecta" });
+        if (FECHA_INICIAL.isBefore(FECHA_ACTUAL)) return res.status(400).json({ message: "La fecha de inicio del proyecto no puede ser menor a la actual" });
+        if (FECHA_FINAL.isBefore(FECHA_INICIAL)) return res.status(400).json({ message: "Fecha final del prooyecto no puedo ser menor a su fecha de inicio" });
 
         const DIAS_PROYECTO = FECHA_FINAL.diff(FECHA_INICIAL, 'days') + 1;
 
-        if (DIAS_PROYECTO < 90) return res.status(400).json({ message: "El proyecto debe durar minimo 3 meses" });
+        if (DIAS_PROYECTO < 60) return res.status(400).json({ message: "El proyecto debe durar minimo 2 meses" });
+        if (DIAS_PROYECTO < 90 && ENTREGAS > 4) return res.status(500).json({message: "Este numero de entregas en el periodo de desarrollo del proyecto (-3 meses), terminaría en entregas de 1 iteración, lo que no es recomendable por favor disminuye la cantidad de entregas que sea menor a 5"}); 
+        if (DIAS_PROYECTO > 179) dias = 14;
         if (DIAS_PROYECTO > 365) return res.status(400).json({ message: "El proyecto debe durar maximo 1 año" });
+        if (DIAS_PROYECTO > 240 && DIAS_PROYECTO < 365 && ENTREGAS < 3) return res.status(500).json({message: "Este número de entregas en este periodo de tiempo (+8 meses) derivaría en entregas de 6 meses, lo cual no es recomendable, por favor aumenta tu número de entregas"});
 
-        let REGISTRO_ACTUAL = moment(FECHA_ACTUAL).format('YYYY-MM-DD 00:00:00');
+        let REGISTRO_ACTUAL = moment(FECHA_ACTUAL).format('YYYY-MM-DD HH:mm:ss');
         let REGISTRO_INICIAL = moment(FECHA_INICIAL).format('YYYY-MM-DD HH:mm:ss');
         let REGISTRO_FINAL = moment(FECHA_FINAL).format('YYYY-MM-DD HH:mm:ss');
 
         const CODIGO_UNICO = await generarCodigo();
 
-        const generarProyecto = await crearProyecto(NOMBRE_PROYECTO, OBJETIVO, DESCRIPCION_GNRL, REGISTRO_ACTUAL, REGISTRO_ACTUAL, REGISTRO_FINAL, ENTREGAS, CODIGO_UNICO, ID);
+        const generarProyecto = await crearProyecto(NOMBRE_PROYECTO, OBJETIVO, DESCRIPCION_GNRL, REGISTRO_ACTUAL, REGISTRO_INICIAL, REGISTRO_FINAL, ENTREGAS, CODIGO_UNICO, ID, MATERIA);
         if (!generarProyecto.success) return res.status(400).json({ message: "Error al crear el proyecto"});
 
-        const ARREGLOPROYECTO = generarEntregas(ENTREGAS, REGISTRO_ACTUAL, FECHA_FINAL, generarProyecto.ID_P);
+        const ARREGLOPROYECTO = generarEntregas(ENTREGAS, REGISTRO_INICIAL, FECHA_FINAL, generarProyecto.ID_P, dias);
         if (!ARREGLOPROYECTO) return res.status(400).json({ message: "Error al crear las entregas e iteraciones" });
         try {
-            const emailsendend = await sendemailProject(CORREO, NOMBRE_PROYECTO, OBJETIVO, REGISTRO_ACTUAL, REGISTRO_FINAL, CODIGO_UNICO);
+            const emailsendend = await sendemailProject(CORREO, NOMBRE_PROYECTO, OBJETIVO, REGISTRO_INICIAL, REGISTRO_FINAL, CODIGO_UNICO);
             if (!emailsendend) return res.status(400).json({ message: "Error inesperado, intente nuevamente" })    
         } catch (error) {
             
@@ -720,7 +724,7 @@ export const createTask = async (req, res) => {
             const FECHA_INICIO_DEP = moment.utc(tarea.task[0].FECHA_INICIO);
             //const FECHA_MAX_TERMINO_DEP = moment.utc(tarea.task[0].FECHA_MAX_TERMINO);
 
-            if (FECHA_INICIO_COMPLETA.isBefore(FECHA_INICIO_DEP)) return res.status(400).json({ message: "Fecha inicial de la dep incorrecta" });
+            if (FECHA_INICIO_DEP.isBefore(FECHA_INICIO_COMPLETA) || FECHA_INICIO_DEP.isBefore(FECHA_MAXIMA_COMPLETA)) return res.status(400).json({ message: "La fecha inicial de la tarea dependiente debe de ser superior a la fecha maxima de entrega de su tarea raíz " });
         }
         const MINUTOS_DIFERENCIA = FECHA_MAXIMA_COMPLETA.diff(FECHA_INICIO_COMPLETA, 'minutes');
         if (MINUTOS_DIFERENCIA < 120) return res.status(400).json({ message: "Diferencia minimo de 2 horas entre el inicio y la fecha maxima de entrega de una tarea" });
@@ -750,6 +754,7 @@ export const createTask = async (req, res) => {
         }catch (error){
             return res.status(500).json({message: `El error es.  ${error}`});
         }
+        
         return res.status(200).json({ message: "Tarea creada con exito" });
 
     } catch (error) {
@@ -769,7 +774,7 @@ export const addParticipant = async (req, res) => {
         const numeroParticipantes = await verificarNumeroParticipantes(ID_PROYECTO);
         if (!numeroParticipantes.success) return res.status(400).json({ message: "Numero maximo de participantes alcanzado" });
         if (numeroParticipantes.participantes.length === 8) {
-            const actualizarCrystal = await actualizarCrystal(2, ID_PROYECTO);
+            //const actualizarCrystal = await actualizarCrystal(2, ID_PROYECTO);
             const actualizarCrystalVar = await actualizarCrystal(2, ID_PROYECTO);
             if (!actualizarCrystalVar.success) return res.status(500).json({ message: "Error al actualizar el crystal" });
         }
@@ -796,7 +801,7 @@ export const deleteParticipant = async (req, res) => {
     const { ID, ID_PROYECTO } = req.body;
     try {
         const numeroParticipantes = await verificarNumeroParticipantes(ID_PROYECTO);
-        if (!numeroParticipantes.success) return res.status(400).json({ message: "Numero maximo de participantes alcanzado" });
+        //if (!numeroParticipantes.success) return res.status(400).json({ message: "Numero maximo de participantes alcanzado" });
 
         const eliminado = await eliminarParticipante(ID_PROYECTO, ID);
         if (!eliminado.success) return res.status(500).json({ message: "Error al eliminar al participante" });

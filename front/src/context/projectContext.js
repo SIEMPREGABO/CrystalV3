@@ -34,6 +34,7 @@ export const ProjectProvider = ({ children }) => {
   const [IsParticipant, setIsParticipant] = useState(true);
   const [userRole, setUserRole] = useState(false);
   const [twoAdmins, setTwoAdmins] = useState(false);
+  const [IsCreated,setIsCreated] = useState(false);
 
   const [message, setMessage] = useState([]);
   const [projecterrors, setProjecterrors] = useState([]);
@@ -52,6 +53,7 @@ export const ProjectProvider = ({ children }) => {
   const [requerimientos, setRequerimientos] = useState([]);
   const [messagesChat, setMessagesChat] = useState([]);
 
+
   const [entregasproject, setEntregasProject] = useState([]);
   const [projectInfo, setProjectInfo] = useState([]);
   const [tareasGantt, setTareasGantt] = useState([]);
@@ -63,19 +65,13 @@ export const ProjectProvider = ({ children }) => {
   const [objetivoItAct, setObjItAct] = useState([]);
 
   useEffect(() => {
-    if (message.length > 0) {
+    if (IsCreated) {
       const timer = setTimeout(() => {
-        setMessage([]);
+        setIsCreated(false);
       }, 5000);
       return () => clearTimeout(timer);
     }
-    if (projecterrors.length > 0) {
-      const timer = setTimeout(() => {
-        setProjecterrors([]);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [projecterrors, message]);
+  }, [IsCreated]);
 
   const createTask = async (Task) => {
     try {
@@ -304,14 +300,13 @@ export const ProjectProvider = ({ children }) => {
   const create = async (project) => {
     try {
       const res = await requestCreate(project);
-      setMessage(res.data.message);
       swal({
         title: 'Crear proyecto',
         text: res.data.message,
         icon: 'success',
         button: 'Aceptar',
       });
-
+      setIsCreated(true);
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
         //setProjecterrors(error.response.data.message);
@@ -964,7 +959,7 @@ export const ProjectProvider = ({ children }) => {
         entregas, 
         iteraciones,
         objetivoItAct,
-        setProjecterrors,
+        setProjecterrors,IsCreated,
         setMessage, setIsParticipant, setScheduleData,changeState,
         actualizarParticipantes, actualizarTareas, actualizarRequerimientos,
         create,

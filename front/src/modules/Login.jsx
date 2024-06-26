@@ -53,12 +53,13 @@ export const Login = () => {
                         <form onSubmit={handleSubmit(onSubmit)} className={styles.forml}>
                             <h1 className={styles.h1l}>Ingresar</h1>
 
+                            <div className={styles.inputgroup}>
                             <input className={styles.inputl}
                                 type="email"
                                 name="CORREO"
                                 placeholder="E-Mail"
                                 {...register("CORREO", { required: true, message: "campo requerido" })} />
-
+                            <label>Correo Electrónico<span style={{color: "red"}}>*</span></label>
                             {errors.CORREO &&
                                 <div className=" pe-2 m-1">
                                     <div className=" flex items-center  p-1 mb-1  text-red-800 rounded-lg bg-red-100 dark:bg-gray-800 dark:text-red-600 " role="alert">
@@ -66,14 +67,15 @@ export const Login = () => {
                                     </div>
                                 </div>
                             }
+                            </div>
 
-
+                            <div className={styles.inputgroup}>
                             <input className={styles.inputl}
                                 type="password"
                                 name="CONTRASENIA"
                                 placeholder="Contraseña"
                                 {...register("CONTRASENIA", { required: true, message: "campo requerido" })} />
-
+                            <label>Contraseña<span style={{color: "red"}}>*</span></label>
                             {errors.CONTRASENIA &&
 
                                 <div className=" pe-2 m-1">
@@ -82,14 +84,15 @@ export const Login = () => {
                                     </div>
                                 </div>
                             }
-                            <Link to="/reset"><a href="#">Olvidaste tu contraseña?</a></Link>
+                            </div>
+                            <Link to="/reset"><a href="#">¿Olvidaste tu contraseña?</a></Link>
                             <button type='submit' className={styles.buttonl}>Iniciar Sesión!</button>
                         </form>
                     </div>
                     <div className={styles['overlay-container']}>
                         <div className={styles.overlay}>
                             <div className={styles['overlay-right']}>
-                                <h1 className={styles.h1l}>Nuevo en CLEAR?</h1>
+                                <h1 className={styles.h1l}>¿Nuevo en CLEAR?</h1>
                                 <p>Ingresa tus datos y registrate con nosotros</p>
                                 <Link to="/register"><button className={styles.buttonl} id={styles.signUp}>Registrarse</button></Link>
                             </div>

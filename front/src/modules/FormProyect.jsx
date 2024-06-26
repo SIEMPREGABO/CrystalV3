@@ -16,13 +16,14 @@ export const FormProyect = () => {
         register,
         handleSubmit,
         formState: { errors },
+        reset 
     } = useForm({
         resolver: zodResolver(projectSchema)
     });
 
     const navigate = useNavigate();
     const { create, IsCreated, message, projecterrors, setProjecterrors ,setMessage} = useProject();
-    const { user } = useAuth();
+    const { user, getProjects } = useAuth();
 
 
     const onSubmit = handleSubmit(async (values) => {
@@ -34,16 +35,20 @@ export const FormProyect = () => {
             FECHA_TERMINO: values.FECHA_TERMINO,
             ENTREGAS: values.ENTREGAS,
             ID: user.ID,
-            CORREO: user.CORREO
+            CORREO: user.CORREO,
+            MATERIA: values.MATERIA_PROYECTO,
         }
-        create(data);
+        await create(data);
+        reset();
     })
 
     useEffect(() => {
-        setProjecterrors([]);
-        setMessage([]);
         if (IsCreated) navigate("/panel");
     }, [IsCreated]);
+
+    useEffect(() => {
+        getProjects();
+    }, []);
 
     return (
         <div>
@@ -57,7 +62,7 @@ export const FormProyect = () => {
                     <form className="mt-6" onSubmit={handleSubmit(onSubmit)}>
                         <div className="mb-2">
                             <label className="block text-sm font-semibold text-gray-800">
-                                Titulo del proyecto:
+                                Titulo del proyecto <span className='text-sm font-semibold text-red-800'>*</span>
                             </label>
                             <input
                                 className="block w-full px-4 py-2 mt-2 text-black-400 bg-white border rounded-md focus:border-indigo-400 focus:ring-indigo-300 focus:outline-none focus:ring focus:ring-opacity-40"
@@ -70,8 +75,8 @@ export const FormProyect = () => {
                         </div>
                         <div className="mb-2">
                             <label className="block text-sm font-semibold text-gray-800">
-                                Descripcion del proyecto:
-                            </label>
+                                Descripcion del proyecto <span className='text-sm font-semibold text-red-800'>*</span>
+                            </label> 
                             <textarea
                                 className=" block w-full px-4 py-2 mt-2 text-black-400 bg-white border rounded-md focus:border-indigo-400 focus:ring-indigo-300 focus:outline-none focus:ring focus:ring-opacity-40 "
                                 style={{ height: "75px" }}
@@ -79,12 +84,12 @@ export const FormProyect = () => {
                                 name="DESCRIPCION_GNRL"
                                 {...register("DESCRIPCION_GNRL", { required: true, message: "Campo requerido" })}
                             />
-                            {errors.DESCRIPCION_GNRL && <div className=" bg-danger mt-2 me-2 text-white shadow">{errors.DESCRIPCION_GNRL.message}</div>}
+                            {errors.DESCRIPCION_GNRL && <div className="  items-center bg-red-100 text-red-700  rounded-lg m-2 shadow-md">{errors.DESCRIPCION_GNRL.message}</div>}
                         </div>
                         <div className="mb-2">
                             <label className="block text-sm font-semibold text-gray-800">
-                                Objetivo del proyecto:
-                            </label>
+                                Objetivo del proyecto <span className='text-sm font-semibold text-red-800'>*</span>
+                            </label> 
                             <textarea
                                 className=" block w-full px-4 py-2 mt-2 text-black-400 bg-white border rounded-md focus:border-indigo-400 focus:ring-indigo-300 focus:outline-none focus:ring focus:ring-opacity-40 "
                                 style={{ height: "75px" }}
@@ -92,14 +97,26 @@ export const FormProyect = () => {
                                 name="OBJETIVO"
                                 {...register("OBJETIVO", { required: true, message: "Campo requerido" })}
                             />
-                            {errors.OBJETIVO && <div className=" bg-danger mt-2 me-2 text-white shadow">{errors.OBJETIVO.message}</div>}
+                            {errors.OBJETIVO && <div className="  items-center bg-red-100 text-red-700  rounded-lg m-2 shadow-md">{errors.OBJETIVO.message}</div>}
                         </div>
-
+                        <div className="mb-2">
+                            <label className="block text-sm font-semibold text-gray-800">
+                                Materia Objetivo del proyecto <span className='text-sm font-semibold text-red-800'>*</span>
+                            </label>
+                            <input
+                                className="block w-full px-4 py-2 mt-2 text-black-400 bg-white border rounded-md focus:border-indigo-400 focus:ring-indigo-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                                type="text"
+                                name="MATERIA_PROYECTO"
+                                placeholder='Nombre de la Materia'
+                                {...register("MATERIA_PROYECTO", { required: true, message: "Campo requerido" })}
+                            />
+                            {errors.MATERIA_PROYECTO && <div className=" items-center bg-red-100 text-red-700  rounded-lg m-2 shadow-md">{errors.NOMBRE_PROYECTO.message}</div>}
+                        </div>
                         <div className="mb-2 items-center">
                             <div className="flex flex-row ">
                                 <div className='flex-row mr-2'>
                                     <label htmlFor="FECHA_INICIO" className="block text-sm font-semibold text-gray-800">
-                                        Fecha de Inicio:
+                                        Fecha de Inicio <span className='text-sm font-semibold text-red-800'>*</span>
                                     </label>
                                     <input
                                         className="block w-full px-4 py-2 mt-2 text-black-600 bg-white border rounded-md focus:border-indigo-400 focus:ring-indigo-300 focus:outline-none focus:ring focus:ring-opacity-40"
@@ -113,8 +130,8 @@ export const FormProyect = () => {
                                 </div>
                                 <div className="flex-row mr-2">
                                     <label htmlFor="FECHA_TERMINO" className="block text-sm font-semibold text-gray-800">
-                                        Fecha de finalización:
-                                    </label>
+                                        Fecha de finalización <span className='text-sm font-semibold text-red-800'>*</span>
+                                    </label> 
                                     <input
                                         className="block w-full px-4 py-2 mt-2 text-black-600 bg-white border rounded-md focus:border-indigo-400 focus:ring-indigo-300 focus:outline-none focus:ring focus:ring-opacity-40"
                                         type="date"
@@ -125,7 +142,7 @@ export const FormProyect = () => {
                                 </div>
                                 <div className="flex-row  mr-2">
                                     <label htmlFor="ENTREGAS" className="block text-sm font-semibold text-gray-800">
-                                        Entregas del proyecto:
+                                        Entregas del proyecto <span className='text-sm font-semibold text-red-800'>*</span>
                                     </label>
                                     <select
                                         className="block w-full px-3 py-2 mt-2 text-black-600 bg-white border rounded-md focus:border-indigo-400 focus:ring-indigo-300 focus:outline-none focus:ring focus:ring-opacity-40"
@@ -133,6 +150,7 @@ export const FormProyect = () => {
                                         {...register("ENTREGAS", { required: true, message: "Campo requerido" })}
                                     >
                                         <option value="0">Entregas</option>
+                                        <option value="2">2</option>
                                         <option value="3">3</option>
                                         <option value="4">4</option>
                                         <option value="5">5</option>

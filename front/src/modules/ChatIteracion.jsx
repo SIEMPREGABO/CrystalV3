@@ -6,13 +6,11 @@ import { useForm } from 'react-hook-form';
 import { Header } from '../components';
 import { useStateContext } from '../context/Provider.js';
 
-
 export const ChatIteracion = () => {
   const messageInputRef = useRef(null);
-  //const socket = io('http://localhost:4001');
   const { activeMenu, themeSettings, setthemeSettings, currentColor, currentMode } = useStateContext();
   const { user } = useAuth();
-  const { createMessages, iteracionactual, entregaactual,messagesChat, getMessages, iterationParticipants, iteraciones, entregas } = useProject();
+  const { createMessages, iteracionactual, entregaactual, messagesChat, getMessages, iterationParticipants, iteraciones, entregas, participants } = useProject();
 
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
@@ -21,7 +19,7 @@ export const ChatIteracion = () => {
   const [participantColors, setParticipantColors] = useState({});
   const [entregaActiva, setEntregaActiva] = useState("");
   const [iteracionActiva, setIteracionActiva] = useState("");
-
+  const [connectedUserList, setConnectedUserList] = useState([]);
 
   const downloadChat = () => {
     const element = document.createElement("a");
@@ -38,13 +36,6 @@ export const ChatIteracion = () => {
     handleSubmit,
     formState: { errors },
   } = useForm();
-
-  /*useEffect(() => {
-    const iteracion = {
-      ID_ITERACION: 1
-    }
-    getMessages(iteracion);
-  }, []);*/
 
   useEffect(() => {
     if (messagesChat != null) {
@@ -82,7 +73,6 @@ export const ChatIteracion = () => {
       HORA: horaFormateada,
       USUARIO: user.ID,
       ITERACION: iteracionactual.ID
-      //ITERACION: iteracionactual,
     };
 
     createMessages(data);
@@ -116,9 +106,12 @@ export const ChatIteracion = () => {
     } else {
       console.log("Sin participantes");
     }
+    
+    // Crear el socket cuando el componente se monta
     const socket = io('http://localhost:4001', {
       auth: {
-        sala: "3",
+        sala: iteracionactual.ID,
+        iduser: user.NOMBRE_USUARIO,
       }
     });
     setConnectedSocket(socket);
@@ -126,6 +119,12 @@ export const ChatIteracion = () => {
     socket.on("connect_error", (err) => {
       console.log(`connect_error due to ${err.message}`);
     });
+
+    socket.on('updateUserList', (userList) => {
+      console.log('Connected users in my room:', userList);
+      setConnectedUserList(userList);
+    });
+
     socket.on('message', receiveMessage);
 
     // Generate and store colors for participants
@@ -139,9 +138,12 @@ export const ChatIteracion = () => {
     });
     setParticipantColors(colors);
 
+    // Desconectar el socket cuando el componente se desmonta
     return () => {
       socket.off('message', receiveMessage);
-    }
+      socket.disconnect();
+      console.log('Socket disconnected');
+    };
   }, []);
 
   const receiveMessage = message => {
@@ -149,7 +151,7 @@ export const ChatIteracion = () => {
       data: String(message.data.data),
       from: String(user.NOMBRE_USUARIO === message.data.from ? 'Yo' : message.data.from),
     };
-    setMessages(prevMessages => [...prevMessages, newMessage]); // Solo agregamos el contenido del mensaje
+    setMessages(prevMessages => [...prevMessages, newMessage]);
   };
 
   const getRandomRGB = () => {
@@ -160,12 +162,9 @@ export const ChatIteracion = () => {
   }
 
   const getLuminanceRGB = (r, g, b) => {
-    // Normalizar los valores RGB a un rango de 0 a 1
     const normalizedR = r / 255;
     const normalizedG = g / 255;
     const normalizedB = b / 255;
-
-    // Fórmula para calcular la luminancia
     const luminance = 0.2126 * normalizedR + 0.7152 * normalizedG + 0.0722 * normalizedB;
     return luminance;
   }
@@ -184,37 +183,61 @@ export const ChatIteracion = () => {
       <Header category="Page" title="Chat de Iteracion" />
       <div className="w-full flex ">
         <div className="w-4/12 p-2 border-r-4 border-black border-solid border-opacity-25">
-        <h2 className="text-xl font-medium border-b-4 mb-4">Iteración Activa </h2>
-        <p className="text-lg text-">{iteracionActiva ? iteracionActiva : "Cargando Iteracion Activa"} {" de "} {entregaActiva ? entregaActiva : "Cargando Entrega Activa"}: {iteracionactual.FECHA_INICIO ? new Date(iteracionactual.FECHA_INICIO).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' }) : "Cargando"} - {iteracionactual.FECHA_TERMINO ? new Date(iteracionactual.FECHA_TERMINO).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' }) : "Cargando"}</p>
+          <h2 className="text-xl font-medium border-b-4 mb-4">Iteración Activa </h2>
+          <p className="text-lg text-">{iteracionActiva ? iteracionActiva : "Cargando Iteracion Activa"} {" de "} {entregaActiva ? entregaActiva : "Cargando Entrega Activa"}: {iteracionactual.FECHA_INICIO ? new Date(iteracionactual.FECHA_INICIO).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' }) : "Cargando"} - {iteracionactual.FECHA_TERMINO ? new Date(iteracionactual.FECHA_TERMINO).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' }) : "Cargando"}</p>
           <h2 className="text-xl font-medium border-b-4 mb-4">Participantes de Iteración</h2>
-          {iterationParticipants != null ? (
+          {iterationParticipants != null && iterationParticipants.length > 0 ? (
             iterationParticipants.map((participant, index) => {
               const { color, textColor } = participantColors[participant.ID_USUARIO] || { color: 'grey', textColor: 'black' };
               return (
-                <div className="px-4">
-                  <div key={index} className="flex items-center my-2 border-b border-solid border-black border-opacity-20">
-                  <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: color, color: textColor }}
-                  >
-                    {participant.NOMBRE_USUARIO.charAt(0)}
+                <div className="px-4" key={index}>
+                  <div className="flex items-center my-2 border-b border-solid border-black border-opacity-20">
+                    <div
+                      className="w-10 h-10 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: color, color: textColor }}
+                    >
+                      {participant.NOMBRE_USUARIO.charAt(0)}
+                    </div>
+                    <div className="ml-2">
+                      <p className="text-lg font-medium">{participant.NOMBRE_USUARIO} {connectedUserList.find(user => user.userId === participant.NOMBRE_USUARIO) ? (<span className="text-sm font-light">{"(Conectado)"}</span>) : (<span className="text-sm font-light">{"(Desconectado)"}</span>)}</p>
+                      <p className="italic">{participant.NOMBRE}</p>
+                    </div>
                   </div>
-                  <div className="ml-2">
-                    <p className="text-lg font-medium">{participant.NOMBRE_USUARIO}</p>
-                    <p className="italic">{participant.NOMBRE}</p>
-                  </div>
-                </div>
                 </div>
               );
             })
           ) : (
-            <p className="text-xl font-medium italic">Sin participantes</p>
+            <p className="text-xl font-medium italic">Sin participantes con desarrollando tareas</p>
+          )}
+          <h2 className="text-xl font-medium border-b-4 mb-4">Participantes Sin Tareas en Iteración</h2>
+          {participants != null && (participants.filter(item => !iterationParticipants.some(item2 => item2.NOMBRE_USUARIO === item.NOMBRE_USUARIO))).length > 0 ? (
+            (participants.filter(item => !iterationParticipants.some(item2 => item2.NOMBRE_USUARIO === item.NOMBRE_USUARIO))).map((participant, index) => {
+              const { color, textColor } = participantColors[participant.ID_USUARIO] || { color: 'grey', textColor: 'black' };
+              return (
+                <div className="px-4" key={index}>
+                  <div className="flex items-center my-2 border-b border-solid border-black border-opacity-20">
+                    <div
+                      className="w-10 h-10 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: color, color: textColor }}
+                    >
+                      {participant.NOMBRE_USUARIO.charAt(0)}
+                    </div>
+                    <div className="ml-2">
+                      <p className="text-lg font-medium">{participant.NOMBRE_USUARIO} {connectedUserList.find(user => user.userId === participant.NOMBRE_USUARIO) ? (<span className="text-sm font-light">{"(Conectado)"}</span>) : (<span className="text-sm font-light">{"(Desconectado)"}</span>)}</p>
+                      <p className="italic">{participant.NOMBRE_CMP}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <p className="text-md">Todos los participantes cuentan con tareas en esta iteración</p>
           )}
         </div>
         <div className="w-8/12  p-2 ">
-        <div className="w-full flex justify-end m-0 p-0.5"><button className="btn text-white" style={{backgroundColor: currentColor}} onClick={downloadChat}>
-        Descargar Chat
-      </button></div>
+          <div className="w-full flex justify-end m-0 p-0.5"><button className="btn text-white" style={{ backgroundColor: currentColor }} onClick={downloadChat}>
+            Descargar Chat
+          </button></div>
           <div className="h-screen bg- text-black">
             <div className='w-full h-5/6 border-2 rounded-lg shadow-md'>
               <form onSubmit={handleSubmit(onSubmit)} className="p-10 w-full h-full rounded-lg overflow-y-scroll flex flex-column justify-end bg-gradient-to-br from-green-400 via-yellow-400 to-red-500 bg-opacity-100" action="POST">
@@ -232,14 +255,16 @@ export const ChatIteracion = () => {
                   </ul>
                 </div>
                 <div className='d-flex gap-4 sticky'>
-                  <input type="text" placeholder='Escribe un mensaje'
+                  <textarea placeholder='Escribe un mensaje'
                     className="block w-5/6 rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     id="messageInput"
                     onChange={(e) => setMessage(e.target.value)}
+                    maxLength={255}
+                    rows={1}
                     {...register("CONTENIDO", { required: true, message: "Campo Requerido" })} />
-
+                  
                   <div className='d-flex'>
-                    <button type="submit" className="btn btn-primary d-flex gap-2">
+                    <button type="submit" className="btn btn-primary d-flex gap-2 ">
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" className="bi bi-send" viewBox="0 0 16 16">
                         <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"></path>
                       </svg>

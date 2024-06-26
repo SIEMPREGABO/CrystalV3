@@ -33,7 +33,7 @@ app.use("/api",projectRoutes);
 
 activarTareasInactivas();
 
-
+let rooms = {};
 const server = http.createServer(app);
 server.listen('4001');
 const io = new ServerSocket(server, {
@@ -50,9 +50,20 @@ console.log('Configuración de socket.io:', io.opts);
 io.on("connection", socket => {
     //console.log("Cliente conectado");
     //console.log(socket.id);
+    //connectedUsers[socket.id] = socket.id;
     const sala = socket.handshake.auth.sala;
     //console.log("Sala: " + socket.handshake.auth.sala);
     socket.join(`S${sala}`);
+
+    if(!rooms[sala]){
+        rooms[sala] = {};
+    }
+
+    rooms[sala][socket.id] = {
+        userId: socket.handshake.auth.iduser,
+    }
+
+    io.to(`S${sala}`).emit('updateUserList', Object.values(rooms[sala]));
     //console.log(`S1`);
     socket.on('message', (data) => {
         //console.log(data);

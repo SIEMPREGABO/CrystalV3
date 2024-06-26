@@ -5,15 +5,16 @@ import { generarIteraciones } from '../libs/makerProject.js';
 import { zonaHoraria } from '../config.js';
 import { query } from "express";
 
-export function crearProyecto(NOMBRE_PROYECTO, OBJETIVO, DESCRIPCION, FECHA_CREACION, FECHA_INICIO, FECHA_TERMINO, ENTREGAS, CODIGO_UNICO, ID) {
+export function crearProyecto(NOMBRE_PROYECTO, OBJETIVO, DESCRIPCION, FECHA_CREACION, FECHA_INICIO, FECHA_TERMINO, ENTREGAS, CODIGO_UNICO, ID, MATERIA) {
     return new Promise(async (resolve, reject) => {
         const ID_CATEGORIA_CRYSTAL = 1;
         const ESTADO = "En espera";
         const connection = await getConnection();
-        const registerquery = 'INSERT INTO PROYECTOS (NOMBRE, OBJETIVO, DESCRIPCION_GNRL, FECHA_CREACION, FECHA_INICIO, FECHA_TERMINO,ESTADO, NUMERO_ENTREGAS, CODIGO_UNIRSE, ID_CATEGORIA_CRYSTAL) VALUES (?,?,?,?,?,?,?,?,?,?)';
+        const registerquery = 'INSERT INTO PROYECTOS (NOMBRE, OBJETIVO, DESCRIPCION_GNRL, FECHA_CREACION, FECHA_INICIO, FECHA_TERMINO,ESTADO, NUMERO_ENTREGAS, CODIGO_UNIRSE, ID_CATEGORIA_CRYSTAL, MATERIA) VALUES (?,?,?,?,?,?,?,?,?,?,?)';
         const insertarquery = 'INSERT INTO U_SEUNE_P (FECHA_UNION, ES_CREADOR, ID_PROYECTO,ID_USUARIO) VALUES (?,?,?,?)';
 
-        connection.query(registerquery, [NOMBRE_PROYECTO, OBJETIVO, DESCRIPCION, FECHA_CREACION, FECHA_INICIO, FECHA_TERMINO, ESTADO, ENTREGAS, CODIGO_UNICO, ID_CATEGORIA_CRYSTAL], (err, results) => {
+    
+        connection.query(registerquery, [NOMBRE_PROYECTO, OBJETIVO, DESCRIPCION, FECHA_CREACION, FECHA_INICIO, FECHA_TERMINO, ESTADO, ENTREGAS, CODIGO_UNICO, ID_CATEGORIA_CRYSTAL, MATERIA], (err, results) => {
             if (err) {
                 reject(err);
             } else {
@@ -750,7 +751,7 @@ export function projectsUsuario(ID) {
     return new Promise(async (resolve, reject) => {
         const connection = await getConnection();
         const usuarioQuery = 'SELECT ID_PROYECTO, ES_CREADOR FROM U_SEUNE_P WHERE ID_USUARIO = ?';
-        const projectQuery = `SELECT NOMBRE, ID, ESTADO, CONVERT_TZ(FECHA_INICIO, '+00:00', '-06:00') AS FECHA_INICIO, CONVERT_TZ(FECHA_TERMINO, '+00:00', '-06:00') AS FECHA_TERMINO FROM PROYECTOS WHERE ID = ?`;
+        const projectQuery = `SELECT NOMBRE, ID, ESTADO,  FECHA_INICIO,  FECHA_TERMINO FROM PROYECTOS WHERE ID = ?`;
         connection.query(usuarioQuery, [ID], (err, results) => {
             if (err) {
                 reject(err);
@@ -785,7 +786,7 @@ export function projectsUsuario(ID) {
     });
 }
 
-export function registrarEntrega(RETROALIMENTACION, ESTADO, FECHA_INICIO, FECHA_TERMINO, ID_PROYECTO) {
+export function registrarEntrega(RETROALIMENTACION, ESTADO, FECHA_INICIO, FECHA_TERMINO, ID_PROYECTO, DIAS) {
     return new Promise(async (resolve, reject) => {
         const FIN = moment(FECHA_TERMINO).endOf('day').format('YYYY-MM-DD HH:mm:ss');
         const connection = await getConnection();
@@ -796,7 +797,7 @@ export function registrarEntrega(RETROALIMENTACION, ESTADO, FECHA_INICIO, FECHA_
             } else {
                 if (results.affectedRows > 0) {
                     resolve(true);
-                    generarIteraciones(moment(FECHA_INICIO), moment(FECHA_TERMINO), results.insertId);
+                    generarIteraciones(moment(FECHA_INICIO), moment(FECHA_TERMINO), results.insertId, DIAS);
                 } else {
                     resolve(false);
                 }
@@ -1207,7 +1208,7 @@ export function GetTareasKanban(ID_ITERACION) {
             const connection = await getConnection();
 
             //const kanbanquery = 'select c.ID_TAREA_REALIZADA, u.NOMBRE_USUARIO as Desarrollador, t.*, r.OBJETIVO FROM COLABORACIONES c JOIN USUARIO u ON c.ID_USUARIO=U.ID JOIN TAREAS t ON c.ID_TAREA_REALIZADA = t.ID JOIN REQUERIMIENTOS r  ON t.ID_REQUERIMIENTO = r.ID WHERE t.ID_ITERACION = ? ;'
-            const kanbanquery = "SELECT CONCAT(c.ID_TAREA_REALIZADA,'-', u.ID) AS IDK, c.ID_TAREA_REALIZADA, c.ROL_REALIZADO, tr.NOMBRE as ROL,  u.NOMBRE_USUARIO as Desarrollador, u.ID as IDDESARROLLADOR, t.*, r.OBJETIVO, tp.ID as ID_TAREA_PADRE, tp.ESTADO_DESARROLLO as ESTADO_PADRE, tp.NOMBRE as NOMBRE_TAREA_PADRE, CASE WHEN tp.ESTADO_DESARROLLO = 'Bloqueada' THEN FALSE WHEN tp.ESTADO_DESARROLLO = 'En espera' THEN FALSE WHEN tp.ESTADO_DESARROLLO = 'En desarrollo' THEN FALSE WHEN tp.ESTADO_DESARROLLO = 'Atrasada' THEN FALSE ELSE TRUE END as ESTADO_PERMITIDO_PADRE FROM COLABORACIONES c JOIN USUARIO u ON c.ID_USUARIO = u.ID JOIN TAREAS t ON c.ID_TAREA_REALIZADA = t.ID JOIN REQUERIMIENTOS r ON t.ID_REQUERIMIENTO = r.ID LEFT JOIN T_DEPENDE_T d ON t.ID = d.ID_SUBTAREA LEFT JOIN TAREAS tp ON d.ID_TAREA_DEPENDIENTE = tp.ID  LEFT JOIN TIPOS_ROLES tr ON c.ROL_REALIZADO = tr.ID WHERE t.ID_ITERACION = ? ORDER BY 1;";
+            const kanbanquery = "SELECT CONCAT(t.NOMBRE,'-', u.ID) AS IDK, c.ID_TAREA_REALIZADA, c.ROL_REALIZADO, tr.NOMBRE as ROL,  u.NOMBRE_USUARIO as Desarrollador, u.ID as IDDESARROLLADOR, t.*, r.OBJETIVO, tp.ID as ID_TAREA_PADRE, tp.ESTADO_DESARROLLO as ESTADO_PADRE, tp.NOMBRE as NOMBRE_TAREA_PADRE, CASE WHEN tp.ESTADO_DESARROLLO = 'Bloqueada' THEN FALSE WHEN tp.ESTADO_DESARROLLO = 'En espera' THEN FALSE WHEN tp.ESTADO_DESARROLLO = 'En desarrollo' THEN FALSE WHEN tp.ESTADO_DESARROLLO = 'Atrasada' THEN FALSE ELSE TRUE END as ESTADO_PERMITIDO_PADRE FROM COLABORACIONES c JOIN USUARIO u ON c.ID_USUARIO = u.ID JOIN TAREAS t ON c.ID_TAREA_REALIZADA = t.ID JOIN REQUERIMIENTOS r ON t.ID_REQUERIMIENTO = r.ID LEFT JOIN T_DEPENDE_T d ON t.ID = d.ID_SUBTAREA LEFT JOIN TAREAS tp ON d.ID_TAREA_DEPENDIENTE = tp.ID  LEFT JOIN TIPOS_ROLES tr ON c.ROL_REALIZADO = tr.ID WHERE t.ID_ITERACION = ? ORDER BY 1;";
             connection.query(kanbanquery, [ID_ITERACION], async (err, results) => {
                 if (err) {
                     reject(err);

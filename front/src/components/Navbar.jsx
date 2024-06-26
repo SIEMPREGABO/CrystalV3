@@ -22,7 +22,7 @@ const NavButton = ({title, customFunc, icon, color, dotColor}) => (
     </TooltipComponent>
 )
 
-const Navbar = () => {
+const Navbar = ({projecttitle}) => {
   const { user } = useAuth();
   const {activeMenu,setActiveMenu, isClicked, setIsClicked, handleClick, screenSize, setScreenSize, currentColor} = useStateContext();
   const {notificaciones}=useProject();
@@ -57,10 +57,11 @@ const Navbar = () => {
   const handleActiveMenu = () => setActiveMenu(!activeMenu);
   return (
     <div className='flex w-full p-2 md:mx-6 relative'>
-      <div className='flex justify-start w-1/12'>
+      <div className='flex justify-start w-6/12 items-center'>
         <NavButton title="Menu" customFunc={handleActiveMenu} color= {currentColor} icon= {<AiOutlineMenu className='text-2xl'/>} />
+        <p className='text-xl font-semibold uppercase text-ellipsis indent-1 text-gray-700'>{projecttitle}</p>
       </div>
-        <div className='flex justify-end w-11/12 mr-5'> 
+        <div className='flex justify-end w-6/12 mr-5'> 
             <NavButton title="Chat" customFunc={() => handleClick('chat')} color= {currentColor} icon= {<BsChatLeft className='text-2xl'/>} />  
             <NavButton title="Notificaciones" customFunc={() => handleClick("notificacion")} color= {currentColor} icon= {<RiNotification3Line className='text-2xl'/>} />
             <TooltipComponent content= "Profile" position='BottomCenter'>

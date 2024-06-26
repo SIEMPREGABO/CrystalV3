@@ -26,7 +26,7 @@ export const Proyecto = () => {
     const { activeMenu, themeSettings, setthemeSettings, currentColor, currentMode } = useStateContext();
 
     const {user} = useAuth();
-    const { getPermissions, userRole } = useProject();
+    const { getPermissions, userRole, fechasproject } = useProject();
 
     const navigate = useNavigate();
 
@@ -75,7 +75,7 @@ export const Proyecto = () => {
                 >
                 
                     {/*<div className="fixed md:static bg-main-bg dark:bg-main-dark-bg navbar w-full md:w-auto">*/}
-                        <Navbar />
+                        <Navbar projecttitle={fechasproject[0].NOMBRE}/>
                     {/*</div>*/}
                     
                     

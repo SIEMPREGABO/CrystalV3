@@ -68,6 +68,26 @@ body{
     border-radius: 5px;
     border: none;
     outline: none;
+    border: 1.2px solid ;
+}
+
+.inputgroup{
+    position: relative;
+}
+
+.inputgroup label{
+    position: absolute;
+    top: 50%;
+    left: 35px;
+    transform: translateY(-50%);
+    transition: .5s;
+    font-size: 16px;
+}
+
+.inputgroup input:focus~label,
+.inputgroup input:valid~label{
+    top: 0;
+    font-size: 14px;
 }
 
 .ar{

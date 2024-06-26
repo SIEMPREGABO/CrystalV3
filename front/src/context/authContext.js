@@ -16,7 +16,6 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
- 
 
   const [projects, setProjects] = useState([]);
 
@@ -27,22 +26,19 @@ export const AuthProvider = ({ children }) => {
   const [message, setMessage] = useState([]);
 
   const [isLoading, setLoading] = useState(true);
+  
+  const [isRegister, setIsRegister] = useState(false);
+
   const [notificaciones, setNotificaciones] = useState([]);
 
   useEffect(() => {
-    if (autherrors.length > 0) {
+    if (isRegister) {
       const timer = setTimeout(() => {
-        setAutherrors([]);
+        setIsRegister(false);
       }, 5000);
       return () => clearTimeout(timer);
     }
-    if (message.length > 0) {
-      const timer = setTimeout(() => {
-        setMessage([]);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [autherrors, message]);
+  }, [isRegister]);
 
   const getProjects = async () => {
     try {
@@ -109,12 +105,14 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await requestRegister(user);
       //setMessage(res.data.message);
+      setIsRegister(true);
       swal({
         title: 'Registrar Usuario',
         text: res.data.message,
         icon: 'success',
         button: 'Aceptar',
       });
+      
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
         //setProjecterrors(error.response.data.message);
@@ -287,7 +285,7 @@ export const AuthProvider = ({ children }) => {
       value={{
         user,projects,
 
-        autherrors, message,
+        autherrors, message,isRegister,
 
         IsAuthenticated, isLoading,notificaciones,setNotificaciones,
 

@@ -14,22 +14,23 @@ export const Register = () => {
         register,
         handleSubmit,
         formState: { errors },
+        reset
     } = useForm({
         resolver: zodResolver(registerSchema)
     });
 
-    const { signup, IsAuthenticated, autherrors, setAutherrors, setMessage, message } = useAuth();
+    const { signup, IsAuthenticated, autherrors, setAutherrors, isRegister, message } = useAuth();
     const navigate = useNavigate();
 
     const onSubmit = handleSubmit(async (values) => {
-        signup(values);
+        await signup(values);
+        reset();
     })
 
     useEffect(() => {
-        setMessage([]);
-        setAutherrors([]);
-        if (IsAuthenticated) navigate("/panel");
-    }, [IsAuthenticated]);
+        if(isRegister) navigate("/login");
+        if (IsAuthenticated ) navigate("/panel");
+    }, [IsAuthenticated,isRegister]);
 
 
     return (
@@ -53,7 +54,7 @@ export const Register = () => {
                     <div className={styles['overlay-containerr']}>
                         <div className={styles.overlayr}>
                             <div className={styles['overlay-rightr']}>
-                                <h1 className={styles.h1r}>Ya tienes una cuenta?</h1>
+                                <h1 className={styles.h1r}>¿Ya tienes una cuenta?</h1>
                                 <p>Inicia Sesión para volver al trabajo </p>
                                 <Link to="/login"><button className={styles.buttonr} id={styles.signInr}>Iniciar Sesión</button></Link>
                             </div>
@@ -63,12 +64,13 @@ export const Register = () => {
                     <div className={styles['sign-inr']}>
                         <form onSubmit={handleSubmit(onSubmit)} className={styles.formr}>
                             <h1 className={styles.h1r}>Crear Cuenta</h1>
-                            <div>
+                            <div className={styles.inputgroup}>
                                 <input className={styles.inputr}
                                     type="text"
                                     name="NOMBRE_PILA"
-                                    placeholder="Nombre(s)"
+                                    placeholder="Nombre (s)"
                                     {...register("NOMBRE_PILA", { required: true })} />
+                                    <label>Nombre (s)<span style={{color: "red"}}>*</span></label>
                                 {errors.NOMBRE_PILA &&
                                     <div className=" pe-2 m-1">
                                         <div className=" flex items-center  p-1 mb-1  text-red-800 rounded-lg bg-red-100 dark:bg-gray-800 dark:text-red-600 " role="alert">
@@ -77,12 +79,13 @@ export const Register = () => {
                                     </div>
                                 }
                             </div>
-                            <div>
+                            <div className={styles.inputgroup}>
                                 <input className={styles.inputr}
                                     type="text"
                                     name="APELLIDO_PATERNO"
                                     placeholder="Apellido Paterno"
                                     {...register("APELLIDO_PATERNO", { required: true })} />
+                                    <label>Apellido Paterno<span style={{color: "red"}}>*</span></label>
                                 {errors.APELLIDO_PATERNO &&
                                     <div className=" pe-2 m-1">
                                     <div className=" flex items-center  p-1 mb-1  text-red-800 rounded-lg bg-red-100 dark:bg-gray-800 dark:text-red-600 " role="alert">
@@ -91,11 +94,12 @@ export const Register = () => {
                                 </div>
                                 }
                             </div>
-                            <div><input className={styles.inputr}
+                            <div className={styles.inputgroup}><input className={styles.inputr}
                                 type="text"
                                 name="APELLIDO_MATERNO"
                                 placeholder="Apellido Materno"
                                 {...register("APELLIDO_MATERNO", { required: true })} />
+                                <label>Apellido Materno<span style={{color: "red"}}>*</span></label>
                                 {errors.APELLIDO_MATERNO &&
                                     <div className=" pe-2 m-1">
                                         <div className=" flex items-center  p-1 mb-1  text-red-800 rounded-lg bg-red-100 dark:bg-gray-800 dark:text-red-600 " role="alert">
@@ -104,11 +108,12 @@ export const Register = () => {
                                     </div>
                                 }
                             </div>
-                            <div><input className={styles.inputr}
+                            <div className={styles.inputgroup}><input className={styles.inputr}
                                 type="text"
                                 name="NUMERO_BOLETA"
-                                placeholder="Número de Boleta "
+                                placeholder="Número de Boleta"
                                 {...register("NUMERO_BOLETA", { required: true })} />
+                                <label>Número de Boleta<span style={{color: "red"}}>*</span></label>
                                 {errors.NUMERO_BOLETA &&
                                     <div className=" pe-2 m-1">
                                         <div className=" flex items-center  p-1 mb-1  text-red-800 rounded-lg bg-red-100 dark:bg-gray-800 dark:text-red-600 " role="alert">
@@ -117,11 +122,12 @@ export const Register = () => {
                                     </div>
                                 }
                             </div>
-                            <div><input className={styles.inputr}
+                            <div className={styles.inputgroup}><input className={styles.inputr}
                                 type="text"
                                 name="NOMBRE_USUARIO"
                                 placeholder="Nombre de Usuario"
                                 {...register("NOMBRE_USUARIO", { required: true })} />
+                                <label>Nombre de Usuario<span style={{color: "red"}}>*</span></label>
                                 {errors.NOMBRE_USUARIO &&
                                     <div className=" pe-2 m-1">
                                         <div className=" flex items-center  p-1 mb-1  text-red-800 rounded-lg bg-red-100 dark:bg-gray-800 dark:text-red-600 " role="alert">
@@ -130,12 +136,13 @@ export const Register = () => {
                                     </div>
                                 }
                             </div>
-                            <div><input className={styles.inputr}
+                            <div className={styles.inputgroup}><input className={styles.inputr}
                                 type="text"
                                 name="TELEFONO"
-                                placeholder="Número Celular"
                                 maxLength="12"
+                                placeholder="Teléfono"
                                 {...register("TELEFONO", { required: true })} />
+                                <label>Teléfono <span style={{color: "red"}}>*</span></label>
                                 {errors.TELEFONO &&
                                     <div className=" pe-2 m-1">
                                         <div className=" flex items-center  p-1 mb-1  text-red-800 rounded-lg bg-red-100 dark:bg-gray-800 dark:text-red-600 " role="alert">
@@ -144,11 +151,12 @@ export const Register = () => {
                                     </div>
                                 }
                             </div>
-                            <div><input className={styles.inputr}
+                            <div className={styles.inputgroup}><input className={styles.inputr}
                                 type="email"
                                 name="CORREO"
                                 placeholder="Correo Electrónico"
                                 {...register("CORREO", { required: true })} />
+                                <label>Correo Electrónico <span style={{color: "red"}}>*</span></label>
                                 {errors.CORREO &&
                                     <div className=" pe-2 m-1">
                                         <div className=" flex items-center  p-1 mb-1  text-red-800 rounded-lg bg-red-100 dark:bg-gray-800 dark:text-red-600 " role="alert">
@@ -157,11 +165,12 @@ export const Register = () => {
                                     </div>
                                 }
                             </div>
-                            <div><input className={styles.inputr}
+                            <div className={styles.inputgroup}><input className={styles.inputr}
                                 type="email"
                                 name="repeatCORREO"
-                                placeholder="Confirmar Correo Electrónico"
+                                placeholder="Confirmar Correo"
                                 {...register("repeatCORREO", { required: true })} />
+                                <label>Confirmar Correo Electrónico <span style={{color: "red"}}>*</span></label>
                                 {errors.repeatCORREO &&
                                     <div className=" pe-2 m-1">
                                         <div className=" flex items-center  p-1 mb-1  text-red-800 rounded-lg bg-red-100 dark:bg-gray-800 dark:text-red-600 " role="alert">
@@ -170,11 +179,12 @@ export const Register = () => {
                                     </div>
                                 }
                             </div>
-                            <div><input className={styles.inputr}
+                            <div className={styles.inputgroup}><input className={styles.inputr}
                                 type="password"
                                 name="CONTRASENIA"
                                 placeholder="Contraseña"
                                 {...register("CONTRASENIA", { required: true })} />
+                                <label>Contraseña <span style={{color: "red"}}>*</span></label>
                                 {errors.CONTRASENIA &&
                                     <div className=" pe-2 m-1">
                                         <div className=" flex items-center  p-1 mb-1  text-red-800 rounded-lg bg-red-100 dark:bg-gray-800 dark:text-red-600 " role="alert">
@@ -183,11 +193,12 @@ export const Register = () => {
                                     </div>
                                 }
                             </div>
-                            <div><input className={styles.inputr}
+                            <div className={styles.inputgroup}><input className={styles.inputr}
                                 type="password"
                                 name="repeatCONTRASENIA"
                                 placeholder="Confirmar Contraseña"
                                 {...register("repeatCONTRASENIA", { required: true })} />
+                                <label>Confirmar Contraseña <span style={{color: "red"}}>*</span></label>
                                 {errors.repeatCONTRASENIA &&
                                     <div className=" pe-2 m-1">
                                         <div className=" flex items-center  p-1 mb-1  text-red-800 rounded-lg bg-red-100 dark:bg-gray-800 dark:text-red-600 " role="alert">

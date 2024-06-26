@@ -80,7 +80,7 @@ const Usuario = () => {
   });
 
   const { fechasproject, addParticipant, participants, deleteParticipant, delegarParticipant,
-    ascenderParticipant, degradarParticipant, twoAdmins, getProject, vaciarProject, actualizarParticipantes } = useProject();
+    ascenderParticipant, degradarParticipant, twoAdmins, getProject, vaciarProject, actualizarParticipantes, getPermissions } = useProject();
   const [gridParticipants, setGridParticipants] = useState([]);
 
   useEffect(() => {
@@ -92,12 +92,12 @@ const Usuario = () => {
       CORREO: values.CORREO,
       ID_PROYECTO: fechasproject[0].ID
     }
-    const idnt = {
-      ID: id,
+    const data1 = {
+      ID: idint,
       USER: user.ID
     }
     await addParticipant(data);
-    await getProject(idnt);
+    await getPermissions(data1);
     const participantes = await actualizarParticipantes();
     setGridParticipants(participantes);
   })

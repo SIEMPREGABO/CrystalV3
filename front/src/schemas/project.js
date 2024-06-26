@@ -17,6 +17,11 @@ export const projectSchema = z.object({
     }).regex(
         new RegExp(/^[A-Za-zÑñÁáÉéÍíÓóÚúÜü\s0-9.,!?¿¡-]+$/), { message: "Descripción invalida" }
     ),
+    MATERIA_PROYECTO: z.string().nonempty({
+        message: 'La materia objetivo del proyecto es requerida'
+    }).regex(
+        new RegExp(/^[A-Za-zÑñÁáÉéÍíÓóÚúÜü\s0-9.,!?¿¡-]+$/), { message: "Nombre de materia inválido" }
+    ),
     FECHA_INICIO: z.string().nonempty({
         message: 'La fecha de inicio es requerida'
     }),

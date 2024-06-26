@@ -70,6 +70,26 @@ body{
     outline: none;
 }
 
+.inputgroup{
+    margin-top: 10px;
+    position: relative;
+}
+
+.inputgroup label{
+    position: absolute;
+    top: 50%;
+    left: 35px;
+    transform: translateY(-50%);
+    transition: .5s;
+    font-size: 16px;
+}
+
+.inputgroup input:focus~label,
+.inputgroup input:valid~label{
+    top: 0;
+    font-size: 14px;
+}
+
 .al{
     color: #333;
     font-size: 14px;

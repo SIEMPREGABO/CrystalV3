@@ -5,7 +5,7 @@ import { registrarIteracion, registrarEntrega } from "../querys/projectquerys.js
 
 
 
-export function generarEntregas(ENTREGAS, FECHA_ACTUAL, FECHA_FINAL,ID_PROYECTO){
+export function generarEntregas(ENTREGAS, FECHA_ACTUAL, FECHA_FINAL,ID_PROYECTO, DIAS){
         const FECHA_INICIAL = moment(FECHA_ACTUAL);
         const DIAS_PROYECTO = FECHA_FINAL.diff(FECHA_INICIAL, 'days') + 1;
         const NUMEROENTREGAS = parseInt(ENTREGAS, 10);
@@ -32,7 +32,7 @@ export function generarEntregas(ENTREGAS, FECHA_ACTUAL, FECHA_FINAL,ID_PROYECTO)
 
         for(let i=0; i<FECHAS.length;i++){
             //let FIN = moment(ARREGLOPROYECTO[i].FIN).endOf('day').format('YYYY-MM-DD HH:mm:ss');
-            success = registrarEntrega("", "En espera", FECHAS[i].INICIO, FECHAS[i].FIN, ID_PROYECTO);
+            success = registrarEntrega("", "En espera", FECHAS[i].INICIO, FECHAS[i].FIN, ID_PROYECTO, DIAS);
         }
         return success;
 }
@@ -53,16 +53,38 @@ export async function generarCodigo() {
     }
 }
 
-export function generarIteraciones(FECHA_INICIAL, FECHA_FINAL,ID_ENTREGA) {
-    const DIAS_PROYECTO = FECHA_FINAL.diff(FECHA_INICIAL, 'days') + 1;
-    const PARTES = Math.floor(DIAS_PROYECTO / 7);
-    const DIAS_RESTANTES = DIAS_PROYECTO % 7;
-    const ARRAYPARTES = Array(PARTES).fill(7);
-    let success = false;
+export function generarIteraciones(FECHA_INICIAL, FECHA_FINAL,ID_ENTREGA, DIAS) {
+    const DIAS_ENTREGA = FECHA_FINAL.diff(FECHA_INICIAL, 'days') + 1;
+    const iteraciones = parseInt(DIAS, 10);
+    console.log(iteraciones," ", DIAS, "ss")
+    //console.log(DIAS_PROYECTO);
+    //console.log(FECHA_INICIAL, FECHA_FINAL, DIAS);
+    const PARTES = Math.floor(DIAS_ENTREGA / iteraciones);
+    let DIAS_RESTANTES = DIAS_ENTREGA % iteraciones;
+    let ARRAYPARTES = Array(PARTES).fill(iteraciones);
+    console.log(ARRAYPARTES);
+    console.log(DIAS_RESTANTES);
+    console.log(PARTES);    let success = false;
 
-    for (let i = 0; i < DIAS_RESTANTES; i++) {
+    /*for (let i = 0; i < DIAS_RESTANTES; i++) {
         ARRAYPARTES[i]++;
+        if((ARRAYPARTES.length - 1) === i && DIAS_RESTANTES > 0){
+            DIAS_RESTANTES = DIAS_RESTANTES - i;
+            i = 0;
+        }
+    }*/
+        let k=0;
+        while(DIAS_RESTANTES > 0){
+            ARRAYPARTES[k]++;
+            DIAS_RESTANTES = DIAS_RESTANTES - 1; k++;
+            if(ARRAYPARTES.length  === k){
+                k = 0;
+            }
     }
+
+    console.log(ARRAYPARTES);
+    console.log(DIAS_RESTANTES);
+    console.log(PARTES);
     
     let INICIOPARTE = FECHA_INICIAL.clone();
     const FECHAS = [];

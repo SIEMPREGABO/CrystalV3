@@ -19,6 +19,28 @@ const requirementsGrid = [
     { field: "OBJETIVO", headerText: "Objetivo", width: "200", textAlign: "left", headerTextAlign: "center" },
     { field: "DESCRIPCION", headerText: "Descripcion", width: "200", textAlign: "left", headerTextAlign: "center" },
     { field: "NOMBRE", headerText: "Tipo Requerimiento", width: "100", textAlign: "center", headerTextAlign: "center" },
+    {
+        field: 'Eliminar',
+        headerText: 'Eliminar',
+        width: '120',
+        textAlign: 'Center',
+        template: (props) => (
+          props.ROLE === 0 && (
+            <span data-toggle="tooltip" title="Eliminar"><FontAwesomeIcon icon={faTrash} className="fa-icon" style={{ cursor: 'pointer', color: '#f70808', fontSize: '1.25rem' }} /*onClick={() => handleDeleteClick(props)}*/ /></span>
+          )
+        )
+    },
+    {
+        field: 'Editar',
+        headerText: 'Editar',
+        width: '120',
+        textAlign: 'Center',
+        template: (props) => (
+          props.ROLE === 0 && (
+            <span data-toggle="tooltip" title="Eliminar"><FontAwesomeIcon icon={faTrash} className="fa-icon" style={{ cursor: 'pointer', color: '#f70808', fontSize: '1.25rem' }} /*onClick={() => handleDeleteClick(props)}*/ /></span>
+          )
+        )
+      },
 ];
 
 L10n.load({
@@ -209,6 +231,7 @@ const Requerimientos = () => {
                             <ColumnDirective key={`c-${index}`} {...item} />
                         ))}
                     </ColumnsDirective>
+
                     <Inject services={[Page, Search, Toolbar, Edit]} />
                 </GridComponent>
 
@@ -305,7 +328,7 @@ const Requerimientos = () => {
                                 {entregaactual !== "" &&
                                     <form onSubmit={handleSubmit(onSubmit)} className='m-3'>
                                         <div className="mb-1">
-                                            <label className={styles.labels}>Objetivo: </label>
+                                            <label className={styles.labels}>Objetivo:<span className='text-sm font-semibold text-red-800'>*</span></label>
                                             <input
                                                 type="text"
                                                 className="form-control"
@@ -321,7 +344,7 @@ const Requerimientos = () => {
                                             }
                                         </div>
                                         <div className="mb-1">
-                                            <label className={styles.labels}>Descripción: </label>
+                                            <label className={styles.labels}>Descripción:<span className='text-sm font-semibold text-red-800'>*</span></label>
                                             <textarea
                                                 className="form-control"
                                                 id="exampleFormControlTextarea1"
@@ -337,7 +360,7 @@ const Requerimientos = () => {
                                             }
                                         </div>
                                         <div className="mb-1">
-                                            <label className={styles.labels}>Tipo de Requerimiento: </label>
+                                            <label className={styles.labels}>Tipo de Requerimiento:<span className='text-sm font-semibold text-red-800'>*</span></label>
                                             <select
                                                 {...register("TIPO", { required: true, message: "Campo Requerido" })}
                                                 className='form-select'
