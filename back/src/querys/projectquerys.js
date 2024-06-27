@@ -696,6 +696,42 @@ export function ActualizarFechasQuery(TABLA, OBJETIVO, ID) {
     })
 }
 
+export function CrearFechasQuery(TABLA, OBJETIVO, ID) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const connection = await getConnection();
+            let query;
+
+            if (TABLA === 'proyectos') {
+                query = `INSERT PROYECTOS SET (FECHA_INICIO = ?, FECHA_TERMINO = ? WHERE ID = ?)`;
+            }
+            if (TABLA === 'entregas') {
+                query = `UPDATE ENTREGAS SET FECHA_INICIO = ?, FECHA_TERMINO = ? WHERE ID = ?`;
+            }
+            if (TABLA === 'iteraciones') {
+                query = `UPDATE ITERACIONES SET FECHA_INICIO = ?, FECHA_TERMINO = ? WHERE ID = ?`;
+            }
+            //console.log(TABLA, OBJETIVO);
+            connection.query(query, [OBJETIVO.StartTime, OBJETIVO.EndTime, ID], (err, results) => {
+                if (err) {
+                    reject(err)
+                } else {
+                    if (results.affectedRows > 0) {
+                        resolve({ success: true });
+                        //console.log("llegue", OBJETIVO.Title)
+                    } else {
+                        reject({ success: false });
+                        //console.log("llegue pero mame", OBJETIVO.Title)
+                    }
+                }
+            });
+        } catch (error) {
+            //console.log(error)
+            reject(error);
+        }
+    })
+}
+
 export function verificarNumeroParticipantes(ID_PROYECTO) {
     return new Promise(async (resolve, reject) => {
         const connection = await getConnection();
@@ -796,8 +832,27 @@ export function registrarEntrega(RETROALIMENTACION, ESTADO, FECHA_INICIO, FECHA_
                 reject(err);
             } else {
                 if (results.affectedRows > 0) {
-                    resolve(true);
+                    resolve({success: true, ID_ENTREGA: results.insertId});
                     generarIteraciones(moment(FECHA_INICIO), moment(FECHA_TERMINO), results.insertId);
+                } else {
+                    resolve(false);
+                }
+            }
+        });
+    });
+}
+
+export function registrarEntregaManual(RETROALIMENTACION, ESTADO, FECHA_INICIO, FECHA_TERMINO, ID_PROYECTO) {
+    return new Promise(async (resolve, reject) => {
+        const FIN = moment(FECHA_TERMINO).endOf('day').format('YYYY-MM-DD HH:mm:ss');
+        const connection = await getConnection();
+        const query = 'INSERT INTO ENTREGAS (RETROALIMENTACION,ESTADO,FECHA_INICIO ,FECHA_TERMINO,ID_PROYECTO) VALUES (?,?,?,?,?)';
+        connection.query(query, [RETROALIMENTACION, ESTADO, FECHA_INICIO, FIN, ID_PROYECTO], (err, results) => {
+            if (err) {
+                reject(err);
+            } else {
+                if (results.affectedRows > 0) {
+                    resolve({success: true, ID_ENTREGA: results.insertId});
                 } else {
                     resolve(false);
                 }

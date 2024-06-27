@@ -56,16 +56,18 @@ function AsignarTarea() {
 
     <div className="relative flex flex-col justify-center min-h-screen overflow-hidden">
 
-      {fechasproject[0].ESTADO === "En espera" && iteracionactual === "" ? [
+      {fechasproject && fechasproject[0].ESTADO === "En espera" && iteracionactual === "" ? [
         <div>
           
             <div className="w-full p-6 m-auto bg-white rounded-md  ring-indigo-600 lg:max-w-xl">
-              No puedes asignar tareas aun
+              No puedes asignar tareas aún.
             </div>
         </div>] : []}
 
       {(fechasproject && fechasproject[0].ESTADO === "En desarrollo" && iteracionactual !== "" ? [
         <div className="w-full p-6 m-auto bg-white rounded-md shadow-xl ring-indigo-600 lg:max-w-xl">
+        {requerimientos === "" ? [
+          <div>
           <h1 className="text-3xl font-semibold text-center text-indigo-700 underline uppercase">
             Asigna una tarea
           </h1>
@@ -295,6 +297,8 @@ function AsignarTarea() {
             </div>
 
           </form>
+          </div>
+          ]:[<div>Agrega un requerimiento</div>]}
         </div>
       ] : [])
       }

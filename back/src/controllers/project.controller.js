@@ -27,7 +27,10 @@ import {
     getProjectWithEntrega,
     eliminarChats,
     getTareasGantt,
-    getAdmins, getNotificaciones, getNotificacion, getAlerta
+    getAdmins, getNotificaciones, getNotificacion, getAlerta,
+    registrarEntrega,
+    registrarEntregaManual,
+    registrarIteracion
 } from '../querys/projectquerys.js';
 import jwt from 'jsonwebtoken'
 import { zonaHoraria } from '../config.js';
@@ -291,6 +294,234 @@ export const getTareasxIteracion = async (req, res) => {
         res.status(500).json({ message: "Error en el servidor al intentar obtener mensajes" })
     }
 };
+
+export const crearProyectoManual = async (req, res) => {
+    try {
+        const FECHA_ACTUAL = moment().tz(zonaHoraria);
+        const REGISTRO_ACTUAL = FECHA_ACTUAL.format('YYYY-MM-DD HH:mm:ss');
+        //console.log(req.body.SCHEDULE);
+        const elementos = req.body.SCHEDULE;
+        const data = req.body.DATA;
+        const proyectos = [];
+        const entregas = [];
+        const iteraciones = [];
+        //Llena el arreglo de las fechas
+        elementos.forEach(elemento => {
+            //console.log(elemento);
+            let FECHA_INICIO = elemento.StartTime;
+            let FECHA_FINAL = elemento.EndTime;
+            //console.log(elemento.Id_Proyecto);
+            if (!(moment(FECHA_FINAL).hour() === 23 && moment(FECHA_FINAL).minute() === 59 && moment(FECHA_FINAL).second() === 59)) {
+                FECHA_FINAL = moment(FECHA_FINAL).subtract(1, 'second').format('YYYY-MM-DD HH:mm:ss');}
+            
+            if (elemento.Id_Proyecto === 0 && !elemento.Id_Entrega) {
+                console.log("hola")
+                if (elemento.Guid) {
+                    proyectos.push({
+                        Title: elemento.Subject,
+                        Id: elemento.Id,
+                        Id_project: elemento.Id_Proyecto,
+                        StartTime: FECHA_INICIO,
+                        EndTime: FECHA_FINAL,
+                        modificado: true
+                    })
+                } else {
+                    proyectos.push({
+                        Title: elemento.Subject,
+                        Id: elemento.Id,
+                        Id_project: elemento.Id_Proyecto,
+                        StartTime: FECHA_INICIO,
+                        EndTime: FECHA_FINAL,
+                        modificado: false
+                    })
+                }
+            }
+
+            if (elemento.Id_Proyecto === 0 && (elemento.Id_Entrega === 0  || elemento.Id_Entrega)) {
+                if (elemento.Guid) {
+                    entregas.push({
+                        Title: elemento.Subject,
+                        Id: elemento.Id,
+                        Id_proyecto: elemento.Id_Proyecto,
+                        Id_entrega: elemento.Id_Entrega,
+                        StartTime: moment(FECHA_INICIO).tz('America/Mexico_City').format('YYYY-MM-DD HH:mm:ss'),
+                        EndTime: FECHA_FINAL,
+                        modificado: true
+                    })
+                } else {
+                    entregas.push({
+                        Title: elemento.Subject,
+                        Id: elemento.Id,
+                        Id_proyecto: elemento.Id_Proyecto,
+                        Id_entrega: elemento.Id_Entrega,
+                        StartTime: moment(FECHA_INICIO).tz('America/Mexico_City').format('YYYY-MM-DD HH:mm:ss'),
+                        EndTime: FECHA_FINAL,
+                        modificado: false
+                    })
+                }
+            }
+
+            if (elemento.Id_Entrega && elemento.Id_Iteracion) {
+                if (elemento.Guid) {
+                    iteraciones.push({
+                        Title: elemento.Subject,
+                        Id: elemento.Id,
+                        Id_iteracion: elemento.Id_Iteracion,
+                        Id_entrega: elemento.Id_Entrega,
+                        StartTime: moment(FECHA_INICIO).tz('America/Mexico_City').format('YYYY-MM-DD HH:mm:ss'),
+                        EndTime: FECHA_FINAL,
+                        modificado: true
+                    })
+                } else {
+                    iteraciones.push({
+                        Title: elemento.Subject,
+                        Id: elemento.Id,
+                        Id_iteracion: elemento.Id_Iteracion,
+                        Id_entrega: elemento.Id_Entrega,
+                        StartTime: FECHA_INICIO,
+                        EndTime: FECHA_FINAL,
+                        modificado: false
+                    })
+                }
+            }
+        });
+
+        const FECHA_INICIAL = moment(proyectos[0].StartTime); const FECHA_FINAL = moment(proyectos[0].EndTime);
+
+        const diasDiferenciaProyecto = FECHA_FINAL.diff(FECHA_INICIAL, 'days') + 1;
+
+        if (diasDiferenciaProyecto < 30 && proyectos[0].modificado) return res.status(400).json({ message: "El proyecto debe durar minimo 1 mes" });
+
+        if (diasDiferenciaProyecto > 365 && proyectos[0].modificado) return res.status(400).json({ message: "El proyecto debe durar maximo 1 año" });
+
+        let diasEntregas = 0;
+        let diasIteracion = 0;
+
+        const responses = await Promise.all(entregas.map(async (entrega, index) => {
+            const entregaActual = moment(entrega.StartTime);
+            const entregaSiguiente = moment(entregas[index + 1]?.StartTime);
+            const fechaFinalEntregaActual = moment(entrega.EndTime).add(1, 'second');
+            const fechaInicialEntregaSiguiente = entregaSiguiente;
+            const entregaFinal = moment(entrega.EndTime);
+            let diasEntregaActual = moment(entrega.EndTime).diff(moment(entrega.StartTime), 'days') + 1;
+            diasEntregas += moment(entrega.EndTime).diff(moment(entrega.StartTime), 'days') + 1;
+
+            if (index === 0) {
+                if (!entregaActual.isSame(FECHA_INICIAL)) return { error: true, message: `La fecha inicial de la primera entrega debe ser igual a la fecha inicial del proyecto ${entrega.Title}` };
+                if (!fechaFinalEntregaActual.isSame(fechaInicialEntregaSiguiente)) return { error: true, message: `Las fechas no son consecutivas en las entregas ${entrega.Title}` };
+            } else if (index > 0 && index < (entregas.length - 1)) {
+                if (!fechaFinalEntregaActual.isSame(fechaInicialEntregaSiguiente)) return { error: true, message: `Las fechas no son consecutivas en las entregas ${entrega.Title}` };
+            } else {
+                if (!entregaFinal.isSame(FECHA_FINAL)) return { error: true, message: `La fecha final de la ultima entrega debe ser igual a la fecha final del proyecto ${entrega.Title}` };
+            }
+            let counterxentrega = 0;
+            const iteracionesPromises = await Promise.all(iteraciones.map(async (iteracion, index) => {
+
+                if (iteracion.Id_entrega === entrega.Id_entrega) {
+                    diasIteracion += moment(iteracion.EndTime).diff(moment(iteracion.StartTime), 'days') + 1;
+                    const iteracionActual = moment(iteracion.StartTime);
+                    if (iteraciones[index + 1]?.Id_entrega === entrega.Id_entrega) {
+
+                        const iteracionSiguiente = moment(iteraciones[index + 1]?.StartTime);
+                        const fechaFinalIteracionActual = moment(iteracion.EndTime).add(1, 'second');
+                        const fechaInicialIteracionSiguiente = iteracionSiguiente;
+
+
+                        if (counterxentrega === 0) {
+                            if (!iteracionActual.isSame(entrega.StartTime)) return { errorIt: true, message: `La fecha inicial de la primera iteracion debe ser igual a la fecha inicial de la entrega ${iteracion.Title}` };
+                            if (!fechaFinalIteracionActual.isSame(fechaInicialIteracionSiguiente)) return { errorIt: true, message: `Las fechas no son consecutivas en las iteraciones ${iteracion.Title}` };
+                        } else {
+                            if (!fechaFinalIteracionActual.isSame(fechaInicialIteracionSiguiente)) return { errorIt: true, message: `Las fechas no son consecutivas en las iteraciones ${iteracion.Title}` };
+                        }
+                        counterxentrega++;
+                    } else if ((iteraciones[index + 1]?.Id_entrega !== entrega.Id_entrega) && counterxentrega > 0) {
+                        const iteracionFinal = moment(iteracion.EndTime);
+                        const fechafinalEntrega = moment(entrega.EndTime)
+                        if (!iteracionFinal.isSame(fechafinalEntrega)) return { errorIt: true, message: `La fecha final de la ultima iteracion debe ser igual a la fecha final de la entrega ${iteracion.Title}` };
+                        counterxentrega = 0;
+                    }
+                    const duracionIteracion = moment(iteracion.EndTime).diff(moment(iteracion.StartTime), 'days') + 1;
+                    if (duracionIteracion < 7) return { errorIt: true, message: `Las iteraciones no pueden durar menos de 7 días ${iteracion.Title}` };
+                }
+                if (iteracion.modificado && (iteracion.State === 'Finalizado' || iteracion.State === 'En desarrollo')) return { errorIt: true, message: `No puedes modificar una iteracion finalizada o en desarrollo ${iteracion.Title}` };
+
+                return { errorIt: false, diasIteracion: diasIteracion };
+            }));
+
+            const iteracionesResponses = await Promise.all(iteracionesPromises);
+
+            const iteracionErrorResponse = iteracionesResponses.find(response => response.errorIt === true);
+            if (iteracionErrorResponse) {
+                // Si hay un error en alguna iteración, devuelve la respuesta de error
+                return { error: true, message: iteracionErrorResponse.message };
+            }
+
+            //const totalDiasIteracion = iteracionesResponses.reduce((acc, curr) => acc + (curr.diasIteracion || 0), 0);
+            //console.log(totalDiasIteracion, diasEntregaActual);
+            if (diasIteracion !== diasDiferenciaProyecto) {
+                return { error: true, message: `Los dias totales de iteracion no concuerdan ${index}` };
+            }
+      
+            console.log("acabe")
+            return { error: false };
+        }));
+        //console.log(responses);
+
+
+        if (diasDiferenciaProyecto !== diasEntregas) return res.status(400).json({ message: "Los dias totales de entrega no concuerdan" });
+
+        const errorResponse = responses.find(response => response.error === true);
+
+        if (errorResponse) {
+            //console.log(errorResponse.message);
+            return res.status(400).json({ message: errorResponse.message });
+        }
+        const tiposDeFecha = [proyectos, entregas, iteraciones];
+        console.log("llegue 0");
+        
+
+        const CODIGO_UNICO = await generarCodigo();
+        //console.log(data.NOMBRE_PROYECTO, data.OBJETIVO, data.DESCRIPCION_GNRL, proyectos[0].StartTime, REGISTRO_ACTUAL, proyectos[0].EndTime, data.ENTREGAS, CODIGO_UNICO, data.ID)
+        const generarProyecto = await crearProyecto(data.NOMBRE_PROYECTO, data.OBJETIVO, data.DESCRIPCION_GNRL, proyectos[0].StartTime, REGISTRO_ACTUAL, proyectos[0].EndTime, data.ENTREGAS, CODIGO_UNICO, data.ID);            
+        const ID_PROYECTO = generarProyecto.ID_P;
+
+
+        await Promise.all(entregas.map(async (entrega, index) => {
+            const register = registrarEntregaManual("", "En espera", entrega.StartTime, entrega.EndTime, ID_PROYECTO);
+            //console.log("", "En espera", entrega.StartTime, entrega.EndTime)
+            const ID_ENTREGA = register.ID_ENTREGA;
+            await Promise.all(iteraciones.map(async (iteracion) => {
+                if(iteracion.Id_entrega === entrega.Id_entrega){
+                    //console.log("", "En espera", iteracion.StartTime, iteracion.EndTime);
+                    const success = registrarIteracion("", "En espera", iteracion.StartTime, iteracion.EndTime, ID_ENTREGA);
+                }
+            }));
+        }));
+        /*
+        const someFailed = success.some(tipoSuccessArray => tipoSuccessArray.includes(false));
+        if (someFailed) return res.status(400).json({ message: 'Algunas actualizaciones fallaron' });
+
+        const correosNotificacion = await IdUsuarios(proyectos[0].Id_project);
+        if (correosNotificacion.participantes === 0) return res.status(500).json({ message: 'Error al enviar la notificación' });
+        const idParticipantes = correosNotificacion.participantes;
+        */
+
+        try {
+            const emailsendend = await sendemailProject(data.CORREO, data.NOMBRE_PROYECTO, data.OBJETIVO, proyectos[0].StartTime, proyectos[0].EndTime, CODIGO_UNICO);
+            if (!emailsendend) return res.status(400).json({ message: "Error inesperado, intente nuevamente" })
+    
+        } catch (error) {
+            
+        }
+        activarTareasInactivas();
+
+        res.status(200).json({ message: "Fechas cambiadas" })
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Error inesperado, intentalo nuevamente" });
+    }
+}
 
 export const configurarProyecto = async (req, res) => {
     try {

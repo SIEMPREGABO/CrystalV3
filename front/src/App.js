@@ -31,9 +31,8 @@ function App() {
             <Route path="/panel" element={<Panel />} />
             <Route path="/configurar-proyecto" element={<FormProyect />} />
             <Route path="/configurar-perfil" element={<ConfigProfile />} />
-            <Route path="/Proyecto/:id/*" element={<Proyecto/>}>
-              <Route index element={<Proyecto />} />
-            </Route>
+            
+            
           </Route>
         </Routes>
 

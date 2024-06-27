@@ -10,7 +10,8 @@ import {
   requestDeleteProject,
   requestDegradar,
   requestAscender,
-  requestCambiarEstado
+  requestCambiarEstado,
+  requestCreateManual
 } from "../requests/projectReq.js";
 import Cookies from "js-cookie";
 import { useAuth } from "./authContext.js";
@@ -287,7 +288,38 @@ export const ProjectProvider = ({ children }) => {
   const create = async (project) => {
     try {
       const res = await requestCreate(project);
-      setMessage(res.data.message);
+      swal({
+        title: 'Crear proyecto',
+        text: res.data.message,
+        icon: 'success',
+        button: 'Aceptar',
+      });
+
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.message) {
+        //setProjecterrors(error.response.data.message);
+        swal({
+          title: 'Crear proyecto',
+          text: error.response.data.message,
+          icon: 'warning',
+          button: 'Aceptar',
+        });
+      } else {
+        //setProjecterrors("Error del servidor");
+        swal({
+          title: 'Crear Proyecto',
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
+      }
+    }
+  };
+
+
+  const createProject = async (project) => {
+    try {
+      const res = await requestCreateManual(project);
       swal({
         title: 'Crear proyecto',
         text: res.data.message,
@@ -827,6 +859,7 @@ export const ProjectProvider = ({ children }) => {
 
         create,
         configProyect,
+        createProject,
         deleteParticipant,
         joinProject,
         getProject,

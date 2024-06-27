@@ -8,7 +8,8 @@ import {
     deleteProject,
     degradarParticipant,
     ascenderParticipant,
-    cambiarEstado
+    cambiarEstado,
+    crearProyectoManual
 } from "../controllers/project.controller.js";
 import { createSchema, joinSchema, taskSchema, addSchema, requerimientoSchema } from "../schemas/project.schema.js";
 import { validateSchema } from "../middlewares/validator.middleware.js";
@@ -16,6 +17,7 @@ import { validateSchema } from "../middlewares/validator.middleware.js";
 const router  = Router();
 
 router.post('/createProject',validateSchema(createSchema), createProject);
+router.post('/createProjectM',crearProyectoManual);
 router.post('/configProject', configurarProyecto);
 router.post('/deleteProject', deleteProject);
 router.post('/joinProject',validateSchema(joinSchema),joinProject);
