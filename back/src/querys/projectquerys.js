@@ -1274,6 +1274,28 @@ export function getProjectInfo(ID_PROYECTO) {
     });
 }
 
+export function numProyectos(ID){
+    return new Promise(async (resolve, reject) => {
+        try {
+            const connection = await getConnection();
+            const query = 'SELECT * FROM U_SEUNE_P WHERE ID_USUARIO = ?';
+            connection.query(query, [ID], async (err, results) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    if(results.length === 20){
+                        resolve({success: true})
+                    }else{
+                        resolve({success: false})
+                    }
+                }
+            })
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
 export function getParticipantsQuery(ID_PROYECTO) {
     return new Promise(async (resolve, reject) => {
         try {

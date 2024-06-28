@@ -30,7 +30,8 @@ import {
     getAdmins, getNotificaciones, getNotificacion, getAlerta,
     registrarEntrega,
     registrarEntregaManual,
-    registrarIteracion
+    registrarIteracion,
+    numProyectos
 } from '../querys/projectquerys.js';
 import jwt from 'jsonwebtoken'
 import { zonaHoraria } from '../config.js';
@@ -43,6 +44,8 @@ export const createProject = async (req, res) => {
     const { NOMBRE_PROYECTO, OBJETIVO, DESCRIPCION_GNRL, FECHA_INICIO, FECHA_TERMINO, ENTREGAS, ID, CORREO } = req.body;
     console.log(req.body);
     try {
+        const numProy = await numProyectos(ID);
+        if(numProy.success) return res.status(400).json({ message: "No puedes tener mas de 20 proyectos" });
         const FECHA_INICIAL = moment(FECHA_INICIO).tz(zonaHoraria).add(1, 'days');
         const FECHA_FINAL = moment(FECHA_TERMINO).tz(zonaHoraria).endOf('day');
 
@@ -122,8 +125,13 @@ export const joinProject = async (req, res) => {
         let mensaje = 'Enlazado al proyecto correctamente';
         const { CODIGO_UNIRSE, ID_USUARIO } = req.body;
 
+        const numProy = await numProyectos(ID_USUARIO);
+        if(numProy.success) return res.status(400).json({ message: "No puedes tener mas de 20 proyectos" });
+
         const proyecto = await verificarCodigo(CODIGO_UNIRSE);
         if (!proyecto.success) return res.status(404).json({ message: "Proyecto no existente" });
+
+
 
         const Admins = await getAdmins(proyecto.project[0].ID);
 
@@ -297,11 +305,16 @@ export const getTareasxIteracion = async (req, res) => {
 
 export const crearProyectoManual = async (req, res) => {
     try {
+        
         const FECHA_ACTUAL = moment().tz(zonaHoraria);
         const REGISTRO_ACTUAL = FECHA_ACTUAL.format('YYYY-MM-DD HH:mm:ss');
         //console.log(req.body.SCHEDULE);
         const elementos = req.body.SCHEDULE;
         const data = req.body.DATA;
+
+        const numProy = await numProyectos(data.ID);
+        if(numProy.success) return res.status(400).json({ message: "No puedes tener mas de 20 proyectos" });
+
         const proyectos = [];
         const entregas = [];
         const iteraciones = [];
@@ -912,6 +925,9 @@ export const addParticipant = async (req, res) => {
         const numeroParticipantes = await verificarNumeroParticipantes(ID_PROYECTO);
         if (!numeroParticipantes.success) return res.status(400).json({ message: "Numero maximo de participantes alcanzado" });
 
+        
+        const numProy = await numProyectos(registrado.ID_USUARIO);
+        if(numProy.success) return res.status(400).json({ message: "No puedes tener mas de 20 proyectos" });
 
         if (numeroParticipantes.participantes.length === 8) {
             const actualizarCrystalVar = await actualizarCrystal(2, ID_PROYECTO);
