@@ -14,17 +14,30 @@ export const Config = () => {
     fechasiteraciones,
     configProyect,
     deleteProjectFunction,
-    getProject
+    getProject,
+    infoUpdateProject
   } = useProject();
   const { user } = useAuth();
   const [scheduleData, setScheduleData] = useState([]);
-
+  const [projectName, setProjectName] = useState([]);
+  const [projectDesc, setProjectDesc] = useState([]);
+  const [projectObj, setProjectObj] = useState([]);
+  const [projectSubject, setProjectSubject] = useState([]);
 
   const handleSaveChanges = async () => {
     const idnt = {
       ID: id,
       USER : user.ID
     }
+
+    const proyecto = {
+      ID_PROYECTO: fechasproject[0].ID,
+      NOMBRE: projectName,
+      OBJETIVO: projectObj,
+      DESCRIPCION: projectDesc,
+      MATERIA: projectSubject
+    }
+    await infoUpdateProject(proyecto);
     await configProyect(scheduleData);
     await getProject(idnt);
   };
@@ -47,6 +60,13 @@ export const Config = () => {
         }
       });
   };
+
+  useEffect(() => {
+    setProjectName(fechasproject[0].NOMBRE);
+    setProjectObj(fechasproject[0].OBJETIVO);
+    setProjectDesc(fechasproject[0].DESCRIPCION_GNRL);
+    setProjectSubject(fechasproject[0].MATERIA);
+  }, [fechasproject]);
 
   useEffect(() => {
     let events = [];
@@ -103,14 +123,76 @@ export const Config = () => {
   }, [fechasproject, fechasentregas, fechasiteraciones]);
 
   return (
-    <div className="relative flex flex-col justify-center min-h-screen ">
+    <div className='m-5 md:m-10 p-2 md:p-10 bg-white rounded-3xl'>
+      <div className="relative flex flex-col justify-center min-h-screen ">
       <div className=" p-6 m-7 bg-gray rounded-md  ring-indigo-600 ">
-        <h1 className="text-3xl pb-3  font-semibold text-center text-indigo-700 underline uppercase">
-          Ajustes del proyecto
-        </h1>
+        <Header category="Page" title="Ajustes de Proyecto" />
 
+      <form className="mt-6">
+      <div className="mb-2">
+                  <label htmlFor="titulo" className="block text-sm font-semibold text-gray-800">
+                    Nombre del Proyecto <span className='text-sm font-semibold text-red-800'>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="NOMBRE"
+                    placeholder='Nombre de la tarea'
+                    className="block w-full px-4 py-2 mt-2 text-indigo-400 bg-white border rounded-md focus:border-indigo-400 focus:ring-indigo-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                    required
+                    defaultValue={fechasproject[0].NOMBRE}
+                    onChange={(e) => {setProjectName(e.target.value);}}
+                  />
+      </div>
+      <div className="mb-2">
+                  <label htmlFor="titulo" className="block text-sm font-semibold text-gray-800">
+                    Objetivo del Proyecto <span className='text-sm font-semibold text-red-800'>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="NOMBRE"
+                    placeholder='Nombre de la tarea'
+                    className="block w-full px-4 py-2 mt-2 text-indigo-400 bg-white border rounded-md focus:border-indigo-400 focus:ring-indigo-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                    required
+                    defaultValue={fechasproject[0].OBJETIVO}
+                    onChange={(e) => setProjectObj(e.target.value)}
+                  />
+                </div>
+                <div className="mb-2">
+                  <label htmlFor="titulo" className="block text-sm font-semibold text-gray-800">
+                    Descripción del Proyecto <span className='text-sm font-semibold text-red-800'>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="NOMBRE"
+                    placeholder='Nombre de la tarea'
+                    className="block w-full px-4 py-2 mt-2 text-indigo-400 bg-white border rounded-md focus:border-indigo-400 focus:ring-indigo-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                    required
+                    defaultValue={fechasproject[0].DESCRIPCION_GNRL}
+                    onChange={(e) => setProjectDesc(e.target.value)}
+                  />
+                </div>
+                <div className="mb-2">
+                  <label htmlFor="titulo" className="block text-sm font-semibold text-gray-800">
+                    Materia Objetivo del Proyecto <span className='text-sm font-semibold text-red-800'>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="NOMBRE"
+                    placeholder='Nombre de la tarea'
+                    className="block w-full px-4 py-2 mt-2 text-indigo-400 bg-white border rounded-md focus:border-indigo-400 focus:ring-indigo-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                    required
+                    defaultValue={fechasproject[0].MATERIA}
+                    onChange={(e) => setProjectSubject(e.target.value)}
+                  />
+                </div>
+                <div className="mb-2">
+                  <label htmlFor="titulo" className="block text-sm font-semibold text-gray-800">
+                    Calendario del Proyecto <span className='text-sm font-semibold text-red-800'>*</span>
+                  </label>
+                </div>
+      </form>
 
-        <ScheduleComponent height="850px" width="1700px" eventSettings={{ dataSource: scheduleData }}>
+        <ScheduleComponent height="850px" width="auto" eventSettings={{ dataSource: scheduleData }}>
           <Inject services={[Day, Month, Agenda, Resize, DragAndDrop]} />
         </ScheduleComponent>
 
@@ -132,6 +214,7 @@ export const Config = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };

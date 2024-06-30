@@ -32,7 +32,7 @@ export const projectSchema = z.object({
         message: 'Las entregas son requeridas'
     }).refine(value => value !== "0", {
         message: 'Selecciona un número de entregas'
-    })
+    }), ITERACIONES: z.string().optional()
 })
 
 export const joinSchema = z.object({

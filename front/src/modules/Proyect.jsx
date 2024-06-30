@@ -75,7 +75,7 @@ export const Proyecto = () => {
                 >
                 
                     {/*<div className="fixed md:static bg-main-bg dark:bg-main-dark-bg navbar w-full md:w-auto">*/}
-                        <Navbar projecttitle={fechasproject[0].NOMBRE}/>
+                        <Navbar projecttitle={fechasproject && fechasproject.length > 0 ? fechasproject[0].NOMBRE : "Cargando"}/>
                     {/*</div>*/}
                     
                     

@@ -1,47 +1,20 @@
-import styles from '../css/voicereq.module.css';
 import React, { useEffect, useRef, useState } from 'react';
-import { useStateContext } from '../context/Provider.js';
-import { DialogComponent } from '@syncfusion/ej2-react-popups';
 import { useForm } from 'react-hook-form';
-import { useProject } from "../context/projectContext.js";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { requerimientoSchema } from '../schemas/project.js';
+import { useProject } from "../context/projectContext.js";
+import { useStateContext } from '../context/Provider.js';
+import { DialogComponent } from '@syncfusion/ej2-react-popups';
 import { Header } from '../components';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPenToSquare, faTrash, faCirclePlus } from '@fortawesome/free-solid-svg-icons';
 import {
     GridComponent, ColumnsDirective, ColumnDirective, Inject, Page, Search, Toolbar, Edit, DialogEditEventArgs
 } from '@syncfusion/ej2-react-grids';
 import { L10n } from '@syncfusion/ej2-base';
-
-const requirementsGrid = [
-    { field: "ID", headerText: "ID", width: "100", textAlign: "center", headerTextAlign: "center", visible: false },
-    { field: "OBJETIVO", headerText: "Objetivo", width: "200", textAlign: "left", headerTextAlign: "center" },
-    { field: "DESCRIPCION", headerText: "Descripcion", width: "200", textAlign: "left", headerTextAlign: "center" },
-    { field: "NOMBRE", headerText: "Tipo Requerimiento", width: "100", textAlign: "center", headerTextAlign: "center" },
-    {
-        field: 'Eliminar',
-        headerText: 'Eliminar',
-        width: '120',
-        textAlign: 'Center',
-        template: (props) => (
-          props.ROLE === 0 && (
-            <span data-toggle="tooltip" title="Eliminar"><FontAwesomeIcon icon={faTrash} className="fa-icon" style={{ cursor: 'pointer', color: '#f70808', fontSize: '1.25rem' }} /*onClick={() => handleDeleteClick(props)}*/ /></span>
-          )
-        )
-    },
-    {
-        field: 'Editar',
-        headerText: 'Editar',
-        width: '120',
-        textAlign: 'Center',
-        template: (props) => (
-          props.ROLE === 0 && (
-            <span data-toggle="tooltip" title="Eliminar"><FontAwesomeIcon icon={faTrash} className="fa-icon" style={{ cursor: 'pointer', color: '#f70808', fontSize: '1.25rem' }} /*onClick={() => handleDeleteClick(props)}*/ /></span>
-          )
-        )
-      },
-];
+import styles from '../css/voicereq.module.css';
+import swal from 'sweetalert';
+import { set } from 'zod';
 
 L10n.load({
     'esp': {
@@ -76,32 +49,86 @@ L10n.load({
 });
 
 const Requerimientos = () => {
+
+    const requirementsGrid = [
+        { field: "ID", headerText: "ID", width: "100", textAlign: "center", headerTextAlign: "center", visible: false },
+        { field: "OBJETIVO", headerText: "Objetivo", width: "200", textAlign: "left", headerTextAlign: "center" },
+        { field: "DESCRIPCION", headerText: "Descripcion", width: "200", textAlign: "left", headerTextAlign: "center" },
+        { field: "NOMBRE", headerText: "Tipo Requerimiento", width: "100", textAlign: "center", headerTextAlign: "center" },
+        {
+            field: 'Editar',
+            headerText: 'Editar',
+            width: '80',
+            textAlign: 'Center',
+            template: (props) => (
+                <span data-toggle="tooltip" title="Editar"><FontAwesomeIcon icon={faPenToSquare} className="fa-icon" style={{ cursor: 'pointer', color: '#21e642', fontSize: '1.25rem' }} onClick={() => handlePenClick(props)} data-bs-toggle="modal" data-bs-target="#exampleModal"/></span>
+            )
+        },
+        {
+            field: 'Eliminar',
+            headerText: 'Eliminar',
+            width: '80',
+            textAlign: 'Center',
+            template: (props) => (
+                <span data-toggle="tooltip" title="Eliminar"><FontAwesomeIcon icon={faTrash} className="fa-icon" style={{ cursor: 'pointer', color: '#f70808', fontSize: '1.25rem' }} onClick={() => handleTrashClick(props)}/></span>
+            )
+          },
+    ];
+
     const { activeMenu, themeSettings, setthemeSettings, currentColor, currentMode } = useStateContext();
-    const modalRef = useRef(null);
+    const { createRequirements, entregaactual, fechasproject, projecterrors, message, requirements, getProject, setRequirements, deleteRequire, updateRequire } = useProject();
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-    const [reqObj, setReqObj] = useState("");
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [idRequierement, setIdRequirement] = useState(0);
     const [selectedReq, setSelectedReq] = useState(null);
-    const [reqLocal, setReqLocal] = useState(null);
+    const [reqLocal, setReqLocal] = useState([]);
+
     const {
         register,
         handleSubmit,
         formState: { errors },
-        setValue
+        setValue,
+        reset,
+        watch
     } = useForm({
         resolver: zodResolver(requerimientoSchema)
     });
 
-    const { createRequirements, entregaactual, fechasproject, projecterrors, message, requirements, getProject } = useProject();
-
-    useEffect(() => {
-        console.log(requirements);
-    }, []);
-
     useEffect(() => {
         setReqLocal(requirements);
-    }, [requirements]); // Asegúrate de poner [requirements] para que se ejecute solo cuando requirements cambie
+    }, [requirements]);
+
+    useEffect(() => {
+        if (selectedReq) {
+            const typereq = selectedReq.NOMBRE;
+            setValue("OBJETIVO", selectedReq.OBJETIVO);
+            setValue("DESCRIPCION", selectedReq.DESCRIPCION);
+            setValue("TIPO", getTypeValue(typereq));
+        } else {
+            reset({
+                OBJETIVO: "",
+                DESCRIPCION: "",
+                TIPO: "0"
+            });
+        }
+    }, [selectedReq, setValue, reset]);
+
+    const getTypeValue = (typereq) => {
+        switch (typereq) {
+            case "FUNCIONAL":
+                return "1";
+            case "NO FUNCIONAL":
+                return "2";
+            case "RENDIMIENTO":
+                return "3";
+            case "SEGURIDAD":
+                return "4";
+            case "CALIDAD":
+                return "5";
+            case "CAMBIO":
+                return "6";
+            default:
+                return "0";
+        }
+    };
 
     const onSubmit = handleSubmit(async (values) => {
         const data = {
@@ -110,20 +137,8 @@ const Requerimientos = () => {
             TIPO: values.TIPO,
             ID_ENTREGA: entregaactual.ID
         };
-        let tr = "";
-        if(values.TIPO === "1"){
-            tr= "Funcional";
-        }else if(values.TIPO === "2"){
-            tr="No Funcional";
-        }else if(values.TIPO === "3"){
-            tr="Rendimiento";
-        }else if(values.TIPO === "4"){
-            tr="Seguridad";
-        }else if(values.TIPO === "5"){
-            tr= "Calidad";
-        }else{
-            tr="Cambio";
-        }
+        const tr = getTypeName(values.TIPO);
+
         const dataLocal = {
             ENTREGA: entregaactual.ID,
             OBJETIVO: values.OBJETIVO,
@@ -131,70 +146,78 @@ const Requerimientos = () => {
             NOMBRE: tr,
         }
 
-        console.log(data);
         setReqLocal((prevdata) => [...prevdata, dataLocal]);
         createRequirements(data);
     });
 
-    const handleEditDialogOpen = () => {
-        setIsEditDialogOpen(true);
+    const getTypeName = (type) => {
+        switch (type) {
+            case "1":
+                return "FUNCIONAL";
+            case "2":
+                return "NO FUNCIONAL";
+            case "3":
+                return "RENDIMIENTO";
+            case "4":
+                return "SEGURIDAD";
+            case "5":
+                return "CALIDAD";
+            case "6":
+                return "CAMBIO";
+            default:
+                return "";
+        }
     };
 
-    const handleEditDialogClose = () => {
-        console.log("Hola");
-        setIsEditDialogOpen(false);
-    };
-
-    const handlePlusClick = (props) => {
-        /*setSelectedRequirement(props);
-        setValue('OBJETIVO', props.OBJETIVO);
-        setValue('DESCRIPCION', props.DESCRIPCION);
-        setValue('TIPO', props.TIPO);
-        setIsModalOpen(true);*/
+    const handlePenClick = (props) => {
+        setSelectedReq(props);
     };
 
     const handleTrashClick = (props) => {
-        console.log(props);
-        alert(`Eliminar elemento en la fila con ID: ${props.ID}`);
+        setSelectedReq(props);
+        console.log(selectedReq);
+        swal({
+            title: 'Eliminar Requerimiento',
+            text: '¿Estás seguro de eliminar este requerimiento? Esta acción eliminará el requerimiento de forma definitiva',
+            icon: 'warning',
+            buttons: ['Cancelar', 'Eliminar'],
+            dangerMode: true,
+          }).then((value) => {
+            if (value) {
+              //deleteTask(deletedTask);
+              const require = {
+                ID_REQUERIMIENTO: props.ID
+              }
+              const estado = deleteRequire(require);
+              //setDialogVisible(false);
+              if(estado){
+                setReqLocal(prevData =>
+                    prevData.filter(req => req.ID !== props.ID)
+                  );
+              }
+            }
+          });
+        //alert(`Eliminar elemento en la fila con ID: ${props.ID}`);
     };
 
-    const actionTemplate = (props) => {
-        return (
-            <div className='w-full flex justify-around '>
-                <span data-toggle="tooltip" title="Editar">
-                    <FontAwesomeIcon
-                        icon={faPenToSquare}
-                        className="fa-icon"
-                        style={{ marginRight: '10px', cursor: 'pointer', color: '#186e8b', fontSize: '1.25rem' }}
-                        onClick={() => handlePlusClick(props)}
-                    />
-                </span>
-                <span data-toggle="tooltip" title="Eliminar">
-                    <FontAwesomeIcon
-                        icon={faTrash}
-                        className="fa-icon"
-                        style={{ cursor: 'pointer', color: '#f70808', fontSize: '1.25rem' }}
-                        onClick={() => handleTrashClick(props)}
-                    />
-                </span>
-            </div>
+    const handleSaveEdit = () => {
+        const editedValues = {
+            ID_REQUERIMIENTO: selectedReq.ID,
+            OBJETIVO: watch("OBJETIVO"),
+            DESCRIPCION: watch("DESCRIPCION"),
+            TIPO: watch("TIPO")
+        };
+
+        
+        console.log("Valores editados:", editedValues);
+        setReqLocal(prevData => 
+            prevData.map(req =>
+                req.ID === selectedReq.ID ?
+                {...req, OBJETIVO: editedValues.OBJETIVO, DESCRIPCION: editedValues.DESCRIPCION, NOMBRE: getTypeName(editedValues.TIPO)} : req
+            )
         );
-    };
-
-    const handleDeleteClick = () => {
-        console.log("Boton Eliminar");
-    }
-
-    const handleSaveClick = () => {
-        console.log("Guardar Click");
-    }
-
-    const handleRowDoubleClick = (args) => {
-        const gridObj = document.getElementById('reqs').ej2_instances[0];
-        gridObj.closeEdit();
-        console.log(args.rowData);
-        setIsEditDialogOpen(true);
-        setSelectedReq(args.rowData);
+        updateRequire(editedValues);
+        //setIsEditDialogOpen(false);
     };
 
     return (
@@ -203,7 +226,7 @@ const Requerimientos = () => {
             <div className='m-3 w-full flex'>
                 <div className='w-6/12'></div>
                 <div className='w-6/12 flex justify-end mr-7'>
-                    <button className='p-1 w-fit rounded-xl border-1 border-blue-700 flex justify-center ' data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    <button className='p-1 w-fit rounded-xl border-1 border-blue-700 flex justify-center ' data-bs-toggle="modal" data-bs-target="#exampleModal" onClick={() => { setSelectedReq(null) }}>
                         <FontAwesomeIcon icon={faCirclePlus} className='fa-flip' style={{ color: currentColor, fontSize: '1.5rem' }} />
                         <p className='ml-1'>Agregar Requerimiento</p>
                     </button>
@@ -223,8 +246,6 @@ const Requerimientos = () => {
                     allowTextWrap={true}
                     textWrapSettings={{ wrapMode: 'Both' }}
                     locale='esp'
-                    recordDoubleClick={(args) => handleRowDoubleClick(args)}
-                    style={{zIndex: 1000}}
                 >
                     <ColumnsDirective>
                         {requirementsGrid.map((item, index) => (
@@ -234,161 +255,80 @@ const Requerimientos = () => {
 
                     <Inject services={[Page, Search, Toolbar, Edit]} />
                 </GridComponent>
-
-                <DialogComponent
-                    id="req_dialog"
-                    header='Detalles de Requerimiento'
-                    width='800px'
-                    zIndex={2000}// Ajusta el zIndex según sea necesario
-                    showCloseIcon={true}
-                    close={handleEditDialogClose}
-                    closeOnEscape={true}
-                    visible={isEditDialogOpen}
-                    style={{ maxHeight: '600px', height: '500px !important', top: '30%'}}
-                >
-                    {/* Contenido del diálogo aquí */}
-                    <form className='h-full'>
-                        <input type="text" id="ID" name="ID" className='hidden' />
-                        <div className="input-group mb-3 flex items-center ">
-                            <label htmlFor="objetivo" className='block text-sm font-semibold text-gray-800'>Objetivo: </label>
-                            <input
-                                className="w-full px-4 py-2 mt-2 text-black bg-white border rounded-md focus:border-indigo-400 focus:ring-indigo-300 focus:outline-none focus:ring focus:ring-opacity-40"
-                                placeholder="Objetivo"
-                                aria-label="objetivo"
-                                id="objetivo"
-                                name='objetivo'
-                                spellCheck={false}
-                                value={selectedReq !== null ? selectedReq.OBJETIVO : ""}
-                                
-                            />
-                        </div>
-                        <div className="input-group mb-3 flex items-center ">
-                            <label htmlFor="desc" className='block text-sm font-semibold text-gray-800'>Descripcion: </label>
-                            <textarea
-                                spellCheck={false}
-                                className="w-full px-4 py-2 mt-2 text-black bg-white border rounded-md focus:border-indigo-400 focus:ring-indigo-300 focus:outline-none focus:ring focus:ring-opacity-40"
-                                placeholder="Descripcion de requerimiento"
-                                rows={4}
-                                aria-label="Username"
-                                id="desc"
-                                name='desc'
-                                value={selectedReq !== null ? selectedReq.DESCRIPCION : ""}
-                                
-                            ></textarea>
-                        </div>
-                        <div className="input-group mb-3 flex items-center ">
-                            <label htmlFor="tipo_req" className='block text-sm font-semibold text-gray-800'>Tipo de Requerimiento: </label>
-                            <select
-                                id="tipo_req"
-                                name='tipo_req'
-                                value={selectedReq !== null ? selectedReq.NOMBRE : ""}
-                                className="block w-full px-4 py-2 mt-2 text-black bg-white border rounded-md focus:border-indigo-400 focus:ring-indigo-300 focus:outline-none focus:ring focus:ring-opacity-40"
-                                
-                            >
-                                <option value="">Selecciona una opción</option>
-                                <option value="Funcional">Funcional</option>
-                                <option value="No Funcional">No funcional</option>
-                                <option value="Calidad">Calidad</option>
-                                <option value="Desempeño">Desempeño</option>
-                                <option value="Cambio">Cambio</option>
-                            </select>
-                        </div>
-                        <div className="e-footer-content">
-                            <button type="button" className="e-control e-btn e-lib e-flat e-dialog-delete" onClick={handleDeleteClick}>Eliminar</button>
-                            <button type="button" className="e-control e-btn e-lib e-flat e-dialog-edit e-primary" onClick={handleSaveClick}>Guardar</button>
-                            <button type="button" className="e-control e-btn e-lib e-flat e-dialog-cancel" onClick={handleEditDialogClose}>Cancelar</button>
-                        </div>
-                    </form>
-                </DialogComponent>
             </div>
 
             {/* Modal para agregar requerimiento */}
             <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div className="modal-dialog modal-dialog-centered">
-                    <div className="modal-content" style={{zInde:1000}}>
+                    <div className="modal-content">
                         <Header category="App" title="Agregar Requerimiento" />
-                        {fechasproject[0].ESTADO === "En espera" &&
-                            <div>
-                                {entregaactual === "" &&
-                                    <div className="w-full p-6 m-auto bg-white rounded-md  ring-indigo-600 lg:max-w-xl">
-                                        No puedes asignar requerimientos
-                                    </div>}
-                            </div>
-                        }
-                        {fechasproject[0].ESTADO === "Finalizado" &&
-                            <div>
-                                {entregaactual === "" &&
-                                    <div className="w-full p-6 m-auto bg-white rounded-md  ring-indigo-600 lg:max-w-xl">
-                                        No puedes asignar requerimientos
-                                    </div>}
-                            </div>
-                        }
-                        {fechasproject[0].ESTADO === "En desarrollo" &&
-                            <>
-                                {entregaactual !== "" &&
-                                    <form onSubmit={handleSubmit(onSubmit)} className='m-3'>
-                                        <div className="mb-1">
-                                            <label className={styles.labels}>Objetivo:<span className='text-sm font-semibold text-red-800'>*</span></label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                id="exampleFormControlInput1"
-                                                name="OBJETIVO"
-                                                placeholder="objetivo del requerimiento"
-                                                {...register("OBJETIVO", { required: true, message: "Campo Requerido" })}
-                                            />
-                                            {errors.OBJETIVO &&
-                                                <div className="p-2">
-                                                    <div className=" items-center bg-red-100 text-red-700  rounded-lg m-2 shadow-md ">{errors.OBJETIVO.message}</div>
-                                                </div>
-                                            }
+                        {fechasproject[0].ESTADO === "En espera" && <div>No puedes asignar requerimientos</div>}
+                        {fechasproject[0].ESTADO === "Finalizado" && <div>No puedes asignar requerimientos</div>}
+                        {fechasproject[0].ESTADO === "En desarrollo" && entregaactual && (
+                            <form onSubmit={selectedReq ? handleSubmit(handleSaveEdit) : handleSubmit(onSubmit)} className='m-3'>
+                                <div className="mb-1">
+                                    <label className={styles.labels}>Objetivo:<span className='text-sm font-semibold text-red-800'>*</span></label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        id="exampleFormControlInput1"
+                                        name="OBJETIVO"
+                                        placeholder="objetivo del requerimiento"
+                                        {...register("OBJETIVO", { required: true, message: "Campo Requerido" })}
+                                    />
+                                    {errors.OBJETIVO && (
+                                        <div className="p-2">
+                                            <div className="items-center bg-red-100 text-red-700 rounded-lg m-2 shadow-md">{errors.OBJETIVO.message}</div>
                                         </div>
-                                        <div className="mb-1">
-                                            <label className={styles.labels}>Descripción:<span className='text-sm font-semibold text-red-800'>*</span></label>
-                                            <textarea
-                                                className="form-control"
-                                                id="exampleFormControlTextarea1"
-                                                name="DESCRIPCION"
-                                                rows="3"
-                                                placeholder='describe el requerimiento'
-                                                {...register("DESCRIPCION", { required: true, message: "Campo Requerido" })}
-                                            />
-                                            {errors.DESCRIPCION &&
-                                                <div className="p-2">
-                                                    <div className=" items-center bg-red-100 text-red-700  rounded-lg m-2 shadow-md ">{errors.DESCRIPCION.message}</div>
-                                                </div>
-                                            }
+                                    )}
+                                </div>
+                                <div className="mb-1">
+                                    <label className={styles.labels}>Descripción:<span className='text-sm font-semibold text-red-800'>*</span></label>
+                                    <textarea
+                                        className="form-control"
+                                        id="exampleFormControlTextarea1"
+                                        name="DESCRIPCION"
+                                        rows="3"
+                                        placeholder='describe el requerimiento'
+                                        {...register("DESCRIPCION", { required: true, message: "Campo Requerido" })}
+                                    />
+                                    {errors.DESCRIPCION && (
+                                        <div className="p-2">
+                                            <div className="items-center bg-red-100 text-red-700 rounded-lg m-2 shadow-md">{errors.DESCRIPCION.message}</div>
                                         </div>
-                                        <div className="mb-1">
-                                            <label className={styles.labels}>Tipo de Requerimiento:<span className='text-sm font-semibold text-red-800'>*</span></label>
-                                            <select
-                                                {...register("TIPO", { required: true, message: "Campo Requerido" })}
-                                                className='form-select'
-                                                defaultValue="0"
-                                            >
-                                                <option value="0">Selecciona el tipo de requerimiento</option>
-                                                <option value="1">Requerimiento Funcional</option>
-                                                <option value="2">Requerimiento No Funcional</option>
-                                                <option value="3">Requerimiento de Rendimiento</option>
-                                                <option value="4">Requerimiento de Seguridad</option>
-                                                <option value="5">Requerimiento de Calidad</option>
-                                                <option value="6">Solicitud de Cambio</option>
-                                            </select>
-                                            {errors.TIPO &&
-                                                <div className="p-2">
-                                                    <div className=" items-center bg-red-100 text-red-700  rounded-lg m-2 shadow-md ">{errors.TIPO.message}</div>
-                                                </div>
-                                            }
+                                    )}
+                                </div>
+                                <div className="mb-1">
+                                    <label className={styles.labels}>Tipo de Requerimiento:<span className='text-sm font-semibold text-red-800'>*</span></label>
+                                    <select
+                                        {...register("TIPO", { required: true, message: "Campo Requerido" })}
+                                        className='form-select'
+                                    >
+                                        <option value="0">Selecciona el tipo de requerimiento</option>
+                                        <option value="1">Requerimiento Funcional</option>
+                                        <option value="2">Requerimiento No Funcional</option>
+                                        <option value="3">Requerimiento de Rendimiento</option>
+                                        <option value="4">Requerimiento de Seguridad</option>
+                                        <option value="5">Requerimiento de Calidad</option>
+                                        <option value="6">Solicitud de Cambio</option>
+                                    </select>
+                                    {errors.TIPO && (
+                                        <div className="p-2">
+                                            <div className="items-center bg-red-100 text-red-700 rounded-lg m-2 shadow-md">{errors.TIPO.message}</div>
                                         </div>
-                                        <div className='mt-3 row'>
-                                            <div className='mt-3 d-flex justify-content-center'>
-                                                <button type="submit" className="btn btn-primary">Agregar</button>
-                                            </div>
-                                        </div>
-                                    </form>
-                                }
-                            </>
-                        }
+                                    )}
+                                </div>
+                                <div className='mt-3 row'>
+                                    <div className='mt-3 d-flex justify-content-center'>
+                                        {selectedReq ? (
+                                            <button className="btn btn-primary">Guardar</button>
+                                        ) : (
+                                            <button type="submit" className="btn btn-primary">Agregar</button>
+                                        )}
+                                    </div>
+                                </div>
+                            </form>
+                        )}
                     </div>
                 </div>
             </div>

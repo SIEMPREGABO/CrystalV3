@@ -10,10 +10,11 @@ export const ChatIteracion = () => {
   const messageInputRef = useRef(null);
   const { activeMenu, themeSettings, setthemeSettings, currentColor, currentMode } = useStateContext();
   const { user } = useAuth();
-  const { createMessages, iteracionactual, entregaactual, messagesChat, getMessages, iterationParticipants, iteraciones, entregas, participants } = useProject();
+  const { createMessages, iteracionactual, entregaactual, messagesChat, messagesChat2, getMessages,getMessages2, fechasproject,iterationParticipants, iteraciones, entregas, participants, chats, getChatsiteracionesDisponibles } = useProject();
 
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const [messages2, setMessages2] = useState([]);
   const [connectedsocket, setConnectedSocket] = useState(null);
   const [room, setRoom] = useState("");
   const [participantColors, setParticipantColors] = useState({});
@@ -24,6 +25,16 @@ export const ChatIteracion = () => {
   const downloadChat = () => {
     const element = document.createElement("a");
     const file = new Blob([messages.map(msg => `${msg.from}: ${msg.data}`).join("\n")], { type: 'text/plain' });
+    element.href = URL.createObjectURL(file);
+    element.download = "chat.txt";
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+
+  const downloadChat2 = () => {
+    const element = document.createElement("a");
+    const file = new Blob([messages2.map(msg => `${msg.from}: ${msg.data}`).join("\n")], { type: 'text/plain' });
     element.href = URL.createObjectURL(file);
     element.download = "chat.txt";
     document.body.appendChild(element);
@@ -46,6 +57,16 @@ export const ChatIteracion = () => {
       setMessages(newMessages);
     }
   }, [messagesChat]);
+
+  useEffect(() => {
+    if (messagesChat2 != null) {
+      const newMessages = messagesChat2.map((msg) => ({
+        data: msg.CONTENIDO,
+        from: (user.ID === msg.ID_USUARIO_ENVIA ? 'Yo' : msg.NOMBRE_USUARIO),
+      }));
+      setMessages2(newMessages);
+    }
+  }, [messagesChat2]);
 
   useEffect(() => {
     if (iteraciones != null) {
@@ -96,6 +117,11 @@ export const ChatIteracion = () => {
 
   useEffect(() => {
     console.log(iteracionactual);
+    const proyecto = {
+      ID_PROYECTO: fechasproject[0].ID,
+    }
+
+    //getChatsiteracionesDisponibles(proyecto)
     const iteracion = {
       ID_ITERACION: iteracionactual.ID
     }
@@ -106,7 +132,7 @@ export const ChatIteracion = () => {
     } else {
       console.log("Sin participantes");
     }
-    
+
     // Crear el socket cuando el componente se monta
     const socket = io('http://localhost:4001', {
       auth: {
@@ -137,6 +163,9 @@ export const ChatIteracion = () => {
       colors[participant.ID_USUARIO] = { color, textColor };
     });
     setParticipantColors(colors);
+
+    console.log("chats");
+    console.log(chats);
 
     // Desconectar el socket cuando el componente se desmonta
     return () => {
@@ -176,6 +205,19 @@ export const ChatIteracion = () => {
 
   const getTextColor = (luminance) => {
     return luminance > 0.5 ? 'black' : 'white';
+  }
+
+  const handleChatClick = (chatID) => {
+    const selectedChatid = chatID;
+    
+    const iteracion = {
+      ID_ITERACION: selectedChatid
+    }
+    getMessages2(iteracion);
+    console.log("mensajes a descargar");
+    console.log(messages2);
+    downloadChat2();
+    console.log("ID de la iteración seleccionada:", selectedChatid);
   }
 
   return (
@@ -235,9 +277,26 @@ export const ChatIteracion = () => {
           )}
         </div>
         <div className="w-8/12  p-2 ">
-          <div className="w-full flex justify-end m-0 p-0.5"><button className="btn text-white" style={{ backgroundColor: currentColor }} onClick={downloadChat}>
+          <div className="w-full flex justify-end m-0 p-0.5">
+            <div class="btn-group">
+            <button className="btn text-white" style={{ backgroundColor: currentColor }} onClick={downloadChat}>
             Descargar Chat
-          </button></div>
+          </button>
+              <button type="button" class="btn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" style={{ backgroundColor: currentColor, color: "white", border: "1px solid gray" }}>
+                <span class="visually-hidden">Toggle Dropdown</span>
+              </button>
+              <ul class="dropdown-menu">
+                {chats && chats.length > 0  ? (
+                  chats.map((chat, index) => {
+                    console.log(chat);
+                    return (
+                      <li key={index} value={chat.ITERACION_ID} onClick={() => handleChatClick(chat.ITERACION_ID)}><a class="dropdown-item" >{chat.ITERACION_ID === iteracionactual.ID ? "Iteración Actual " : ((chat.ENTREGA_ID === entregaactual.ID ? (iteraciones.find(iteracion => iteracion.ID === chat.ITERACION_ID)).Nombre_Iteracion + " de Entrega Actual" : `Iteración ${chat.ITERACION_ID}`+`Entrega ${chat.ENTREGA_ID}`)) }</a></li>
+                    )
+                  })
+                ) : (<li><a class="dropdown-item text-black" >Sin chats Disponibles</a></li>)}
+              </ul>
+            </div>
+          </div>
           <div className="h-screen bg- text-black">
             <div className='w-full h-5/6 border-2 rounded-lg shadow-md'>
               <form onSubmit={handleSubmit(onSubmit)} className="p-10 w-full h-full rounded-lg overflow-y-scroll flex flex-column justify-end bg-gradient-to-br from-green-400 via-yellow-400 to-red-500 bg-opacity-100" action="POST">
@@ -262,7 +321,7 @@ export const ChatIteracion = () => {
                     maxLength={255}
                     rows={1}
                     {...register("CONTENIDO", { required: true, message: "Campo Requerido" })} />
-                  
+
                   <div className='d-flex'>
                     <button type="submit" className="btn btn-primary d-flex gap-2 ">
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" className="bi bi-send" viewBox="0 0 16 16">

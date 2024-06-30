@@ -14,7 +14,12 @@ import {
   requestDeleteCollab,
   requestCambiarEstado,
   requestSetObjetivo,
-  requestSetRetroalimentacion
+  requestSetRetroalimentacion,
+  requestDeleteRequierement,
+  requestUpdateRequirement,
+  requestChatsIteraciones,
+  requestUpdateProject,
+  requestCreateManual
 } from "../requests/projectReq.js";
 import Cookies from "js-cookie";
 import { useAuth } from "./authContext.js";
@@ -34,6 +39,9 @@ export const ProjectProvider = ({ children }) => {
   const [IsParticipant, setIsParticipant] = useState(true);
   const [userRole, setUserRole] = useState(false);
   const [twoAdmins, setTwoAdmins] = useState(false);
+  const [threeAdmins , setThreeAdmins] = useState(false);
+  const [fourAdmins , setFourAdmins] = useState(false);
+  const [fiveAdmins , setFiveAdmins] = useState(false);
   const [IsCreated,setIsCreated] = useState(false);
 
   const [message, setMessage] = useState([]);
@@ -52,7 +60,8 @@ export const ProjectProvider = ({ children }) => {
   const [iteracionactual, setiteracionactual] = useState([]);
   const [requerimientos, setRequerimientos] = useState([]);
   const [messagesChat, setMessagesChat] = useState([]);
-
+  const [messagesChat2, setMessagesChat2] = useState([]);
+  const [chats, setChats] = useState([]);
 
   const [entregasproject, setEntregasProject] = useState([]);
   const [projectInfo, setProjectInfo] = useState([]);
@@ -270,6 +279,37 @@ export const ProjectProvider = ({ children }) => {
     }
   }
 
+  const infoUpdateProject = async (proyecto) => {
+    try {
+      const res = await requestUpdateProject(proyecto);
+      swal({
+        title: 'Configurar Proyecto',
+        text: res.data.message,
+        icon: 'success',
+        button: 'Aceptar',
+      });
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.message) {
+        //setProjecterrors(error.response.data.message);
+        swal({
+          title: 'Configurar Proyecto',
+          text: error.response.data.message,
+          icon: 'warning',
+          button: 'Aceptar',
+        });
+        //console.log(error.response.data.message);
+      } else {
+        swal({
+          title: 'Configurar Proyecto',
+          text: "Error del servidor",
+          icon: 'error',
+          button: 'Aceptar',
+        });
+        //setProjecterrors("Error del servidor");
+      }
+    }
+  }
+
 
   const getTasksProject = async (project) => {
     try {
@@ -328,6 +368,37 @@ export const ProjectProvider = ({ children }) => {
     }
   };
 
+  const createProject = async (project) => {
+    try {
+      const res = await requestCreateManual(project);
+      swal({
+        title: 'Crear proyecto',
+        text: res.data.message,
+        icon: 'success',
+        button: 'Aceptar',
+      });
+      setIsCreated(true);
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.message) {
+        //setProjecterrors(error.response.data.message);
+        swal({
+          title: 'Crear proyecto',
+          text: error.response.data.message,
+          icon: 'warning',
+          button: 'Aceptar',
+        });
+      } else {
+        //setProjecterrors("Error del servidor");
+        swal({
+          title: 'Crear Proyecto',
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
+      }
+    }
+  };
+
   const createMessages = async (message) => {
     try {
       const res = await requestAddMessage(message);
@@ -345,6 +416,61 @@ export const ProjectProvider = ({ children }) => {
         //setProjecterrors("Error del servidor");
         swal({
           title: 'Crear mensajes',
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
+      }
+    }
+  };
+
+  const getChatsiteracionesDisponibles = async (proyecto) => {
+    try {
+      const res = await requestChatsIteraciones(proyecto); 
+      //setChats(res.data);
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.message) {
+        //setProjecterrors(error.response.data.message);
+        swal({
+          title: 'Extraer mensajes',
+          text: error.response.data.message,
+          icon: 'warning',
+          button: 'Aceptar',
+        });
+      } else {
+        //setProjecterrors("Error del servidor");
+        swal({
+          title: 'Extraer mensajes',
+          text: 'Error del servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
+      }
+    }
+  }
+
+  const getMessages2 = async (iteracion) => {
+    try {
+      //const cookies = Cookies.get();
+      //console.log('iteracion pcontext: ' + iteracion.ID_ITERACION);
+      //console.log(iteracion);
+      const res = await requestMessages(iteracion);
+      //console.log('pcontext: ' + res);
+      setMessagesChat2(res.data);
+      //setIsCreated(true);
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.message) {
+        //setProjecterrors(error.response.data.message);
+        swal({
+          title: 'Extraer mensajes',
+          text: error.response.data.message,
+          icon: 'warning',
+          button: 'Aceptar',
+        });
+      } else {
+        //setProjecterrors("Error del servidor");
+        swal({
+          title: 'Extraer mensajes',
           text: 'Error del servidor',
           icon: 'error',
           button: 'Aceptar',
@@ -544,6 +670,71 @@ export const ProjectProvider = ({ children }) => {
     }
   }
 
+  const deleteRequire = async (require) => {
+    try {
+      const res = await requestDeleteRequierement(require);
+
+      swal({
+        title: 'Eliminar Requerimiento',
+        text: res.data.message,
+        icon: 'success',
+        button: 'Aceptar'
+      });
+      return res.data.estado;
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.message) {
+        swal({
+          title: 'Eliminar Requerimiento',
+          text: error.response.data.message,
+          icon: 'error',
+          button: 'Aceptar',
+        });
+        //setProjecterrors(error.response.data.message);
+      } else {
+        swal({
+          title: 'Eliminar Requerimiento',
+          text: 'Error en el servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
+        //setProjecterrors("Error del servidor");
+      }
+      return false;
+    }
+  }
+
+  const updateRequire = async (require) => {
+    try {
+      const res = await requestUpdateRequirement(require);
+      console.log(res);
+      swal({
+        title: 'Actualizar Requerimiento',
+        text: res.data.message,
+        icon: 'success',
+        button: 'Aceptar'
+      });
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.message) {
+        swal({
+          title: 'Actualizar Requerimiento',
+          text: error.response.data.message,
+          icon: 'error',
+          button: 'Aceptar',
+        });
+        //setProjecterrors(error.response.data.message);
+      } else {
+        swal({
+          title: 'Actualizar Requerimiento',
+          text: 'Error en el servidor',
+          icon: 'error',
+          button: 'Aceptar',
+        });
+        //setProjecterrors("Error del servidor");
+      }
+    }
+  }
+
+  
   const addParticipant = async (participant) => {
     try {
       const res = await requestAdd(participant);
@@ -628,7 +819,9 @@ export const ProjectProvider = ({ children }) => {
       setNotificaciones(res.data.notificaciones);
       setEntregas(res.data.entregas);
       setObjItAct(iteracionactual.OBJETIVO);
+      setChats(res.data.chats);
       if(res.data.fechasProyecto[0].ID_CATEGORIA_CRYSTAL === 2 ){
+        console.log("Contador participantes para yellow");
         res.data.participants.map((participant)=>{
           if(participant.ROLE === 1){
             counter++;
@@ -637,6 +830,46 @@ export const ProjectProvider = ({ children }) => {
       }
       if(counter === 2){
         setTwoAdmins(true);
+        counter = 0;
+      }
+      if(res.data.fechasProyecto[0].ID_CATEGORIA_CRYSTAL === 3 ){
+        console.log("Contador participantes para orange");
+        res.data.participants.map((participant)=>{
+          
+          if(participant.ROLE === 1){
+            counter++;
+          }
+        });
+        console.log(counter);
+      }
+      if(counter === 3){
+        setThreeAdmins(true);
+        console.log(threeAdmins);
+        counter = 0;
+      }
+      if(res.data.fechasProyecto[0].ID_CATEGORIA_CRYSTAL === 4 ){
+        console.log("Contador participantes para red");
+        res.data.participants.map((participant)=>{
+          if(participant.ROLE === 1){
+            counter++;
+          }
+        })
+        //console.log(counter);
+      }
+      if(counter === 4){
+        setFourAdmins(true);
+        counter = 0;
+      }
+      if(res.data.fechasProyecto[0].ID_CATEGORIA_CRYSTAL === 5 ){
+        console.log("Contador participantes para diamond");
+        res.data.participants.map((participant)=>{
+          if(participant.ROLE === 1){
+            counter++;
+          }
+        })
+      }
+      if(counter === 5){
+        setFiveAdmins(true);
         counter = 0;
       }
     } catch (error) {
@@ -664,14 +897,35 @@ export const ProjectProvider = ({ children }) => {
     try {
       //const res = await requestDelete(id);
       //setMessage(res.data.message);
-      if(participants.length === 9 && twoAdmins){
+      if(participants.length === 6 && twoAdmins){
         swal({
           title: 'Eliminar un participante',
           text: 'Degrada a un administrador para continuar',
           icon: 'warning',
           button: 'Aceptar',
         });
-      }else{
+      }else if(participants.length === 15 && threeAdmins){
+        swal({
+          title: 'Eliminar un participante',
+          text: 'Degrada a un administrador para continuar y bajar a la categoria Yellow',
+          icon: 'warning',
+          button: 'Aceptar',
+        });
+      }else if(participants.length === 35 && fourAdmins){
+        swal({
+          title: 'Eliminar un participante',
+          text: 'Degrada a un administrador para continuar y bajar a la categoria Orange',
+          icon: 'warning',
+          button: 'Aceptar',
+        });
+      }else if(participants.length === 69 && fiveAdmins){
+        swal({
+          title: 'Eliminar un participante',
+          text: 'Degrada a un administrador para continuar y bajar a la categoria Red',
+          icon: 'warning',
+          button: 'Aceptar',
+        });
+      } else{
         const res = await requestDelete(id);
         swal({
           title: 'Eliminar un participante',
@@ -745,7 +999,18 @@ export const ProjectProvider = ({ children }) => {
         icon: 'success',
         button: 'Aceptar',
       });
-      setTwoAdmins(false);
+      if(fechasproject[0].ID_CATEGORIA_CRYSTAL === 2){
+        setTwoAdmins(false);
+      }
+      if(fechasproject[0].ID_CATEGORIA_CRYSTAL === 3 && participants.length > 14){
+        setThreeAdmins(false);
+      }
+      if(fechasproject[0].ID_CATEGORIA_CRYSTAL === 4 && participants.length > 34){
+        setFourAdmins(false);
+      }
+      if(fechasproject[0].ID_CATEGORIA_CRYSTAL === 5 && participants.length > 68){
+        setFiveAdmins(false);
+      }
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
         swal({
@@ -949,8 +1214,8 @@ export const ProjectProvider = ({ children }) => {
         projectInfo,
 
         userRole,
-        IsParticipant,twoAdmins,
-
+        IsParticipant,twoAdmins,threeAdmins, fourAdmins, fiveAdmins,
+        messagesChat2,
         requerimientos, tareas,tareasGantt,
 
         messagesChat, notificaciones,setNotificaciones,
@@ -959,11 +1224,13 @@ export const ProjectProvider = ({ children }) => {
         entregas, 
         iteraciones,
         objetivoItAct,
+        chats,
         setProjecterrors,IsCreated,
         setMessage, setIsParticipant, setScheduleData,changeState,
         actualizarParticipantes, actualizarTareas, actualizarRequerimientos,
         create,
         configProyect,
+        infoUpdateProject,
         deleteParticipant,
         joinProject,
         getProject,
@@ -974,6 +1241,7 @@ export const ProjectProvider = ({ children }) => {
         delegarParticipant,degradarParticipant,ascenderParticipant,
         createMessages,
         getMessages,
+        getMessages2,
         getTasksProject,
         setTareasKanban,
         deleteTask,
@@ -985,7 +1253,12 @@ export const ProjectProvider = ({ children }) => {
         deleteCollab,
         setObjetivo,
         setObjItAct,
-        setRetroalimentacion
+        setRetroalimentacion,
+        setRequirements,
+        deleteRequire,
+        updateRequire,
+        getChatsiteracionesDisponibles,
+        createProject
       }}
     >
       {children}

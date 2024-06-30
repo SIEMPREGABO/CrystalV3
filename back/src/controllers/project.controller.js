@@ -34,7 +34,9 @@ import {
     EliminarColaborador,
     GetEntregas,
     GetIteraciones,
-    getNotificaciones, getNotificacion, getAlerta, SetObjetivo, SetRetroalimentacion
+    getNotificaciones, getNotificacion, getAlerta, SetObjetivo, SetRetroalimentacion, EliminarRequerimiento, ActualizarRequerimiento, ConsultarTareasRequerimiento, ChatsIteraciones, ActualizarProyecto,registrarEntrega,
+    registrarEntregaManual,
+    registrarIteracion
     
 } from '../querys/projectquerys.js';
 import jwt from 'jsonwebtoken'
@@ -138,8 +140,22 @@ export const joinProject = async (req, res) => {
         
         const numeroParticipantes = await verificarNumeroParticipantes(proyecto.project[0].ID);
         if (!numeroParticipantes.success) return res.status(400).json({ message: "Numero maximo de participantes alcanzado" });
-        if (numeroParticipantes.participantes.length === 8) {
+        if (numeroParticipantes.participantes.length === 5) {
+            //const actualizarCrystal = await actualizarCrystal(2, ID_PROYECTO);
             const actualizarCrystal = await actualizarCrystal(2, proyecto.project[0].ID);
+            if (!actualizarCrystal.success) return res.status(500).json({ message: "Error al actualizar el color de crystal" });
+        }else if (numeroParticipantes.participantes.length === 14) {
+            //const actualizarCrystal = await actualizarCrystal(2, ID_PROYECTO);
+            const actualizarCrystal = await actualizarCrystal(3, proyecto.project[0].ID);
+            if (!actualizarCrystal.success) return res.status(500).json({ message: "Error al actualizar el color de crystal" });
+        } else if (numeroParticipantes.participantes.length === 34) {
+            //const actualizarCrystal = await actualizarCrystal(2, ID_PROYECTO);
+            const actualizarCrystal = await actualizarCrystal(4, proyecto.project[0].ID);
+            if (!actualizarCrystal.success) return res.status(500).json({ message: "Error al actualizar el color de crystal" });
+        }else if (numeroParticipantes.participantes.length === 68) {
+            //const actualizarCrystal = await actualizarCrystal(2, ID_PROYECTO);
+            const actualizarCrystal = await actualizarCrystal(5, proyecto.project[0].ID);
+            if (!actualizarCrystal.success) return res.status(500).json({ message: "Error al actualizar el color de crystal" });
         }
         const registrado = await verificarUnion(proyecto.project[0].ID, ID_USUARIO);
         if (registrado.success) return res.status(400).json({ message: "Ya estas participando en el proyecto" })
@@ -251,6 +267,7 @@ export const getProject = async (req, res) => {
         const iterationParticipants = await getIterationParticipants(ITERACION_ACTUAL.ID);
         const iteraciones = await GetIteraciones(ENTREGA_ACTUAL.ID);
         const entregas  = await GetEntregas(ID_PROYECTO);
+        const chats = await ChatsIteraciones(ID_PROYECTO);
         const data = {
             fechasProyecto: FECHAS_PROYECTO,
             fechasEntregas: FECHAS_ENTREGAS,
@@ -267,7 +284,8 @@ export const getProject = async (req, res) => {
             iterationParticipants: iterationParticipants, 
             entregas: entregas,
             iteraciones: iteraciones,
-            notificaciones: allNotificaciones
+            notificaciones: allNotificaciones,
+            chats: chats,
         };
         return res.json(data);
     } catch (error) {
@@ -335,6 +353,246 @@ export const getTareasxIteracion = async (req, res) => {
         return res.status(500).json({ message: `Error: ${error}` })
     }
 };
+
+export const crearProyectoManual = async (req, res) => {
+    try {
+        const FECHA_ACTUAL = moment().tz(zonaHoraria);
+        const REGISTRO_ACTUAL = FECHA_ACTUAL.format('YYYY-MM-DD HH:mm:ss');
+        //console.log(req.body.SCHEDULE);
+        const elementos = req.body.SCHEDULE;
+        const data = req.body.DATA;
+        const proyectos = [];
+        const entregas = [];
+        const iteraciones = [];
+        //Llena el arreglo de las fechas
+        elementos.forEach(elemento => {
+            //console.log(elemento);
+            let FECHA_INICIO = elemento.StartTime;
+            let FECHA_FINAL = elemento.EndTime;
+            //console.log(elemento.Id_Proyecto);
+            if (!(moment(FECHA_FINAL).hour() === 23 && moment(FECHA_FINAL).minute() === 59 && moment(FECHA_FINAL).second() === 59)) {
+                FECHA_FINAL = moment(FECHA_FINAL).subtract(1, 'second').format('YYYY-MM-DD HH:mm:ss');}
+
+            if (elemento.Id_Proyecto === 0 && !elemento.Id_Entrega) {
+                console.log("hola")
+                if (elemento.Guid) {
+                    proyectos.push({
+                        Title: elemento.Subject,
+                        Id: elemento.Id,
+                        Id_project: elemento.Id_Proyecto,
+                        StartTime: FECHA_INICIO,
+                        EndTime: FECHA_FINAL,
+                        modificado: true
+                    })
+                } else {
+                    proyectos.push({
+                        Title: elemento.Subject,
+                        Id: elemento.Id,
+                        Id_project: elemento.Id_Proyecto,
+                        StartTime: FECHA_INICIO,
+                        EndTime: FECHA_FINAL,
+                        modificado: false
+                    })
+                }
+            }
+
+            if (elemento.Id_Proyecto === 0 && (elemento.Id_Entrega === 0  || elemento.Id_Entrega)) {
+                if (elemento.Guid) {
+                    entregas.push({
+                        Title: elemento.Subject,
+                        Id: elemento.Id,
+                        Id_proyecto: elemento.Id_Proyecto,
+                        Id_entrega: elemento.Id_Entrega,
+                        StartTime: moment(FECHA_INICIO).tz('America/Mexico_City').format('YYYY-MM-DD HH:mm:ss'),
+                        EndTime: FECHA_FINAL,
+                        modificado: true
+                    })
+                } else {
+                    entregas.push({
+                        Title: elemento.Subject,
+                        Id: elemento.Id,
+                        Id_proyecto: elemento.Id_Proyecto,
+                        Id_entrega: elemento.Id_Entrega,
+                        StartTime: moment(FECHA_INICIO).tz('America/Mexico_City').format('YYYY-MM-DD HH:mm:ss'),
+                        EndTime: FECHA_FINAL,
+                        modificado: false
+                    })
+                }
+            }
+
+            if (elemento.Id_Entrega && elemento.Id_Iteracion) {
+                if (elemento.Guid) {
+                    iteraciones.push({
+                        Title: elemento.Subject,
+                        Id: elemento.Id,
+                        Id_iteracion: elemento.Id_Iteracion,
+                        Id_entrega: elemento.Id_Entrega,
+                        StartTime: moment(FECHA_INICIO).tz('America/Mexico_City').format('YYYY-MM-DD HH:mm:ss'),
+                        EndTime: FECHA_FINAL,
+                        modificado: true
+                    })
+                } else {
+                    iteraciones.push({
+                        Title: elemento.Subject,
+                        Id: elemento.Id,
+                        Id_iteracion: elemento.Id_Iteracion,
+                        Id_entrega: elemento.Id_Entrega,
+                        StartTime: FECHA_INICIO,
+                        EndTime: FECHA_FINAL,
+                        modificado: false
+                    })
+                }
+            }
+        });
+
+        const FECHA_INICIAL = moment(proyectos[0].StartTime); const FECHA_FINAL = moment(proyectos[0].EndTime);
+
+        const diasDiferenciaProyecto = FECHA_FINAL.diff(FECHA_INICIAL, 'days') + 1;
+
+        if (diasDiferenciaProyecto < 30 && proyectos[0].modificado) return res.status(400).json({ message: "El proyecto debe durar minimo 1 mes" });
+
+        if (diasDiferenciaProyecto > 365 && proyectos[0].modificado) return res.status(400).json({ message: "El proyecto debe durar maximo 1 año" });
+
+        let diasEntregas = 0;
+        let diasIteracion = 0;
+
+        const responses = await Promise.all(entregas.map(async (entrega, index) => {
+            const entregaActual = moment(entrega.StartTime);
+            const entregaSiguiente = moment(entregas[index + 1]?.StartTime);
+            const fechaFinalEntregaActual = moment(entrega.EndTime).add(1, 'second');
+            const fechaInicialEntregaSiguiente = entregaSiguiente;
+            const entregaFinal = moment(entrega.EndTime);
+            let diasEntregaActual = moment(entrega.EndTime).diff(moment(entrega.StartTime), 'days') + 1;
+            diasEntregas += moment(entrega.EndTime).diff(moment(entrega.StartTime), 'days') + 1;
+
+            if (index === 0) {
+                if (!entregaActual.isSame(FECHA_INICIAL)) return { error: true, message: `La fecha inicial de la primera entrega debe ser igual a la fecha inicial del proyecto ${entrega.Title}` };
+                if (!fechaFinalEntregaActual.isSame(fechaInicialEntregaSiguiente)) return { error: true, message: `Las fechas no son consecutivas en las entregas ${entrega.Title}` };
+            } else if (index > 0 && index < (entregas.length - 1)) {
+                if (!fechaFinalEntregaActual.isSame(fechaInicialEntregaSiguiente)) return { error: true, message: `Las fechas no son consecutivas en las entregas ${entrega.Title}` };
+            } else {
+                if (!entregaFinal.isSame(FECHA_FINAL)) return { error: true, message: `La fecha final de la ultima entrega debe ser igual a la fecha final del proyecto ${entrega.Title}` };
+            }
+            let counterxentrega = 0;
+            const iteracionesPromises = await Promise.all(iteraciones.map(async (iteracion, index) => {
+
+                if (iteracion.Id_entrega === entrega.Id_entrega) {
+                    diasIteracion += moment(iteracion.EndTime).diff(moment(iteracion.StartTime), 'days') + 1;
+                    const iteracionActual = moment(iteracion.StartTime);
+                    if (iteraciones[index + 1]?.Id_entrega === entrega.Id_entrega) {
+
+                        const iteracionSiguiente = moment(iteraciones[index + 1]?.StartTime);
+                        const fechaFinalIteracionActual = moment(iteracion.EndTime).add(1, 'second');
+                        const fechaInicialIteracionSiguiente = iteracionSiguiente;
+
+
+                        if (counterxentrega === 0) {
+                            if (!iteracionActual.isSame(entrega.StartTime)) return { errorIt: true, message: `La fecha inicial de la primera iteracion debe ser igual a la fecha inicial de la entrega ${iteracion.Title}` };
+                            if (!fechaFinalIteracionActual.isSame(fechaInicialIteracionSiguiente)) return { errorIt: true, message: `Las fechas no son consecutivas en las iteraciones ${iteracion.Title}` };
+                        } else {
+                            if (!fechaFinalIteracionActual.isSame(fechaInicialIteracionSiguiente)) return { errorIt: true, message: `Las fechas no son consecutivas en las iteraciones ${iteracion.Title}` };
+                        }
+                        counterxentrega++;
+                    } else if ((iteraciones[index + 1]?.Id_entrega !== entrega.Id_entrega) && counterxentrega > 0) {
+                        const iteracionFinal = moment(iteracion.EndTime);
+                        const fechafinalEntrega = moment(entrega.EndTime)
+                        if (!iteracionFinal.isSame(fechafinalEntrega)) return { errorIt: true, message: `La fecha final de la ultima iteracion debe ser igual a la fecha final de la entrega ${iteracion.Title}` };
+                        counterxentrega = 0;
+                    }
+                    const duracionIteracion = moment(iteracion.EndTime).diff(moment(iteracion.StartTime), 'days') + 1;
+                    if (duracionIteracion < 7) return { errorIt: true, message: `Las iteraciones no pueden durar menos de 7 días ${iteracion.Title}` };
+                }
+                if (iteracion.modificado && (iteracion.State === 'Finalizado' || iteracion.State === 'En desarrollo')) return { errorIt: true, message: `No puedes modificar una iteracion finalizada o en desarrollo ${iteracion.Title}` };
+
+                return { errorIt: false, diasIteracion: diasIteracion };
+            }));
+
+            const iteracionesResponses = await Promise.all(iteracionesPromises);
+
+            const iteracionErrorResponse = iteracionesResponses.find(response => response.errorIt === true);
+            if (iteracionErrorResponse) {
+                // Si hay un error en alguna iteración, devuelve la respuesta de error
+                return { error: true, message: iteracionErrorResponse.message };
+            }
+
+            //const totalDiasIteracion = iteracionesResponses.reduce((acc, curr) => acc + (curr.diasIteracion || 0), 0);
+            //console.log(totalDiasIteracion, diasEntregaActual);
+            if (diasIteracion !== diasDiferenciaProyecto) {
+                return { error: true, message: `Los dias totales de iteracion no concuerdan ${index}` };
+            }
+
+            console.log("acabe")
+            return { error: false };
+        }));
+        //console.log(responses);
+
+
+        if (diasDiferenciaProyecto !== diasEntregas) return res.status(400).json({ message: "Los dias totales de entrega no concuerdan" });
+
+        const errorResponse = responses.find(response => response.error === true);
+
+        if (errorResponse) {
+            //console.log(errorResponse.message);
+            return res.status(400).json({ message: errorResponse.message });
+        }
+        const tiposDeFecha = [proyectos, entregas, iteraciones];
+        console.log("llegue 0");
+
+
+        const CODIGO_UNICO = await generarCodigo();
+        //console.log(data.NOMBRE_PROYECTO, data.OBJETIVO, data.DESCRIPCION_GNRL, proyectos[0].StartTime, REGISTRO_ACTUAL, proyectos[0].EndTime, data.ENTREGAS, CODIGO_UNICO, data.ID)
+        const generarProyecto = await crearProyecto(data.NOMBRE_PROYECTO, data.OBJETIVO, data.DESCRIPCION_GNRL, proyectos[0].StartTime, REGISTRO_ACTUAL, proyectos[0].EndTime, data.ENTREGAS, CODIGO_UNICO, data.ID, data.MATERIA);            
+        const ID_PROYECTO = generarProyecto.ID_P;
+
+
+        await Promise.all(entregas.map(async (entrega, index) => {
+            const register = registrarEntregaManual("", "En espera", entrega.StartTime, entrega.EndTime, ID_PROYECTO);
+            //console.log("", "En espera", entrega.StartTime, entrega.EndTime)
+            const ID_ENTREGA = register.ID_ENTREGA;
+            await Promise.all(iteraciones.map(async (iteracion) => {
+                if(iteracion.Id_entrega === entrega.Id_entrega){
+                    //console.log("", "En espera", iteracion.StartTime, iteracion.EndTime);
+                    const success = registrarIteracion("", "En espera", iteracion.StartTime, iteracion.EndTime, ID_ENTREGA);
+                }
+            }));
+        }));
+        /*
+        const someFailed = success.some(tipoSuccessArray => tipoSuccessArray.includes(false));
+        if (someFailed) return res.status(400).json({ message: 'Algunas actualizaciones fallaron' });
+        const correosNotificacion = await IdUsuarios(proyectos[0].Id_project);
+        if (correosNotificacion.participantes === 0) return res.status(500).json({ message: 'Error al enviar la notificación' });
+        const idParticipantes = correosNotificacion.participantes;
+        */
+
+        try {
+            const emailsendend = await sendemailProject(data.CORREO, data.NOMBRE_PROYECTO, data.OBJETIVO, proyectos[0].StartTime, proyectos[0].EndTime, CODIGO_UNICO);
+            if (!emailsendend) return res.status(400).json({ message: "Error inesperado, intente nuevamente" })
+
+        } catch (error) {
+
+        }
+        activarTareasInactivas();
+
+        res.status(200).json({ message: "Fechas cambiadas" })
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Error inesperado, intentalo nuevamente" });
+    }
+}
+
+export const actualizarProyecto = async (req, res) => {
+    const {ID_PROYECTO, NOMBRE, OBJETIVO, DESCRIPCION, MATERIA} = req.body;
+
+    try {
+        const updatedproject = await ActualizarProyecto(ID_PROYECTO, NOMBRE, OBJETIVO, DESCRIPCION, MATERIA);
+        
+        if(!updatedproject) return res.status(500).json({message: "Error al intentar actualizar la información del proyecto"});
+        return res.status(200).json({message: "Información de proyecto actualizada con éxito"});
+    } catch (error) {
+        return res.status(500).json({ message: `Error: ${error}` })
+    }
+}
 
 export const configurarProyecto = async (req, res) => {
     try {
@@ -773,10 +1031,22 @@ export const addParticipant = async (req, res) => {
         if (registrado.success) return res.status(400).json({ message: "Ya esta participando en el proyecto" })
         const numeroParticipantes = await verificarNumeroParticipantes(ID_PROYECTO);
         if (!numeroParticipantes.success) return res.status(400).json({ message: "Numero maximo de participantes alcanzado" });
-        if (numeroParticipantes.participantes.length === 8) {
+        if (numeroParticipantes.participantes.length === 5) {
             //const actualizarCrystal = await actualizarCrystal(2, ID_PROYECTO);
             const actualizarCrystalVar = await actualizarCrystal(2, ID_PROYECTO);
-            if (!actualizarCrystalVar.success) return res.status(500).json({ message: "Error al actualizar el crystal" });
+            if (!actualizarCrystalVar.success) return res.status(500).json({ message: "Error al actualizar el color de crystal" });
+        }else if (numeroParticipantes.participantes.length === 14) {
+            //const actualizarCrystal = await actualizarCrystal(2, ID_PROYECTO);
+            const actualizarCrystalVar = await actualizarCrystal(3, ID_PROYECTO);
+            if (!actualizarCrystalVar.success) return res.status(500).json({ message: "Error al actualizar el color de crystal" });
+        } else if (numeroParticipantes.participantes.length === 34) {
+            //const actualizarCrystal = await actualizarCrystal(2, ID_PROYECTO);
+            const actualizarCrystalVar = await actualizarCrystal(4, ID_PROYECTO);
+            if (!actualizarCrystalVar.success) return res.status(500).json({ message: "Error al actualizar el color de crystal" });
+        }else if (numeroParticipantes.participantes.length === 68) {
+            //const actualizarCrystal = await actualizarCrystal(2, ID_PROYECTO);
+            const actualizarCrystalVar = await actualizarCrystal(5, ID_PROYECTO);
+            if (!actualizarCrystalVar.success) return res.status(500).json({ message: "Error al actualizar el color de crystal" });
         }
         const union = await agregarUsuario(REGISTRO_ACTUAL, ES_CREADOR, ID_PROYECTO, registrado.ID_USUARIO);
         if (!union.success) return res.status(500).json({ message: "Usuario no agregado con exito" });
@@ -805,8 +1075,20 @@ export const deleteParticipant = async (req, res) => {
 
         const eliminado = await eliminarParticipante(ID_PROYECTO, ID);
         if (!eliminado.success) return res.status(500).json({ message: "Error al eliminar al participante" });
-        if (numeroParticipantes.participantes.length === 9) {
+        if (numeroParticipantes.participantes.length === 6) {
             const actualizarCrystalVar = await actualizarCrystal(1, ID_PROYECTO);
+            if (!actualizarCrystalVar.success) return res.status(500).json({ message: "Error al actualizar el crystal" });
+        }
+        if (numeroParticipantes.participantes.length === 15) {
+            const actualizarCrystalVar = await actualizarCrystal(2, ID_PROYECTO);
+            if (!actualizarCrystalVar.success) return res.status(500).json({ message: "Error al actualizar el crystal" });
+        }
+        if (numeroParticipantes.participantes.length === 35) {
+            const actualizarCrystalVar = await actualizarCrystal(3, ID_PROYECTO);
+            if (!actualizarCrystalVar.success) return res.status(500).json({ message: "Error al actualizar el crystal" });
+        }
+        if (numeroParticipantes.participantes.length === 69) {
+            const actualizarCrystalVar = await actualizarCrystal(4, ID_PROYECTO);
             if (!actualizarCrystalVar.success) return res.status(500).json({ message: "Error al actualizar el crystal" });
         }
         return res.status(200).json({ message: "Usuario eliminado con exito" });
@@ -1099,6 +1381,18 @@ export const getMessages = async (req, res) => {
     }
 }
 
+export const chatsIteraciones = async (req, res) => {
+    const {ID_PROYECTO } = req.body;
+
+    try {
+        const chats = await ChatsIteraciones(ID_PROYECTO);
+
+        return res.json(chats);
+    } catch (error) {
+        return res.status(500).json({message: "Error al obtener los chats del proyecto disponibles"});
+    }
+}
+
 export const agregarColaboradorTarea = async (req, res)=> {
     const {ID_USUARIO, ITERACION, ID_TAREA_REALIZADA, ROLPARTICIPANTE} = req.body;
     try {
@@ -1127,5 +1421,32 @@ export const eliminarColaboradorTarea = async (req, res) => {
         return res.status(200).json({message: "El colaborador ha sido eliminado correctamente"});
     } catch (error) {
         res.status(500).json({ message: `el error es: ${error.message}` });
+    }
+}
+
+export const actualizarRequerimiento = async (req, res) => {
+    const {ID_REQUERIMIENTO, OBJETIVO, DESCRIPCION, TIPO} = req.body;
+    try {
+        const actualizar_requerimiento = await ActualizarRequerimiento(ID_REQUERIMIENTO, OBJETIVO, DESCRIPCION, TIPO );
+
+        if(!actualizar_requerimiento.success) return res.status(500).json({message: "Error al intentar actualizar el requerimiento, intentelo de nuevo más tarde"});
+        return res.status(200).json({message: "El requerimiento ha sido actualizado correctamente"});
+    } catch (error) {
+        return res.status(500).json({ message: `el error es: ${error.message}` });
+    }
+}
+
+export const eliminarRequerimiento = async (req, res) => {
+    const {ID_REQUERIMIENTO} = req.body;
+    try {
+        const consultar_tareas = await ConsultarTareasRequerimiento(ID_REQUERIMIENTO);
+        if(consultar_tareas) return res.status(500).json({message: "Existen tareas que están asignadas a este requerimiento, eliminalas primero antes de eliminar este requerimiento", estado: false});
+
+        const eliminar_requerimiento = await EliminarRequerimiento(ID_REQUERIMIENTO);
+
+        if(!eliminar_requerimiento.success) return res.status(500).json({message: "Error al intentar eliminar el requerimiento, intentelo de nuevo más tarde", estado:false});
+        return res.status(200).json({message: "El requerimiento ha sido eliminado correctamente", estado: true});
+    } catch (error) {
+        return res.status(500).json({ message: `el error es: ${error.message}` });
     }
 }

@@ -235,9 +235,10 @@ const Inicio = () => {
           <div className="flex justify-between items-center">
             <div>
               <p className=' text-2xl font-bold text-white'>{fechasproject && fechasproject.length > 0 ? `Proyecto ${fechasproject[0].NOMBRE}` : 'Cargando...'}</p>
-              <p className='text-xl text-white'>Crystal {fechasproject && fechasproject.length > 0 ? (fechasproject[0].ID_CATEGORIA_CRYSTAL == 1 ? 'Clear' : 'Yellow') : 'Cargando...'}</p>
+              <p className='text-xl text-white'>Crystal {fechasproject && fechasproject.length > 0 ? (fechasproject[0].ID_CATEGORIA_CRYSTAL == 1 ? 'Clear' : (fechasproject[0].ID_CATEGORIA_CRYSTAL == 2 ? 'Yellow' : (fechasproject[0].ID_CATEGORIA_CRYSTAL == 3 ? 'Orange' : (fechasproject[0].ID_CATEGORIA_CRYSTAL == 4 ? 'Orange' : ('Diamond'))))) : 'Cargando...'}</p>
               <p className='text-xl text-white '>Código: {fechasproject && fechasproject.length > 0 ? fechasproject[0].CODIGO_UNIRSE : 'Cargando...'}</p>
               <p className=' text-white'>{fechasproject && fechasproject.length > 0 ? `Objetivo:  ${fechasproject[0].OBJETIVO}` : 'Cargando...'}</p>
+              <p className=' text-white'>{fechasproject && fechasproject.length > 0 ? `Materia:  ${fechasproject[0].MATERIA}` : 'Cargando...'}</p>
             </div>
           </div>
           <div className='mt-6'>

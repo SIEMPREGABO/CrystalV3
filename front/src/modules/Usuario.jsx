@@ -80,12 +80,23 @@ const Usuario = () => {
   });
 
   const { fechasproject, addParticipant, participants, deleteParticipant, delegarParticipant,
-    ascenderParticipant, degradarParticipant, twoAdmins, getProject, vaciarProject, actualizarParticipantes, getPermissions } = useProject();
+    ascenderParticipant, degradarParticipant, twoAdmins, threeAdmins, fourAdmins, fiveAdmins, getProject, vaciarProject, actualizarParticipantes, getPermissions } = useProject();
   const [gridParticipants, setGridParticipants] = useState([]);
 
   useEffect(() => {
     setGridParticipants(participants);
   }, [participants]);
+
+  useEffect(() => {
+    console.log("Valor twoAdmins");
+    console.log(twoAdmins);
+    console.log("Valor ThreeAdmins");
+    console.log(threeAdmins);
+    console.log("Valor FourAdmins");
+    console.log(fourAdmins);
+    console.log("Valor FiveAdmins");
+    console.log(fiveAdmins);
+  }, []);
 
   const onSubmit = handleSubmit(async (values) => {
     const data = {
@@ -325,7 +336,91 @@ const Usuario = () => {
               )
             )
           }
-        ] : [])
+        ] : []),
+        ...(fechasproject && fechasproject[0]?.ID_CATEGORIA_CRYSTAL === 3 && threeAdmins ?
+          [
+            {
+              field: 'Degradar',
+              headerText: 'Degradar',
+              width: '120',
+              textAlign: 'Center',
+              template: (props) => (
+                props.ROLE === 1 && (
+                  <span data-toggle="tooltip" title="Degradar"><FontAwesomeIcon icon={faPersonArrowDownToLine} className="fa-icon" style={{ cursor: 'pointer', color: '#f29c07', fontSize: '1.25rem' }} onClick={() => handleDegradarClick(props)} /></span>
+                )
+              )
+            }
+          ] : []),
+        ...(fechasproject && fechasproject[0]?.ID_CATEGORIA_CRYSTAL === 3 && !threeAdmins ?
+          [
+            {
+              field: 'Ascender',
+              headerText: 'Ascender',
+              width: '120',
+              textAlign: 'Center',
+              template: (props) => (
+                props.ROLE === 0 && (
+                  <span data-toggle="tooltip" title="Ascender"><FontAwesomeIcon icon={faPersonArrowUpFromLine} className="fa-icon" style={{ cursor: 'pointer', color: '#02f7ba', fontSize: '1.25rem' }} onClick={() => handleAscenderClick(props)} /></span>
+                )
+              )
+            }
+          ] : []),
+          ...(fechasproject && fechasproject[0]?.ID_CATEGORIA_CRYSTAL === 4 && fourAdmins ?
+            [
+              {
+                field: 'Degradar',
+                headerText: 'Degradar',
+                width: '120',
+                textAlign: 'Center',
+                template: (props) => (
+                  props.ROLE === 1 && (
+                    <span data-toggle="tooltip" title="Degradar"><FontAwesomeIcon icon={faPersonArrowDownToLine} className="fa-icon" style={{ cursor: 'pointer', color: '#f29c07', fontSize: '1.25rem' }} onClick={() => handleDegradarClick(props)} /></span>
+                  )
+                )
+              }
+            ] : []),
+          ...(fechasproject && fechasproject[0]?.ID_CATEGORIA_CRYSTAL === 4 && !fourAdmins ?
+            [
+              {
+                field: 'Ascender',
+                headerText: 'Ascender',
+                width: '120',
+                textAlign: 'Center',
+                template: (props) => (
+                  props.ROLE === 0 && (
+                    <span data-toggle="tooltip" title="Ascender"><FontAwesomeIcon icon={faPersonArrowUpFromLine} className="fa-icon" style={{ cursor: 'pointer', color: '#02f7ba', fontSize: '1.25rem' }} onClick={() => handleAscenderClick(props)} /></span>
+                  )
+                )
+              }
+            ] : []),
+            ...(fechasproject && fechasproject[0]?.ID_CATEGORIA_CRYSTAL === 5 && fiveAdmins ?
+              [
+                {
+                  field: 'Degradar',
+                  headerText: 'Degradar',
+                  width: '120',
+                  textAlign: 'Center',
+                  template: (props) => (
+                    props.ROLE === 1 && (
+                      <span data-toggle="tooltip" title="Degradar"><FontAwesomeIcon icon={faPersonArrowDownToLine} className="fa-icon" style={{ cursor: 'pointer', color: '#f29c07', fontSize: '1.25rem' }} onClick={() => handleDegradarClick(props)} /></span>
+                    )
+                  )
+                }
+              ] : []),
+            ...(fechasproject && fechasproject[0]?.ID_CATEGORIA_CRYSTAL === 5 && !fiveAdmins ?
+              [
+                {
+                  field: 'Ascender',
+                  headerText: 'Ascender',
+                  width: '120',
+                  textAlign: 'Center',
+                  template: (props) => (
+                    props.ROLE === 0 && (
+                      <span data-toggle="tooltip" title="Ascender"><FontAwesomeIcon icon={faPersonArrowUpFromLine} className="fa-icon" style={{ cursor: 'pointer', color: '#02f7ba', fontSize: '1.25rem' }} onClick={() => handleAscenderClick(props)} /></span>
+                    )
+                  )
+                }
+              ] : [])
     ] : [])
 ];
 

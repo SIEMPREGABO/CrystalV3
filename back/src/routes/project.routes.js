@@ -12,7 +12,12 @@ import {
     agregarColaboradorTarea,
     eliminarColaboradorTarea,
     setObjetivo,
-    setRetroalimentacion
+    setRetroalimentacion,
+    actualizarRequerimiento,
+    eliminarRequerimiento,
+    chatsIteraciones,
+    actualizarProyecto,
+    crearProyectoManual 
 } from "../controllers/project.controller.js";
 import { createSchema, joinSchema, taskSchema, addSchema, requerimientoSchema, collabSchema } from "../schemas/project.schema.js";
 import { validateSchema } from "../middlewares/validator.middleware.js";
@@ -20,6 +25,7 @@ import { validateSchema } from "../middlewares/validator.middleware.js";
 const router  = Router();
 
 router.post('/createProject',validateSchema(createSchema), createProject);
+router.post('/createProjectM',crearProyectoManual);
 router.post('/configProject', configurarProyecto);
 router.post('/deleteProject', deleteProject);
 router.post('/joinProject',validateSchema(joinSchema),joinProject);
@@ -45,6 +51,10 @@ router.post('/deleteCollab', eliminarColaboradorTarea);
 router.post('/changeState', cambiarEstado);
 router.post('/setObjetivo', setObjetivo);
 router.post('/setRetroalimentacion', setRetroalimentacion);
+router.post('/updateRequirement', actualizarRequerimiento);
+router.post('/deleteRequirement', eliminarRequerimiento);
+router.post('/chatsIteraciones', chatsIteraciones);
+router.post('/updateProject', actualizarProyecto);
 
 
 

@@ -1,6 +1,7 @@
 import axios from './axios.js';
 
 export const requestCreate = async project => axios.post(`/createProject`,project);
+export const requestCreateManual = async project => axios.post('/createProjectM', project);
 export const requestJoin = async joinable => axios.post(`/joinProject`,joinable);
 export const requestAdd = async participant => axios.post(`/addParticipant`, participant);
 export const requestProjects = async () => axios.get(`/getProjects`);
@@ -25,3 +26,7 @@ export const requestDeleteCollab = async collab => axios.post('/deleteCollab', c
 export const requestCambiarEstado = async notificaciones => axios.post("/changeState",notificaciones);
 export const requestSetObjetivo = async objetivo => axios.post("/setObjetivo", objetivo);
 export const requestSetRetroalimentacion = async retro => axios.post("/setRetroalimentacion", retro);
+export const requestDeleteRequierement = async require => axios.post("/deleteRequirement", require);
+export const requestUpdateRequirement = async require => axios.post("/updateRequirement", require);
+export const requestChatsIteraciones = async proyecto => axios.post("/chatsIteraciones", proyecto);
+export const requestUpdateProject = async proyecto => axios.post("/updateProject", proyecto);
