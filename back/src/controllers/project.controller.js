@@ -45,7 +45,7 @@ export const createProject = async (req, res) => {
     console.log(req.body);
     try {
         const numProy = await numProyectos(ID);
-        if(numProy.success) return res.status(400).json({ message: "No puedes tener mas de 20 proyectos" });
+        if(numProy.success) return res.status(400).json({ message: "No puedes tener mas de 40 proyectos" });
         const FECHA_INICIAL = moment(FECHA_INICIO).tz(zonaHoraria).add(1, 'days');
         const FECHA_FINAL = moment(FECHA_TERMINO).tz(zonaHoraria).endOf('day');
 

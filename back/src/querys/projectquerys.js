@@ -1283,7 +1283,7 @@ export function numProyectos(ID){
                 if (err) {
                     reject(err);
                 } else {
-                    if(results.length === 20){
+                    if(results.length === 40){
                         resolve({success: true})
                     }else{
                         resolve({success: false})

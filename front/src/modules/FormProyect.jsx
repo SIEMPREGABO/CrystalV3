@@ -10,6 +10,8 @@ import Footer from "./Footer.jsx";
 import moment from 'moment-timezone';
 import { ScheduleComponent, Day, Month, ViewsDirective, ViewDirective, Agenda, Resize, DragAndDrop, Inject } from '@syncfusion/ej2-react-schedule';
 import swal from 'sweetalert';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faQuestion } from '@fortawesome/free-solid-svg-icons';
 
 
 export const FormProyect = () => {
@@ -29,6 +31,7 @@ export const FormProyect = () => {
 
     const onSubmit = handleSubmit(async (values) => {
         if (view === 'manual') {
+            const FECHA_ACTUAL = moment().tz('America/Mexico_City');
             const FECHAS = [];
             let contador = 0;
             const entregas = parseInt(values.ENTREGAS, 10);
@@ -36,6 +39,26 @@ export const FormProyect = () => {
             let fechainicial = moment(values.FECHA_INICIO).tz('America/Mexico_City');
             let fechafinal = moment(values.FECHA_TERMINO).tz('America/Mexico_City');
             let diasDiferencia = fechafinal.diff(fechainicial, 'days') + 1;
+
+            if (fechainicial.isBefore(FECHA_ACTUAL)) {
+                swal({
+                    title: 'Crear proyecto',
+                    text: 'El proyecto debe iniciar hoy o en una fecha posterior',
+                    icon: 'warning',
+                    button: 'Aceptar',
+                });
+                return;
+            }
+            if (fechafinal.isBefore(fechainicial)) {
+                swal({
+                    title: 'Crear proyecto',
+                    text: 'La fecha final suceder después a la fecha inicial',
+                    icon: 'warning',
+                    button: 'Aceptar',
+                });
+                return;
+            }
+
 
             if (diasDiferencia < 30) {
                 swal({
@@ -157,10 +180,10 @@ export const FormProyect = () => {
                     return;
                 }
 
-            } else if (diasDiferencia < 90 && diasDiferencia > 30 && entregas > 2 && iteraciones > 3) {
+            } else if (diasDiferencia < 90 && diasDiferencia > 30 && (entregas > 2 || iteraciones > 3)) {
                 swal({
                     title: 'Crear proyecto',
-                    text: 'En un proyecto tan corto solo puedes hacer 2 entregas y 2 iteraciones',
+                    text: 'En un proyecto tan corto solo puedes hacer 2 entregas y máximo 3 iteraciones',
                     icon: 'warning',
                     button: 'Aceptar',
                 });
@@ -226,7 +249,7 @@ export const FormProyect = () => {
 
                 let INICIOPARTE = FECHA_INICIAL_ENTREGA.clone();
 
-                for (let j = 0; j < entregas; j++) {
+                for (let j = 0; j < ARRAY_PARTES_ITERACIONES.length; j++) {
                     let FINPARTE = INICIOPARTE.clone().add(ARRAY_PARTES_ITERACIONES[j] - 1, 'days');
                     FECHAS.push({
                         Subject: `Entrega ${i} Iteracion ${j}`,
@@ -297,10 +320,23 @@ export const FormProyect = () => {
                     <h1 className="text-3xl font-semibold text-center text-indigo-700 underline uppercase mt-3">
                         {view === 'form' ? 'Crea tu Proyecto' : 'Crea tu Proyecto'}
                     </h1>
-                    <select className="mt-6 " onChange={handleViewChange}>
-                        <option value="form">Rápido</option>
-                        <option value="manual">Manual</option>
-                    </select>
+                    <div className='flex flex-row'>
+                        <div className='w-6/12 flex justify-start ml-7'>
+                            <select className="mt-6" onChange={handleViewChange}>
+                                <option value="form">Rápido</option>
+                                <option value="manual">Manual</option>
+                            </select>
+                        </div>
+
+                        <div className='w-6/12 flex justify-end mr-7'>
+                            <button className=' flex justify-center' data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                <FontAwesomeIcon icon={faQuestion} className='fa-flip' style={{ fontSize: '1.5rem' }} />
+                                
+                            </button>
+                        </div>
+                    </div>
+
+
                     {view === 'form' ? (
                         <form className="mt-3" onSubmit={onSubmit}>
                             <div className="mb-2">
@@ -515,10 +551,13 @@ export const FormProyect = () => {
                                                 {...register("ITERACIONES", { required: true, message: "Campo requerido" })}
                                             >
                                                 <option value="0">ITERACIONES</option>
+                                                <option value="2">2</option>
                                                 <option value="3">3</option>
                                                 <option value="4">4</option>
                                                 <option value="5">5</option>
                                                 <option value="6">6</option>
+                                                <option value="7">7</option>
+                                                <option value="8">8</option>
                                             </select>
                                             {errors.ITERACIONES && (
                                                 <div className="bg-red-100 text-red-700 rounded-lg m-2 shadow-md p-2">
@@ -571,6 +610,23 @@ export const FormProyect = () => {
                         </div>
                     </div>
                 )}
+
+                <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="m-3">
+                            <h1>Consideraciones para el proyecto</h1>
+                            <p>- El proyecto debe iniciar hoy o en una fecha posterior</p>
+                            <p>- La fecha final debe situarse posterior a la fecha de inicio</p>
+                            <p>- El proyecto debe durar minimo 1 me y maximo 12 meses</p>
+                            <p>- Si el proyecto dura de 1 a 2 meses solo puede tener 2 iteraciones y máximo 3 iteraciones</p>
+                            <p>- Si dura entre 3 a 4 meses puede tener entre 3 a 6 entregas y de 2 a 4 iteraciones</p>
+                            <p>- Si dura entre 5 a 6 meses puede tener entre 3 a 6 entregas y de 3 a 6 iteraciones</p>
+                            <p>- Si dura entre 7 a 12 meses puede tener entre 3 a 6 entregas y de 4 a 8 iteraciones</p>
+                        </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <Footer />
         </div>
