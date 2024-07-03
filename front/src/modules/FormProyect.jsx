@@ -10,7 +10,8 @@ import Footer from "./Footer.jsx";
 import moment from 'moment-timezone';
 import { ScheduleComponent, ViewsDirective, ViewDirective, Day, Week, WorkWeek, Month, Agenda, Resize, DragAndDrop, Inject } from '@syncfusion/ej2-react-schedule';
 import swal from 'sweetalert';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faQuestion } from '@fortawesome/free-solid-svg-icons';
 
 export const FormProyect = () => {
     const { register, handleSubmit, formState: { errors } } = useForm({
@@ -29,6 +30,7 @@ export const FormProyect = () => {
 
     const onSubmit = handleSubmit(async (values) => {
         if (view === 'manual') {
+            const FECHA_ACTUAL = moment().tz('America/Mexico_City').startOf('day');
             const FECHAS = [];
             let contador = 0;
             const entregas = parseInt(values.ENTREGAS, 10);
@@ -37,10 +39,29 @@ export const FormProyect = () => {
             let fechafinal = moment(values.FECHA_TERMINO).tz('America/Mexico_City');
             let diasDiferencia = fechafinal.diff(fechainicial, 'days') + 1;
 
+            if (fechainicial.isBefore(FECHA_ACTUAL)) {
+                swal({
+                    title: 'Crear proyecto',
+                    text: 'El proyecto debe iniciar hoy o en una fecha posterior',
+                    icon: 'warning',
+                    button: 'Aceptar',
+                });
+                return;
+            }
+            if (fechafinal.isBefore(fechainicial)) {
+                swal({
+                    title: 'Crear proyecto',
+                    text: 'La fecha final suceder después a la fecha inicial',
+                    icon: 'warning',
+                    button: 'Aceptar',
+                });
+                return;
+            }
+
             if (diasDiferencia < 30) {
                 swal({
                     title: 'Crear proyecto',
-                    text: 'Muy pocos dias de proyecto',
+                    text: 'El proyecto debe durar mínimo 1 mes',
                     icon: 'warning',
                     button: 'Aceptar',
                 });
@@ -49,36 +70,121 @@ export const FormProyect = () => {
             else if (diasDiferencia > 365) {
                 swal({
                     title: 'Crear proyecto',
-                    text: 'Muchos dias de proyecto',
+                    text: 'El proyecto debe durar máximo 12 meses',
                     icon: 'warning',
                     button: 'Aceptar',
                 });
                 return;
             }
             else if (diasDiferencia > 240 && diasDiferencia < 365 && entregas < 3) {
+                if (entregas < 3) {
+                    swal({
+                        title: 'Crear proyecto',
+                        text: 'El número de entregas es muy bajo para el tiempo del proyecto',
+                        icon: 'warning',
+                        button: 'Aceptar',
+                    });
+                    return;
+                }
+
+                if (iteraciones < 4) {
+                    swal({
+                        title: 'Crear proyecto',
+                        text: 'El número de iteraciones es muy bajo para el tiempo del proyecto',
+                        icon: 'warning',
+                        button: 'Aceptar',
+                    });
+                    return;
+                }
+                if (iteraciones > 8) {
+                    swal({
+                        title: 'Crear proyecto',
+                        text: 'El número de iteraciones es muy alto para el tiempo del proyecto',
+                        icon: 'warning',
+                        button: 'Aceptar',
+                    });
+                    return;
+                }
+            } else if (diasDiferencia >= 90 && diasDiferencia < 135) {
+                if (entregas > 6) {
+                    swal({
+                        title: 'Crear proyecto',
+                        text: 'El número de entregas es muy alto para el tiempo del proyecto',
+                        icon: 'warning',
+                        button: 'Aceptar',
+                    });
+                    return;
+                } else if (entregas < 3) {
+                    swal({
+                        title: 'Crear proyecto',
+                        text: 'El número de entregas es muy bajo para el tiempo del proyecto',
+                        icon: 'warning',
+                        button: 'Aceptar',
+                    });
+                    return;
+                }
+                if (iteraciones < 2) {
+                    swal({
+                        title: 'Crear proyecto',
+                        text: 'El número de iteraciones es muy bajo para el tiempo del proyecto',
+                        icon: 'warning',
+                        button: 'Aceptar',
+                    });
+                    return;
+                }
+                if (iteraciones > 4) {
+                    swal({
+                        title: 'Crear proyecto',
+                        text: 'El número de iteraciones es muy alto para el tiempo del proyecto',
+                        icon: 'warning',
+                        button: 'Aceptar',
+                    });
+                    return;
+                }
+            } else if (diasDiferencia >= 135 && diasDiferencia < 180 && entregas > 3) {
+                if (entregas > 6) {
+                    swal({
+                        title: 'Crear proyecto',
+                        text: 'El número de entregas es muy alto para el tiempo del proyecto',
+                        icon: 'warning',
+                        button: 'Aceptar',
+                    });
+                    return;
+                } else if (entregas < 3) {
+                    swal({
+                        title: 'Crear proyecto',
+                        text: 'El número de entregas es muy bajo para el tiempo del proyecto',
+                        icon: 'warning',
+                        button: 'Aceptar',
+                    });
+                    return;
+                }
+                if (iteraciones < 3) {
+                    swal({
+                        title: 'Crear proyecto',
+                        text: 'El número de iteraciones está fuera del rango permitido',
+                        icon: 'warning',
+                        button: 'Aceptar',
+                    });
+                    return;
+                } if (iteraciones > 6) {
+                    swal({
+                        title: 'Crear proyecto',
+                        text: 'El número de entregas es muy bajo para el tiempo del proyecto',
+                        icon: 'warning',
+                        button: 'Aceptar',
+                    });
+                    return;
+                }
+
+            }else if (diasDiferencia < 90 && diasDiferencia > 30 && (entregas > 2 || iteraciones > 3)) {
                 swal({
                     title: 'Crear proyecto',
-                    text: 'Agrega mas entregas a tu proyecto',
+                    text: 'En un proyecto tan corto solo puedes hacer 2 entregas y máximo 3 iteraciones',
                     icon: 'warning',
                     button: 'Aceptar',
                 });
-                return;
-            } else if (diasDiferencia > 60 && diasDiferencia <= 90 && entregas > 3) {
-                swal({
-                    title: 'Crear proyecto',
-                    text: 'Son muchas entregas en el proyecto',
-                    icon: 'warning',
-                    button: 'Aceptar',
-                });
-                return;
-            } else if (diasDiferencia <= 60 && diasDiferencia > 30 && entregas > 2) {
-                swal({
-                    title: 'Crear proyecto',
-                    text: 'En un poryecto tan corto solo puedes hacer 2 entregas',
-                    icon: 'warning',
-                    button: 'Aceptar',
-                });
-                return;
+                return; 
             }
 
             FECHAS.push({
@@ -138,9 +244,11 @@ export const FormProyect = () => {
                     }
                 }
 
+                console.log(ARRAY_PARTES_ITERACIONES);
+
                 let INICIOPARTE = FECHA_INICIAL_ENTREGA.clone();
 
-                for (let j = 0; j < entregas; j++) {
+                for (let j = 0; j < ARRAY_PARTES_ITERACIONES.length; j++) {
                     let FINPARTE = INICIOPARTE.clone().add(ARRAY_PARTES_ITERACIONES[j] - 1, 'days');
                     FECHAS.push({
                         Subject: `Entrega ${i} Iteracion ${j}`,
@@ -213,12 +321,24 @@ export const FormProyect = () => {
                     <h1 className="text-3xl font-semibold text-center text-indigo-700 underline uppercase mt-3">
                         {view === 'form' ? 'Crea tu Proyecto' : 'Crea tu Proyecto'}
                     </h1>
-                    <select className="mt-6 mb-6" onChange={handleViewChange}>
-                        <option value="form">Rápido</option>
-                        <option value="manual">Manual</option>
-                    </select>
+                    <div className='flex flex-row'>
+                        <div className='w-6/12 flex justify-start ml-7'>
+                            <select className="mt-6" onChange={handleViewChange}>
+                                <option value="form">Rápido</option>
+                                <option value="manual">Manual</option>
+                            </select>
+                        </div>
+
+                        <div className='w-6/12 flex justify-end mr-7'>
+                            <button className=' flex justify-center' data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                <FontAwesomeIcon icon={faQuestion} className='fa-flip' style={{ fontSize: '1.5rem' }} />
+
+                            </button>
+                        </div>
+                    </div>
+
                     {view === 'form' ? (
-                        <form className="mt-4" onSubmit={onSubmit}>
+                        <form className="mt-3" onSubmit={onSubmit}>
                             <div className="mb-2">
                                 <label className="block text-sm font-semibold text-gray-800">
                                     Título del proyecto:
@@ -301,20 +421,25 @@ export const FormProyect = () => {
                                         <label htmlFor="ENTREGAS" className="block text-sm font-semibold text-gray-800">
                                             Entregas:
                                         </label>
-                                        <input
-                                            className="block w-full px-4 py-2 mt-2 text-black-600 bg-white border rounded-md focus:border-indigo-400 focus:ring-indigo-300 focus:outline-none focus:ring focus:ring-opacity-40"
-                                            type="number"
-                                            placeholder="ENTREGAS"
+                                        <select
+                                            className="block w-full px-3 py-2 mt-2 text-black-600 bg-white border rounded-md focus:border-indigo-400 focus:ring-indigo-300 focus:outline-none focus:ring focus:ring-opacity-40"
                                             name="ENTREGAS"
-                                            {...register("ENTREGAS", { required: true })}
-                                        />
+                                            {...register("ENTREGAS", { required: true, message: "Campo requerido" })}
+                                            >
+                                                <option value="0">Entregas</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                                <option value="6">6</option>
+                                            </select>
                                         {errors.ENTREGAS && <div className="items-center bg-red-100 text-red-700 rounded-lg m-2 shadow-md">{errors.ENTREGAS.message}</div>}
                                     </div>
                                 </div>
                             </div>
-                            <div className="mb-2">
+                            <div className="mb-2 mt-2 pt-2">
                                 <button
-                                    className="text-center hover:text-white w-full px-4 py-2 tracking-wide text-white-800 transition-colors duration-200 transform bg-indigo-700 rounded-md hover:bg-indigo-600 focus:outline-none focus:bg-indigo-600"
+                                    className="text-center text-white w-full px-4 py-2 tracking-wide text-white-800 transition-colors duration-200 transform bg-indigo-700 rounded-md hover:bg-indigo-600 focus:outline-none focus:bg-indigo-600"
                                     type="submit"
                                 >
                                     Crear Proyecto
@@ -408,8 +533,8 @@ export const FormProyect = () => {
                                 </div>
 
                                 <div className="mb-2 items-center">
-                                    <div className="flex flex-row ">
-                                        <div className="flex-row  mr-2">
+                                    <div className="row ">
+                                        <div className="mr-2 col justify-end">
                                             <label htmlFor="ENTREGAS" className="block text-sm font-semibold text-gray-800">
                                                 Entregas del proyecto:
                                             </label>
@@ -428,7 +553,7 @@ export const FormProyect = () => {
                                             {errors.ENTREGAS && <div className=" items-center bg-red-100 text-red-700  rounded-lg m-2 shadow-md">{errors.ENTREGAS.message}</div>}
                                         </div>
 
-                                        <div className="flex-row  mr-2">
+                                        <div className="col">
                                             <label htmlFor="ITERACIONES" className="block text-sm font-semibold text-gray-800">
                                                 Iteraciones del proyecto:
                                             </label>
@@ -438,10 +563,13 @@ export const FormProyect = () => {
                                                 {...register("ITERACIONES", { required: true, message: "Campo requerido" })}
                                             >
                                                 <option value="0">ITERACIONES</option>
+                                                <option value="2">2</option>
                                                 <option value="3">3</option>
                                                 <option value="4">4</option>
                                                 <option value="5">5</option>
                                                 <option value="6">6</option>
+                                                <option value="7">7</option>
+                                                <option value="8">8</option>
                                             </select>
                                             {errors.ENTREGAS && <div className=" items-center bg-red-100 text-red-700  rounded-lg m-2 shadow-md">{errors.ENTREGAS.message}</div>}
                                         </div>
@@ -449,7 +577,9 @@ export const FormProyect = () => {
                                 </div>
 
                                 <div className="mt-6 flex items-center justify-between">
-                                    <button type='submit' className="px-4 py-2 tracking-wide text-white transition-colors duration-200 transform bg-indigo-700 rounded-md hover:bg-indigo-600 focus:outline-none focus:bg-indigo-600">
+                                <button type='submit'
+                                        className="text-center text-white w-full px-4 py-2 tracking-wide text-white-800 transition-colors duration-200 transform bg-indigo-700 rounded-md hover:bg-indigo-600 focus:outline-none focus:bg-indigo-600"
+                                    >
                                         Crear proyecto
                                     </button>
                                 </div>
@@ -487,6 +617,23 @@ export const FormProyect = () => {
                         </div>
                     </div>
                 )}
+
+                <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="m-3">
+                            <h1>Consideraciones para el proyecto</h1>
+                            <p>- El proyecto debe iniciar hoy o en una fecha posterior</p>
+                            <p>- La fecha final debe situarse posterior a la fecha de inicio</p>
+                            <p>- El proyecto debe durar minimo 1 me y maximo 12 meses</p>
+                            <p>- Si el proyecto dura de 1 a 2 meses solo puede tener 2 iteraciones y máximo 3 iteraciones</p>
+                            <p>- Si dura entre 3 a 4 meses puede tener entre 3 a 6 entregas y de 2 a 4 iteraciones</p>
+                            <p>- Si dura entre 5 a 6 meses puede tener entre 3 a 6 entregas y de 3 a 6 iteraciones</p>
+                            <p>- Si dura entre 7 a 12 meses puede tener entre 3 a 6 entregas y de 4 a 8 iteraciones</p>
+                        </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <Footer />
         </div>

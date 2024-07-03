@@ -36,7 +36,8 @@ import {
     GetIteraciones,
     getNotificaciones, getNotificacion, getAlerta, SetObjetivo, SetRetroalimentacion, EliminarRequerimiento, ActualizarRequerimiento, ConsultarTareasRequerimiento, ChatsIteraciones, ActualizarProyecto,registrarEntrega,
     registrarEntregaManual,
-    registrarIteracion
+    registrarIteracion,
+    numProyectos
     
 } from '../querys/projectquerys.js';
 import jwt from 'jsonwebtoken'
@@ -52,6 +53,8 @@ export const createProject = async (req, res) => {
     console.log(req.body);
     try {
         let dias = 7;
+        const numProy = await numProyectos(ID);
+        if(numProy.success) return res.status(400).json({ message: "No puedes tener mas de 20 proyectos" });
         const FECHA_INICIAL = moment(FECHA_INICIO).tz(zonaHoraria).startOf('day');
         const FECHA_FINAL = moment(FECHA_TERMINO).tz(zonaHoraria).endOf('day');
 
@@ -132,6 +135,10 @@ export const joinProject = async (req, res) => {
     try {
         let mensaje = 'Enlazado al proyecto correctamente';
         const { CODIGO_UNIRSE, ID_USUARIO } = req.body;
+
+        const numProy = await numProyectos(ID_USUARIO);
+        if(numProy.success) return res.status(400).json({ message: "No puedes tener mas de 20 proyectos" });
+
         const proyecto = await verificarCodigo(CODIGO_UNIRSE);
         if (!proyecto) return res.status(404).json({ message: "Proyecto no existente" });
         const Admins = await getAdmins(proyecto.project[0].ID);
@@ -140,19 +147,19 @@ export const joinProject = async (req, res) => {
         
         const numeroParticipantes = await verificarNumeroParticipantes(proyecto.project[0].ID);
         if (!numeroParticipantes.success) return res.status(400).json({ message: "Numero maximo de participantes alcanzado" });
-        if (numeroParticipantes.participantes.length === 5) {
+        if (numeroParticipantes.participantes.length === 3) {
             //const actualizarCrystal = await actualizarCrystal(2, ID_PROYECTO);
             const actualizarCrystal = await actualizarCrystal(2, proyecto.project[0].ID);
             if (!actualizarCrystal.success) return res.status(500).json({ message: "Error al actualizar el color de crystal" });
-        }else if (numeroParticipantes.participantes.length === 14) {
+        }else if (numeroParticipantes.participantes.length === 8) {
             //const actualizarCrystal = await actualizarCrystal(2, ID_PROYECTO);
             const actualizarCrystal = await actualizarCrystal(3, proyecto.project[0].ID);
             if (!actualizarCrystal.success) return res.status(500).json({ message: "Error al actualizar el color de crystal" });
-        } else if (numeroParticipantes.participantes.length === 34) {
+        } else if (numeroParticipantes.participantes.length === 18) {
             //const actualizarCrystal = await actualizarCrystal(2, ID_PROYECTO);
             const actualizarCrystal = await actualizarCrystal(4, proyecto.project[0].ID);
             if (!actualizarCrystal.success) return res.status(500).json({ message: "Error al actualizar el color de crystal" });
-        }else if (numeroParticipantes.participantes.length === 68) {
+        }else if (numeroParticipantes.participantes.length === 28) {
             //const actualizarCrystal = await actualizarCrystal(2, ID_PROYECTO);
             const actualizarCrystal = await actualizarCrystal(5, proyecto.project[0].ID);
             if (!actualizarCrystal.success) return res.status(500).json({ message: "Error al actualizar el color de crystal" });
@@ -250,9 +257,9 @@ export const getProject = async (req, res) => {
             allNotificaciones = await Promise.all(
                 notificaciones.map(async (Notificacion) => {
                     const notificacionData = await getNotificacion(Notificacion.ID_NOTIFICACION);
-                    console.log(notificacionData[0].ID_TIPO_NOTIFICACION)
+                    //console.log(notificacionData[0].ID_TIPO_NOTIFICACION)
                     const alerta = await getAlerta(notificacionData[0].ID_TIPO_NOTIFICACION);
-                    console.log(alerta);
+                    //console.log(alerta);
                     const combinedData = {
                         ...notificacionData[0], // Copia todas las propiedades de notificacionData
                         ESTADO_VISUALIZACION: Notificacion.ESTADO_VISUALIZACION, // Añade ESTADO_VISUALIZACION
@@ -262,12 +269,26 @@ export const getProject = async (req, res) => {
                 })
             )
         }
-        console.log(allNotificaciones);
+        //console.log(allNotificaciones);
         const projectreqs = await getProjectRequirements(ID_PROYECTO, ENTREGA_ACTUAL.ID);
         const iterationParticipants = await getIterationParticipants(ITERACION_ACTUAL.ID);
-        const iteraciones = await GetIteraciones(ENTREGA_ACTUAL.ID);
+        let arrayIteraciones = [];
         const entregas  = await GetEntregas(ID_PROYECTO);
+        console.log("entregas");
+        console.log(entregas);
         const chats = await ChatsIteraciones(ID_PROYECTO);
+
+        for(let i=0; i < entregas.length; ++i ){
+            console.log("Ciclo de obtener iteraciones de entrega");
+            console.log(entregas[i].ID);
+            const iteraciones = await GetIteraciones(entregas[i].ID);
+            console.log(iteraciones);
+            arrayIteraciones = [...arrayIteraciones, ...iteraciones];
+            console.log(arrayIteraciones);
+        }
+        console.log("Hola");
+        console.log(arrayIteraciones);
+
         const data = {
             fechasProyecto: FECHAS_PROYECTO,
             fechasEntregas: FECHAS_ENTREGAS,
@@ -283,7 +304,7 @@ export const getProject = async (req, res) => {
             requirements: projectreqs,
             iterationParticipants: iterationParticipants, 
             entregas: entregas,
-            iteraciones: iteraciones,
+            iteraciones: arrayIteraciones,
             notificaciones: allNotificaciones,
             chats: chats,
         };
@@ -361,6 +382,10 @@ export const crearProyectoManual = async (req, res) => {
         //console.log(req.body.SCHEDULE);
         const elementos = req.body.SCHEDULE;
         const data = req.body.DATA;
+
+        const numProy = await numProyectos(data.ID);
+        if(numProy.success) return res.status(400).json({ message: "No puedes tener mas de 20 proyectos" });
+
         const proyectos = [];
         const entregas = [];
         const iteraciones = [];
@@ -444,6 +469,8 @@ export const crearProyectoManual = async (req, res) => {
                 }
             }
         });
+
+        console.log(elementos);
 
         const FECHA_INICIAL = moment(proyectos[0].StartTime); const FECHA_FINAL = moment(proyectos[0].EndTime);
 
@@ -545,14 +572,16 @@ export const crearProyectoManual = async (req, res) => {
         const ID_PROYECTO = generarProyecto.ID_P;
 
 
+        console.log(iteraciones);
+        let resultado = null;
         await Promise.all(entregas.map(async (entrega, index) => {
-            const register = registrarEntregaManual("", "En espera", entrega.StartTime, entrega.EndTime, ID_PROYECTO);
+            const register = await registrarEntregaManual("", "En espera", entrega.StartTime, entrega.EndTime, ID_PROYECTO).then(result => {resultado = result}).catch(error => {console.error('Error:', error);});
             //console.log("", "En espera", entrega.StartTime, entrega.EndTime)
-            const ID_ENTREGA = register.ID_ENTREGA;
+            console.log(resultado.success);
             await Promise.all(iteraciones.map(async (iteracion) => {
                 if(iteracion.Id_entrega === entrega.Id_entrega){
-                    //console.log("", "En espera", iteracion.StartTime, iteracion.EndTime);
-                    const success = registrarIteracion("", "En espera", iteracion.StartTime, iteracion.EndTime, ID_ENTREGA);
+                    //console.log("", "En espera", iteracion.StartTime, iteracion.EndTime, "iteracion de la entrega ");
+                    const success = registrarIteracion("", "En espera", iteracion.StartTime, iteracion.EndTime, resultado.ID_ENTREGA);
                 }
             }));
         }));
@@ -573,7 +602,7 @@ export const crearProyectoManual = async (req, res) => {
         }
         activarTareasInactivas();
 
-        res.status(200).json({ message: "Fechas cambiadas" })
+        res.status(200).json({ message: "Proyecto creado" })
 
     } catch (error) {
         console.log(error);
@@ -1031,19 +1060,23 @@ export const addParticipant = async (req, res) => {
         if (registrado.success) return res.status(400).json({ message: "Ya esta participando en el proyecto" })
         const numeroParticipantes = await verificarNumeroParticipantes(ID_PROYECTO);
         if (!numeroParticipantes.success) return res.status(400).json({ message: "Numero maximo de participantes alcanzado" });
-        if (numeroParticipantes.participantes.length === 5) {
+        
+        const numProy = await numProyectos(registrado.ID_USUARIO);
+        if(numProy.success) return res.status(400).json({ message: "No puedes tener mas de 20 proyectos" });
+
+        if (numeroParticipantes.participantes.length === 3) {
             //const actualizarCrystal = await actualizarCrystal(2, ID_PROYECTO);
             const actualizarCrystalVar = await actualizarCrystal(2, ID_PROYECTO);
             if (!actualizarCrystalVar.success) return res.status(500).json({ message: "Error al actualizar el color de crystal" });
-        }else if (numeroParticipantes.participantes.length === 14) {
+        }else if (numeroParticipantes.participantes.length === 8) {
             //const actualizarCrystal = await actualizarCrystal(2, ID_PROYECTO);
             const actualizarCrystalVar = await actualizarCrystal(3, ID_PROYECTO);
             if (!actualizarCrystalVar.success) return res.status(500).json({ message: "Error al actualizar el color de crystal" });
-        } else if (numeroParticipantes.participantes.length === 34) {
+        } else if (numeroParticipantes.participantes.length === 18) {
             //const actualizarCrystal = await actualizarCrystal(2, ID_PROYECTO);
             const actualizarCrystalVar = await actualizarCrystal(4, ID_PROYECTO);
             if (!actualizarCrystalVar.success) return res.status(500).json({ message: "Error al actualizar el color de crystal" });
-        }else if (numeroParticipantes.participantes.length === 68) {
+        }else if (numeroParticipantes.participantes.length === 28) {
             //const actualizarCrystal = await actualizarCrystal(2, ID_PROYECTO);
             const actualizarCrystalVar = await actualizarCrystal(5, ID_PROYECTO);
             if (!actualizarCrystalVar.success) return res.status(500).json({ message: "Error al actualizar el color de crystal" });
@@ -1075,19 +1108,19 @@ export const deleteParticipant = async (req, res) => {
 
         const eliminado = await eliminarParticipante(ID_PROYECTO, ID);
         if (!eliminado.success) return res.status(500).json({ message: "Error al eliminar al participante" });
-        if (numeroParticipantes.participantes.length === 6) {
+        if (numeroParticipantes.participantes.length === 4) {
             const actualizarCrystalVar = await actualizarCrystal(1, ID_PROYECTO);
             if (!actualizarCrystalVar.success) return res.status(500).json({ message: "Error al actualizar el crystal" });
         }
-        if (numeroParticipantes.participantes.length === 15) {
+        if (numeroParticipantes.participantes.length === 9) {
             const actualizarCrystalVar = await actualizarCrystal(2, ID_PROYECTO);
             if (!actualizarCrystalVar.success) return res.status(500).json({ message: "Error al actualizar el crystal" });
         }
-        if (numeroParticipantes.participantes.length === 35) {
+        if (numeroParticipantes.participantes.length === 19) {
             const actualizarCrystalVar = await actualizarCrystal(3, ID_PROYECTO);
             if (!actualizarCrystalVar.success) return res.status(500).json({ message: "Error al actualizar el crystal" });
         }
-        if (numeroParticipantes.participantes.length === 69) {
+        if (numeroParticipantes.participantes.length === 29) {
             const actualizarCrystalVar = await actualizarCrystal(4, ID_PROYECTO);
             if (!actualizarCrystalVar.success) return res.status(500).json({ message: "Error al actualizar el crystal" });
         }
@@ -1430,7 +1463,7 @@ export const actualizarRequerimiento = async (req, res) => {
         const actualizar_requerimiento = await ActualizarRequerimiento(ID_REQUERIMIENTO, OBJETIVO, DESCRIPCION, TIPO );
 
         if(!actualizar_requerimiento.success) return res.status(500).json({message: "Error al intentar actualizar el requerimiento, intentelo de nuevo más tarde"});
-        return res.status(200).json({message: "El requerimiento ha sido actualizado correctamente"});
+        return res.status(200).json({message: "El requerimiento ha sido actualizado correctamente."});
     } catch (error) {
         return res.status(500).json({ message: `el error es: ${error.message}` });
     }

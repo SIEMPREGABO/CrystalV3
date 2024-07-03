@@ -853,8 +853,11 @@ export function registrarEntregaManual(RETROALIMENTACION, ESTADO, FECHA_INICIO, 
             } else {
                 if (results.affectedRows > 0) {
                     resolve({success: true, ID_ENTREGA: results.insertId});
+                    console.log(results.insertId + "id de insercion ");
+                    console.log("no falle")
                 } else {
                     resolve(false);
+                    console.log("falle")
                 }
             }
         });
@@ -872,6 +875,7 @@ export function registrarIteracion(OBJETIVO, ESTADO, FECHA_INICIO, FECHA_TERMINO
             } else {
                 if (results.affectedRows > 0) {
                     resolve(true);
+                    console.log("registrada");
                 } else {
                     resolve(false);
                 }
@@ -1879,6 +1883,8 @@ export function GetIteraciones(ID_ENTREGA){
     return new Promise (async (resolve, reject) => {
         try {
             const connection = await getConnection();
+            console.log("ID_ENTREGA EN GETITERACIONES QUERY");
+            console.log(ID_ENTREGA);
             const query = "select  concat('Iteración', ' ', (@row_number:=@row_number + 1)) AS Nombre_Iteracion, iteraciones.ID from iteraciones, (SELECT @row_number:=0) r  WHERE iteraciones.ID_ENTREGA = ?";
 
             connection.query(query, [ID_ENTREGA], async (err, results) => {
@@ -1892,6 +1898,28 @@ export function GetIteraciones(ID_ENTREGA){
                     }
                 }
             });
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
+export function numProyectos(ID){
+    return new Promise(async (resolve, reject) => {
+        try {
+            const connection = await getConnection();
+            const query = 'SELECT * FROM U_SEUNE_P WHERE ID_USUARIO = ?';
+            connection.query(query, [ID], async (err, results) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    if(results.length === 20){
+                        resolve({success: true})
+                    }else{
+                        resolve({success: false})
+                    }
+                }
+            })
         } catch (error) {
             reject(error);
         }

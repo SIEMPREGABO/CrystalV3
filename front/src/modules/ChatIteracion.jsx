@@ -69,11 +69,20 @@ export const ChatIteracion = () => {
   }, [messagesChat2]);
 
   useEffect(() => {
-    if (iteraciones != null) {
+    if(entregas != null && iteraciones != null){
       const found = entregas.find(entrega => entrega.ID === entregaactual.ID);
       const found2 = iteraciones.find(iteracion => iteracion.ID === iteracionactual.ID);
-      setEntregaActiva(found.Nombre_Entrega);
-      setIteracionActiva(found2.Nombre_Iteracion);
+      if(found && found2){
+        console.log(found);
+        console.log(found2);
+        setEntregaActiva(found.Nombre_Entrega);
+        setIteracionActiva(found2.Nombre_Iteracion);
+      }else{
+        console.log("No se han encontrado la entrega o la iteracion actual");
+      }
+        
+        
+      
     }
   }, [entregas, iteraciones]);
 
@@ -116,6 +125,7 @@ export const ChatIteracion = () => {
   });
 
   useEffect(() => {
+    
     console.log(iteracionactual);
     const proyecto = {
       ID_PROYECTO: fechasproject[0].ID,
@@ -166,7 +176,8 @@ export const ChatIteracion = () => {
 
     console.log("chats");
     console.log(chats);
-
+    console.log("Iteraciones");
+    console.log(iteraciones);
     // Desconectar el socket cuando el componente se desmonta
     return () => {
       socket.off('message', receiveMessage);
@@ -290,7 +301,7 @@ export const ChatIteracion = () => {
                   chats.map((chat, index) => {
                     console.log(chat);
                     return (
-                      <li key={index} value={chat.ITERACION_ID} onClick={() => handleChatClick(chat.ITERACION_ID)}><a class="dropdown-item" >{chat.ITERACION_ID === iteracionactual.ID ? "Iteración Actual " : ((chat.ENTREGA_ID === entregaactual.ID ? (iteraciones.find(iteracion => iteracion.ID === chat.ITERACION_ID)).Nombre_Iteracion + " de Entrega Actual" : `Iteración ${chat.ITERACION_ID}`+`Entrega ${chat.ENTREGA_ID}`)) }</a></li>
+                      <li key={index} value={chat.ITERACION_ID} onClick={() => handleChatClick(chat.ITERACION_ID)}><a class="dropdown-item" >{chat.ITERACION_ID === iteracionactual.ID ? "Iteración Actual " : ((chat.ENTREGA_ID === entregaactual.ID ? (iteraciones.find(iteracion => iteracion.ID === chat.ITERACION_ID)).Nombre_Iteracion + " de Entrega Actual" : `${(iteraciones.find(iteracion => iteracion.ID === chat.ITERACION_ID)).Nombre_Iteracion}`+` ${(entregas.find(entrega => entrega.ID === chat.ENTREGA_ID)).Nombre_Entrega}`)) }</a></li>
                     )
                   })
                 ) : (<li><a class="dropdown-item text-black" >Sin chats Disponibles</a></li>)}
